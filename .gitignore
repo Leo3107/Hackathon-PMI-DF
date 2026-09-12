@@ -37,3 +37,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
+
+# camada de coleta — warehouse e dados brutos baixados das fontes públicas.
+# Os arquivos da Receita passam de 20 GB descomprimidos; nada disso é versionado.
+data/raw/
+data/*.duckdb
+data/*.duckdb.wal
+!data/raw/protestos_manual.csv

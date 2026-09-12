@@ -7,10 +7,13 @@ desafio proposto pela empresa parceira **Krill Tech**: conceber um sistema intel
 realizar due diligence automatizada, triagem cadastral, monitoramento processual e financeiro, e
 gerar um Relatório Padronizado de Risco de Crédito com alerta precoce de Recuperação Judicial.
 
-> ### ⚠ DADOS SIMULADOS — protótipo demonstrativo
-> Nenhuma integração real com órgão público é realizada. Todos os clientes, documentos, processos
-> e evidências são fictícios, gerados para demonstração. Empresas e CPF/CNPJ não correspondem a
-> pessoas ou entidades reais.
+> ### ⚠ A carteira de demonstração usa DADOS SIMULADOS
+> Os 18 clientes da carteira, seus processos, garantias e evidências são fictícios, criados para
+> demonstração — empresas e CPF/CNPJ não correspondem a entidades reais.
+>
+> A camada de coleta (`coleta/`) é a exceção: ela consulta **fontes públicas de verdade**
+> (Receita Federal, PGFN, IBAMA, IBGE/SIDRA, BCB, clima e protestos). A interface identifica
+> sempre qual das duas origens sustenta cada número.
 
 ---
 
@@ -44,12 +47,25 @@ Toda tela existe para o analista de crédito responder rápido a cinco perguntas
 ## Stack
 
 ```
-web/   Next.js 16 · React 19 · TypeScript · Tailwind v4     interface e proxy server-side
-api/   Flask 3 · pydantic 2 · OpenAI                        motor de risco e camada de linguagem
+web/      Next.js 16 · React 19 · TypeScript · Tailwind v4   interface e proxy server-side
+api/      Flask 3 · pydantic 2 · OpenAI                      motor de risco e camada de linguagem
+coleta/   Python · DuckDB · httpx · polars                   ingestão real das fontes públicas
 ```
 
 O navegador nunca fala com o Flask diretamente: o Next faz proxy no servidor, de modo que a chave
 da API nunca sai do backend.
+
+### As três camadas e os quatro agentes do desafio
+
+| Camada | Agente da §6 do desafio | O que faz |
+|---|---|---|
+| `coleta/` | **Agente Coletor & Parser** e **Agente de Risco Agro & Climático** | Baixa e normaliza as fontes públicas num warehouse DuckDB e monta o dicionário de features de um documento |
+| `api/scoring/` | **Motor de Decisão & Scoring** | Transforma fatos em score, PD, risco de RJ, red flags e recomendação, de forma determinística e auditável |
+| `api/llm/` | **Agente Sintetizador & Gerador de Relatórios** | Redige parecer, explicação e recomendação em linguagem natural, **sem nunca produzir um número** |
+
+A fronteira entre a coleta e o motor é o contrato `Features → FatosDoCliente`, em
+[`api/adaptadores/`](api/adaptadores/): é o que permite a mesma análise rodar sobre um cliente
+simulado da carteira ou sobre um CNPJ real consultado na hora.
 
 ## Rodando
 
@@ -85,6 +101,7 @@ npm run e2e       # Playwright
 - [`specs/README.md`](specs/README.md) — índice das especificações e invariantes do produto
 - [`specs/02-motor-de-risco.md`](specs/02-motor-de-risco.md) — a matemática completa do score, PD e risco de RJ
 - [`specs/_desafio-pdf.txt`](specs/_desafio-pdf.txt) — documento oficial do desafio
+- [`coleta/README.md`](coleta/README.md) — a camada de ingestão: fontes, warehouse, CLI e API
 - Dentro da aplicação: `/canvas` (Project Canvas do edital) e `/arquitetura` (pipeline da solução)
 
 ## Aviso
