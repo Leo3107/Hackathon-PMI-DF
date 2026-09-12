@@ -708,3 +708,375 @@
   color: var(--color-fg-secondary);
   font-weight: 700;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Acréscimos: estado de execução por etapa, cabeçalho do diagrama e ajustes  */
+/* de composição. Menos caixa alta, menos borda, mais espaço em branco.       */
+/* ------------------------------------------------------------------------- */
+
+.arq-titulo {
+  font-size: 30px;
+  letter-spacing: -0.015em;
+}
+
+.arq-subtitulo {
+  font-size: 15px;
+  line-height: 23px;
+  margin-top: 8px;
+}
+
+.arq-cabecalho-diagrama {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 34px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-line-subtle);
+}
+
+.arq-secao-apoio {
+  margin-top: 6px;
+  color: var(--color-fg-secondary);
+  max-width: 90ch;
+}
+
+/* O trilho respira: as setas precisam de vão entre os cards. */
+.arq-grade--trilho {
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.arq-grade--faixa {
+  gap: 14px;
+}
+
+.arq-grade--chips {
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.arq-card {
+  height: auto;
+  min-height: 172px;
+}
+
+.arq-card-topo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.arq-card-topo .arq-pilula-servico {
+  margin-left: auto;
+}
+
+.arq-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-fg-primary);
+}
+
+/* Estado de execução: cor + rótulo + pictograma, nunca só cor. */
+.arq-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 15px;
+}
+
+.arq-estado--real {
+  color: var(--color-accent-300);
+}
+
+.arq-estado--parcial {
+  color: var(--color-risk-b);
+}
+
+.arq-estado--conceitual {
+  color: var(--color-fg-tertiary);
+}
+
+.arq-estado--bloco {
+  margin-top: 10px;
+  font-size: 12.5px;
+}
+
+.arq-painel-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.arq-painel-regra {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 19px;
+}
+
+.arq-painel-nota {
+  margin-top: 10px;
+  color: var(--color-fg-secondary);
+  font-size: 12.5px;
+  line-height: 18px;
+}
+
+.arq-painel-link {
+  color: var(--color-accent-300);
+}
+
+.arq-painel-camada p + p {
+  margin-top: 7px;
+}
+
+.arq-painel--vazio {
+  color: var(--color-fg-secondary);
+}
+
+.arq-painel--vazio p + p {
+  margin-top: 10px;
+}
+
+/* Rótulos de ficha em caixa baixa: caixa alta em toda etiqueta polui. */
+.arq-painel dt,
+.arq-card-fonte dt {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Cards de fonte: o que é coletado de verdade se distingue do que é contrato. */
+.arq-card-fonte--real {
+  border-style: solid;
+  border-color: var(--color-accent-line);
+}
+
+.arq-badge-real {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--color-accent-line);
+  background: var(--color-accent-tint);
+  color: var(--color-accent-300);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.arq-badge-real::before {
+  content: "●";
+  font-size: 8px;
+}
+
+.arq-badge-simulado {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10px;
+}
+
+.arq-fonte-fornece {
+  margin-top: 6px;
+  color: var(--color-fg-secondary);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.arq-fonte-real {
+  margin-top: 8px;
+  padding-left: 9px;
+  border-left: 2px solid var(--color-accent-line);
+  color: var(--color-fg-secondary);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+
+.arq-barra-web {
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.arq-barra-web:hover {
+  color: var(--color-fg-primary);
+}
+
+.arq-tabela th[scope="row"] {
+  font-weight: 700;
+  width: 22%;
+}
+
+.arq-encerramento {
+  font-size: 16px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Cadeia em duas fileiras, com a fronteira como régua horizontal entre elas.  */
+/* Substitui a fileira única de doze colunas: a doze, cada card ficava com     */
+/* 100 px e a página só era legível rolando na horizontal.                     */
+/* ------------------------------------------------------------------------- */
+
+.arq-diagrama {
+  display: block;
+}
+
+.arq-rolagem {
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.arq-quadro {
+  position: relative;
+  min-width: 0;
+  gap: 8px;
+}
+
+.arq-grade--7 {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.arq-grade--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.arq-grade--7,
+.arq-grade--4 {
+  gap: 18px;
+}
+
+.arq-grade--faixa {
+  margin-top: 2px;
+}
+
+.arq-card {
+  min-width: 0;
+  min-height: 158px;
+  gap: 6px;
+}
+
+.arq-card-fluxo {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* Fronteira: a linha mais larga da página. */
+.arq-fronteira {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 22px 0 6px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-line-strong);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+}
+
+.arq-fronteira:hover,
+.arq-fronteira[aria-expanded='true'] {
+  border-color: var(--color-accent-line);
+}
+
+.arq-fronteira-lado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+  writing-mode: horizontal-tb;
+}
+
+.arq-fronteira-lado--volta {
+  justify-content: flex-end;
+  color: var(--color-accent-llm);
+}
+
+.arq-fronteira-nome {
+  font-size: 12px;
+  color: var(--color-fg-tertiary);
+}
+
+.arq-loop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--color-fg-tertiary);
+  font-size: 12.5px;
+}
+
+/* Painel abaixo do diagrama, largura inteira: o trilho não divide espaço. */
+.arq-painel {
+  position: static;
+  width: auto;
+  flex: none;
+  max-height: none;
+  margin-top: 22px;
+  overflow: visible;
+}
+
+.arq-painel dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px 28px;
+  margin-top: 6px;
+}
+
+.arq-painel dt {
+  margin-top: 8px;
+}
+
+.arq-painel-camada {
+  margin-top: 12px;
+}
+
+.arq-painel--vazio {
+  border-style: dashed;
+  background: transparent;
+}
+
+.arq-fronteira-lado {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+
+.arq-painel dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 28px;
+  margin-top: 12px;
+  align-items: start;
+}
+
+.arq-ficha dt {
+  margin-top: 0;
+}

@@ -104,9 +104,23 @@ def _corpo() -> dict:
     return dados if isinstance(dados, dict) else {}
 
 
+def _em_bytes(stream: Iterator[str]) -> Iterator[bytes]:
+    """Codifica cada linha antes de entregá-la ao servidor WSGI.
+
+    `direct_passthrough=True` desliga a codificação automática do Werkzeug, então
+    o gerador precisa emitir `bytes`. O cliente de teste do Flask tolera `str` e
+    não reproduz a falha; um servidor WSGI real aborta com
+    `AssertionError: applications must write bytes` **depois** de já ter enviado
+    o status 200, o que aparece como resposta vazia de zero byte e nenhum erro
+    visível ao chamador. Foi exatamente o que aconteceu em produção.
+    """
+    for linha in stream:
+        yield linha.encode("utf-8") if isinstance(linha, str) else linha
+
+
 def _resposta_ndjson(stream: Iterator[str]) -> Response:
     return Response(
-        stream_with_context(stream),
+        stream_with_context(_em_bytes(stream)),
         mimetype=MIMETYPE_NDJSON,
         content_type=_CHARSET,
         headers=_CABECALHOS_DO_STREAM,

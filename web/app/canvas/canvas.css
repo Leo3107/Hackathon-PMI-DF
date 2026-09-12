@@ -84,7 +84,7 @@
 .canvas-grade {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: 30fr 38fr 32fr;
+  grid-template-rows: 29fr 37fr 34fr;
   gap: 1.8mm;
   flex: 1 1 auto;
   min-height: 0;
@@ -234,7 +234,7 @@ ol.canvas-lista > li::before {
 }
 
 .canvas-bloco--denso .canvas-tabela {
-  font-size: 5.5pt;
+  font-size: 0.95em;
 }
 
 .canvas-leitura .canvas-bloco--denso .canvas-corpo,
@@ -245,7 +245,8 @@ ol.canvas-lista > li::before {
 .canvas-tabela {
   width: 100%;
   border-collapse: collapse;
-  font-size: 6pt;
+  /* Relativo ao corpo: o ajuste de tipografia da folha precisa arrastar a tabela junto. */
+  font-size: 0.94em;
   line-height: 1.25;
 }
 
@@ -265,14 +266,14 @@ ol.canvas-lista > li::before {
 }
 
 .canvas-rodape-bloco {
-  font-size: 6.4pt;
+  font-size: 1em;
   font-weight: 700;
   line-height: 1.25;
   color: var(--color-fg-primary);
 }
 
 .canvas-nota {
-  font-size: 6pt;
+  font-size: 0.94em;
   font-style: italic;
   color: var(--color-fg-tertiary);
   line-height: 1.25;

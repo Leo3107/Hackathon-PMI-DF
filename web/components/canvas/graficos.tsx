@@ -6,7 +6,7 @@ import { User } from "lucide-react";
 /* modo de leitura ampliada.                                                  */
 /* ------------------------------------------------------------------------ */
 
-/** 1 · Bloco 3 — cadeia de 5 pastilhas com setas. */
+/** 1 · Bloco 3, cadeia de 5 pastilhas com setas. */
 export function CadeiaDeAgentes() {
   return (
     <div className="canvas-cadeia" aria-label="Cadeia de agentes do pipeline">
@@ -54,7 +54,7 @@ const FAIXAS_RATING = [
   { rating: "D", faixa: "0–399", cor: "var(--color-risk-d)" },
 ];
 
-/** 2a · Bloco 4 — barra segmentada A/B/C/D com as faixas dentro. */
+/** 2a · Bloco 4, barra segmentada A/B/C/D com as faixas dentro. */
 export function BarraDeRatings() {
   return (
     <div className="canvas-barra-rating" aria-label="Faixas de rating">
@@ -81,7 +81,7 @@ const PESOS = [
   { rotulo: "Ambiental", pct: 9 },
 ];
 
-/** 2b · Bloco 4 — barra proporcional de pesos das 7 dimensões. */
+/** 2b · Bloco 4, barra proporcional de pesos das 7 dimensões. */
 export function BarraDePesos() {
   return (
     <div className="canvas-barra-pesos" aria-label="Pesos das sete dimensões">
@@ -131,7 +131,7 @@ const SEVERIDADES = [
   },
 ];
 
-/** 3 · Bloco 5 — quatro faixas empilhadas de severidade. */
+/** 3 · Bloco 5, quatro faixas empilhadas de severidade. */
 export function FaixasDeRedFlags() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.3em" }}>
@@ -144,7 +144,7 @@ export function FaixasDeRedFlags() {
           <span aria-hidden="true">{s.simbolo}</span>
           <span style={{ color: "inherit" }}>
             <strong style={{ color: "inherit" }}>{s.rotulo}</strong>
-            <span style={{ color: "var(--color-fg-secondary)" }}> — {s.texto}</span>
+            <span style={{ color: "var(--color-fg-secondary)" }}>, {s.texto}</span>
           </span>
         </div>
       ))}
@@ -161,7 +161,7 @@ const DEGRAUS = [
   { rotulo: "SUSPENDER EXPOSIÇÃO", cor: "var(--color-risk-d)" },
 ];
 
-/** 4 · Bloco 6 — seis degraus da recomendação, verde → vermelho. */
+/** 4 · Bloco 6, seis degraus da recomendação, verde → vermelho. */
 export function DegrausDaRecomendacao() {
   return (
     <div className="canvas-degraus" aria-label="Escala de recomendação">
@@ -189,7 +189,7 @@ const CASCATA = [
   { rotulo: "atraso médio (3 d → 11 d)", pontos: -17 },
 ];
 
-/** 5 · Bloco 7 — 712 → 604 (−108) como mini-cascata de 4 barras. */
+/** 5 · Bloco 7, 712 → 604 (−108) como mini-cascata de 4 barras. */
 export function CascataDoRecalculo() {
   const maior = Math.max(...CASCATA.map((c) => Math.abs(c.pontos)));
   return (
@@ -210,7 +210,7 @@ export function CascataDoRecalculo() {
   );
 }
 
-/** 6 · Bloco 8 — dois números grandes com o “×1,8” entre eles. */
+/** 6 · Bloco 8, dois números grandes com o “×1,8” entre eles. */
 export function NumerosDoRetorno() {
   return (
     <div
@@ -246,7 +246,7 @@ const MARCOS = [
   { horizonte: "Fase 4 · 12+ m", rotulo: "Rede" },
 ];
 
-/** 7 · Bloco 10 — linha do tempo com 5 marcos. */
+/** 7 · Bloco 10, linha do tempo com 5 marcos. */
 export function LinhaDoTempo() {
   return (
     <div className="canvas-timeline" aria-label="Linha do tempo dos próximos passos">

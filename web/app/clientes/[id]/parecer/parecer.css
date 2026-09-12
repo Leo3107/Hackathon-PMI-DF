@@ -1,0 +1,729 @@
+/* ------------------------------------------------------------------------- */
+/* /clientes/[id]/parecer — documento, não tela de trabalho (spec 07 §3.3).   */
+/*                                                                            */
+/* A aplicação é dark-only (D9). Este arquivo é a exceção declarada: um        */
+/* parecer é papel, e papel é branco. O escopo inteiro vive sob `.pc-raiz`,    */
+/* então nada aqui vaza para as outras rotas.                                  */
+/* ------------------------------------------------------------------------- */
+
+.pc-raiz {
+  --pc-tinta: #111318;
+  --pc-tinta-2: #454d59;
+  --pc-tinta-3: #6c7683;
+  --pc-linha: #d3d8de;
+  --pc-linha-forte: #9aa3ae;
+  --pc-fundo: #f2f3f5;
+  --pc-papel: #ffffff;
+  --pc-verde: #1f7a3a;
+  --pc-ambar: #b26b00;
+  --pc-laranja: #c2410c;
+  --pc-vermelho: #b91c1c;
+  --pc-ambar-fundo: #fdf3dd;
+  --pc-cinza-fundo: #f4f5f7;
+
+  min-height: 100vh;
+  background: var(--pc-fundo);
+  color: var(--pc-tinta);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif);
+  font-size: 10pt;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+.pc-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.pc-mono {
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 7.5pt;
+  color: var(--pc-tinta-3);
+}
+
+/* Barra de ferramentas ----------------------------------------------------- */
+
+.pc-barra {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #0b0f14;
+  color: #e6ebf0;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.pc-barra-id {
+  color: #a3aebb;
+  font-size: 11px;
+}
+
+.pc-barra-estado {
+  color: #7ccdf0;
+  font-size: 11px;
+}
+
+.pc-barra-espaco {
+  flex: 1;
+}
+
+.pc-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  border: 1px solid #3a4756;
+  background: #171e27;
+  color: #e6ebf0;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pc-botao:hover {
+  background: #1b232e;
+}
+
+.pc-botao--primario {
+  border-color: #2a5a73;
+  background: #192d39;
+  color: #7ccdf0;
+  font-weight: 600;
+}
+
+/* Palco e página ----------------------------------------------------------- */
+
+.pc-palco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 12px 64px;
+}
+
+.pc-pagina {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: 22mm 16mm 20mm;
+  background: var(--pc-papel);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+/*
+ * Quebra **antes** de cada folha a partir da segunda, nunca depois da última. `break-after` na
+ * folha emite uma página em branco no fim do PDF em Chromium, e o contador `Página X de Y` do
+ * documento passa a mentir em relação ao arquivo.
+ */
+.pc-pagina + .pc-pagina {
+  page-break-before: always;
+  break-before: page;
+}
+
+.pc-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 6mm;
+}
+
+.pc-cabecalho,
+.pc-rodape {
+  position: absolute;
+  left: 16mm;
+  right: 16mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10mm;
+  font-size: 7.5pt;
+  line-height: 1.35;
+  color: var(--pc-tinta-3);
+}
+
+.pc-cabecalho {
+  top: 8mm;
+  padding-bottom: 2mm;
+  border-bottom: 0.4pt solid var(--pc-linha);
+}
+
+.pc-cabecalho strong {
+  color: var(--pc-tinta);
+  letter-spacing: 0.04em;
+}
+
+.pc-cabecalho-cliente {
+  color: var(--pc-tinta-2);
+}
+
+.pc-cabecalho-direita {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pc-rodape {
+  bottom: 8mm;
+  padding-top: 2mm;
+  border-top: 0.4pt solid var(--pc-linha);
+}
+
+.pc-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 0.5pt solid var(--pc-ambar);
+  border-radius: 2px;
+  background: var(--pc-ambar-fundo);
+  color: #7a4a00;
+  font-size: 7pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pc-marca-dagua {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 64pt;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(17, 19, 24, 0.07);
+  pointer-events: none;
+  user-select: none;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* Título formal da página 1 ------------------------------------------------ */
+
+.pc-titulo-formal h1 {
+  font-size: 15pt;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  max-width: 38ch;
+}
+
+.pc-titulo-formal p {
+  margin-top: 3mm;
+  color: var(--pc-tinta-2);
+  font-size: 8.5pt;
+  max-width: 74ch;
+}
+
+/* Seções ------------------------------------------------------------------- */
+
+.pc-secao {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.pc-secao-cabeca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8mm;
+  padding-bottom: 1.4mm;
+  margin-bottom: 2.4mm;
+  border-bottom: 0.5pt solid var(--pc-linha-forte);
+}
+
+.pc-secao-cabeca h2 {
+  font-size: 10.5pt;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.pc-secao-numero {
+  display: inline-block;
+  min-width: 4.4mm;
+  color: var(--pc-tinta-3);
+  font-weight: 700;
+}
+
+.pc-origem {
+  font-size: 7pt;
+  white-space: nowrap;
+  color: var(--pc-tinta-3);
+}
+
+.pc-origem--llm::before,
+.pc-origem--motor::before {
+  content: "● ";
+  font-size: 6pt;
+}
+
+.pc-origem--llm {
+  color: #5b21b6;
+}
+
+/* Campos e tabelas --------------------------------------------------------- */
+
+.pc-cliente-nome {
+  font-size: 13pt;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 2mm;
+}
+
+.pc-campos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.4mm 6mm;
+}
+
+.pc-campos dt {
+  font-size: 7pt;
+  color: var(--pc-tinta-3);
+}
+
+.pc-campos dd {
+  margin: 0;
+  font-size: 9pt;
+}
+
+.pc-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2.4mm;
+  font-size: 8.5pt;
+}
+
+.pc-tabela th,
+.pc-tabela td {
+  padding: 1mm 2mm 1mm 0;
+  border-bottom: 0.25pt solid var(--pc-linha);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pc-tabela thead th {
+  border-bottom: 0.5pt solid var(--pc-linha-forte);
+  font-size: 7pt;
+  font-weight: 600;
+  color: var(--pc-tinta-3);
+}
+
+.pc-tabela--evidencias {
+  font-size: 7.5pt;
+}
+
+.pc-direita {
+  text-align: right;
+  padding-right: 0;
+}
+
+.pc-total td {
+  border-top: 0.5pt solid var(--pc-linha-forte);
+  font-weight: 700;
+}
+
+.pc-sub {
+  color: var(--pc-tinta-3);
+  font-size: 7.5pt;
+}
+
+.pc-nota {
+  margin-top: 2mm;
+  font-size: 8pt;
+  color: var(--pc-tinta-2);
+}
+
+.pc-nota--metodo {
+  font-size: 7.5pt;
+  color: var(--pc-tinta-3);
+}
+
+.pc-lista {
+  margin-top: 1.2mm;
+  padding-left: 4mm;
+  list-style: disc;
+  font-size: 8.5pt;
+}
+
+.pc-duas-colunas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6mm;
+  margin-top: 3mm;
+}
+
+/* Bloco de destaque do score ---------------------------------------------- */
+
+.pc-destaque {
+  display: flex;
+  align-items: flex-end;
+  gap: 10mm;
+  padding-bottom: 3mm;
+}
+
+.pc-destaque-score {
+  text-align: center;
+}
+
+.pc-gauge {
+  width: 34mm;
+  height: auto;
+  display: block;
+}
+
+.pc-destaque-colunas {
+  display: flex;
+  gap: 10mm;
+  padding-bottom: 1mm;
+}
+
+.pc-destaque-rotulo {
+  font-size: 7pt;
+  color: var(--pc-tinta-3);
+}
+
+.pc-numero-grande {
+  font-size: 28pt;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.pc-numero-medio {
+  font-size: 16pt;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.pc-tendencia {
+  font-size: 10pt;
+  font-weight: 600;
+}
+
+.pc-caixa {
+  margin-top: 3mm;
+  padding: 2.6mm 3.4mm;
+  border: 0.7pt solid var(--pc-linha-forte);
+  border-radius: 1.2mm;
+  font-size: 8.5pt;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pc-caixa--veto {
+  border-color: var(--pc-vermelho);
+  border-left-width: 2.4pt;
+  color: var(--pc-vermelho);
+}
+
+.pc-caixa--veto p {
+  color: var(--pc-tinta);
+}
+
+.pc-caixa--teto {
+  border-color: var(--pc-laranja);
+  border-left-width: 2.4pt;
+  color: var(--pc-laranja);
+}
+
+.pc-caixa--teto p {
+  color: var(--pc-tinta);
+}
+
+.pc-caixa--destaque {
+  border-width: 1pt;
+  border-color: var(--pc-tinta);
+}
+
+.pc-caixa--destaque .pc-numero-grande {
+  font-size: 19pt;
+  margin: 0.8mm 0 1.2mm;
+}
+
+.pc-caixa--aviso {
+  background: var(--pc-cinza-fundo);
+  border-width: 1pt;
+  font-size: 9pt;
+}
+
+/* PD e indicadores --------------------------------------------------------- */
+
+.pc-pd {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8mm;
+}
+
+.pc-minibarra {
+  display: block;
+  height: 1.6mm;
+  margin-top: 1.4mm;
+  background: var(--pc-linha);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pc-minibarra > span {
+  display: block;
+  height: 100%;
+  background: var(--pc-tinta);
+}
+
+.pc-indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2mm 6mm;
+  margin-top: 2.6mm;
+  font-size: 9.5pt;
+  font-weight: 600;
+}
+
+.pc-garantias-bloco {
+  margin-top: 3mm;
+}
+
+/* Red flags ---------------------------------------------------------------- */
+
+.pc-flags {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6mm;
+}
+
+.pc-flag {
+  display: grid;
+  grid-template-columns: 26mm 1fr;
+  gap: 0 3mm;
+  padding-left: 2.4mm;
+  border-left: 1.6pt solid var(--pc-linha-forte);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pc-flag--critica {
+  border-left-color: var(--pc-vermelho);
+}
+.pc-flag--alta {
+  border-left-color: var(--pc-laranja);
+}
+.pc-flag--media {
+  border-left-color: var(--pc-ambar);
+}
+.pc-flag--baixa {
+  border-left-color: var(--pc-tinta-3);
+}
+
+.pc-flag-sev {
+  grid-row: span 2;
+  font-size: 8pt;
+  font-weight: 700;
+}
+
+.pc-flag--critica .pc-flag-sev {
+  color: var(--pc-vermelho);
+}
+.pc-flag--alta .pc-flag-sev {
+  color: var(--pc-laranja);
+}
+.pc-flag--media .pc-flag-sev {
+  color: var(--pc-ambar);
+}
+.pc-flag--baixa .pc-flag-sev {
+  color: var(--pc-tinta-3);
+}
+
+.pc-flag-titulo {
+  font-size: 9pt;
+  font-weight: 600;
+}
+
+.pc-flag-meta {
+  font-size: 7.5pt;
+  color: var(--pc-tinta-3);
+}
+
+/* Prosa da camada de linguagem --------------------------------------------- */
+
+.pc-prosa {
+  margin-top: 2.6mm;
+  padding-left: 3mm;
+  border-left: 1.6pt solid #c4b5fd;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pc-prosa p {
+  font-size: 9.5pt;
+}
+
+.pc-prosa-rotulo {
+  display: block;
+  font-size: 7pt;
+  color: var(--pc-tinta-3);
+  margin-bottom: 0.8mm;
+}
+
+.pc-etiqueta {
+  margin-top: 1.4mm;
+  font-size: 7pt;
+  color: #5b21b6;
+}
+
+.pc-esqueleto {
+  color: var(--pc-tinta-3);
+  font-style: italic;
+}
+
+/* Recomendação e decisão --------------------------------------------------- */
+
+.pc-recomendacao {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6mm;
+}
+
+.pc-acoes {
+  margin-top: 2.6mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4mm;
+  counter-reset: acao;
+  list-style: none;
+}
+
+.pc-acoes li {
+  display: grid;
+  grid-template-columns: 22mm 1fr;
+  gap: 3mm;
+  font-size: 9pt;
+}
+
+.pc-acao-prio {
+  font-size: 7.5pt;
+  color: var(--pc-tinta-3);
+}
+
+.pc-aviso-decisao {
+  margin-top: 2.4mm;
+  padding: 2.2mm 3mm;
+  border: 1pt solid var(--pc-tinta);
+  border-radius: 1.2mm;
+  font-size: 9pt;
+  font-weight: 700;
+}
+
+.pc-decisao {
+  margin-top: 3.4mm;
+  font-size: 9pt;
+}
+
+.pc-decisao--assinatura p {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-top: 4mm;
+  font-size: 8pt;
+  color: var(--pc-tinta-3);
+}
+
+.pc-linha {
+  flex: 1;
+  border-bottom: 0.5pt solid var(--pc-linha-forte);
+  height: 1px;
+}
+
+.pc-fechamento {
+  margin-top: 2.6mm;
+  padding: 2mm 3mm;
+  background: var(--pc-cinza-fundo);
+  border-left: 2pt solid var(--pc-tinta);
+  font-size: 9pt;
+  font-weight: 600;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* Medidor invisível do alocador de páginas --------------------------------- */
+
+.pc-medidor {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 178mm;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pc-medidor > div {
+  margin-bottom: 6mm;
+}
+
+/* Estados de erro ---------------------------------------------------------- */
+
+.pc-raiz--aviso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+.pc-aviso-caixa {
+  max-width: 56ch;
+  padding: 24px 28px;
+  background: var(--pc-papel);
+  border: 1px solid var(--pc-linha);
+  border-radius: 8px;
+}
+
+.pc-aviso-caixa h1 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pc-aviso-caixa p {
+  margin: 10px 0 18px;
+  color: var(--pc-tinta-2);
+}
+
+/* Impressão ---------------------------------------------------------------- */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  .no-print,
+  .pc-medidor {
+    display: none !important;
+  }
+
+  .pc-raiz {
+    background: #fff;
+    min-height: 0;
+  }
+
+  .pc-palco {
+    display: block;
+    padding: 0;
+    gap: 0;
+  }
+
+  .pc-pagina {
+    box-shadow: none;
+    margin: 0;
+    /*
+     * 296,6 mm, e não 297. O Chromium arredonda a caixa da página para o DPI do dispositivo;
+     * uma folha exatamente do tamanho do papel transborda por uma fração de milímetro e o
+     * navegador emite uma página em branco depois de cada uma. A folga é invisível no papel e
+     * é o que faz `Página X de Y` bater com o PDF.
+     */
+    height: 296.6mm;
+  }
+}
