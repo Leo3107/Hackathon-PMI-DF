@@ -1,0 +1,415 @@
+===== PAGE 1 =====
+ 
+ 
+ 
+ 
+Sistema Inteligente de Prevenção à 
+Inadimplência e Análise de Risco de 
+Crédito no Agronegócio 
+Documento de Desafio 
+Empresa Parceira: Krill tech 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 2 =====
+ 
+ 
+ 
+ 
+ 
+1. Apresentação 
+O presente documento tem por finalidade apresentar, de forma 
+detalhada, o case a ser trabalhado pelas equipes participantes 
+do Hackathon 2026, promovido pelo Student Club do Project 
+Management 
+Institute 
+Distrito 
+Federal 
+(PMI-DF), 
+em 
+conformidade com o Edital 01/2026. 
+O desafio apresentado é proposto pela empresa parceira Krill 
+Tech, que atua com soluções e comercialização voltadas a 
+clientes do agronegócio e do mercado B2B, contando com 
+apoio tecnológico da IBM, por meio das ferramentas watsonx.ai, 
+watsonx Orchestrate e agentes IBM Bob. 
+As equipes deverão apresentar sua proposta de solução por 
+meio de dois entregáveis: um Project Canvas e um pitch de 
+apresentação 
+perante 
+a 
+banca 
+avaliadora, 
+nos 
+termos 
+detalhados na Seção 7 deste documento. 
+2. Visão Geral do Desafio e o Problema da Krill Tech 
+Nos últimos ciclos econômicos, a Krill Tech identificou uma dor 
+crítica 
+em 
+sua 
+operação: 
+a 
+elevação 
+acentuada 
+da 
+inadimplência, pedidos repentinos de Recuperação Judicial (RJ) 
+e quebras de produtores rurais e agroindústrias entre seus 
+clientes. Quando um cliente entra em RJ ou se torna 
+inadimplente, o fluxo de caixa da empresa é severamente 
+comprometido, e a recuperação do capital investido torna-se 
+um processo demorado e complexo. 
+Objetivo do Hackathon: as equipes participantes deverão 
+conceber um sistema inteligente (motor preditivo e/ou agente 
+de inteligência artificial) capaz de realizar due diligence 
+ 
+
+===== PAGE 3 =====
+ 
+ 
+ 
+automatizada, triagem cadastral, monitoramento processual e 
+financeiro, e propor um modelo de Relatório Padronizado de 
+Risco de Crédito e Alerta Precoce de RJ/Insolvência voltado aos 
+clientes e parceiros da Krill Tech. A proposta deverá ser 
+apresentada por meio de um Project Canvas e defendida em 
+pitch perante a banca avaliadora, conforme detalhado na Seção 
+7. 
+3. Contexto de Mercado e Cenário Macroeconômico 
+O agronegócio brasileiro atravessa um ciclo sem precedentes de 
+reestruturação financeira. Historicamente reconhecido como 
+um setor de inadimplência reduzida, o agro passou a registrar 
+aumentos expressivos em pedidos de recuperação judicial, por 
+razões como as descritas a seguir: 
+●​ Marco Legal (Lei nº 14.112/2020): a norma regulamentou e 
+facilitou a extensão do instituto da Recuperação Judicial ao 
+produtor rural pessoa física, mediante comprovação de 
+atividade mínima de dois anos, por meio de Livro Caixa 
+Digital ou inscrição estadual, o que provocou uma escalada 
+nos pedidos formais de RJ no campo. 
+●​ Pressão de margens e quebra de safra: a combinação de 
+instabilidades climáticas (fenômenos El Niño/La Niña), 
+custos elevados de fertilizantes e insumos e queda nas 
+cotações de commodities, como soja e milho, estrangulou 
+a liquidez de médios e grandes produtores rurais. 
+●​ Efeito cascata na cadeia produtiva: a inadimplência na 
+ponta do produtor rural contamina progressivamente 
+distribuidores de insumos, revendas, tradings, indústrias de 
+equipamentos e fornecedores de tecnologia e serviços, a 
+exemplo da Krill Tech. 
+ 
+
+===== PAGE 4 =====
+ 
+ 
+ 
+4. Glossário Fundamental de Crédito e Termos 
+Jurídicos 
+Para subsidiar o desenvolvimento das soluções, apresenta-se a 
+seguir um glossário com os principais conceitos de crédito e 
+institutos jurídicos relacionados ao desafio: 
+Termo / 
+Conceito 
+Definição Operacional 
+Impacto no Risco da Krill 
+Tech 
+Recuperação 
+Judicial (RJ) 
+Procedimento jurídico (Lei nº 
+11.101/2005) requerido por empresas 
+ou produtores rurais em crise para 
+renegociar coletivamente suas 
+dívidas perante a Justiça, evitando 
+a falência. 
+Créditos da Krill Tech 
+anteriores ao pedido entram 
+no plano com deságios 
+severos e prazos de 
+pagamento de vários anos. 
+Stay Period 
+Período de suspensão legal de 180 
+dias (prorrogáveis) de todas as 
+execuções e cobranças contra o 
+devedor que teve o processamento 
+da RJ deferido pelo juiz. 
+A Krill Tech fica legalmente 
+impedida de executar 
+garantias ou protestar o 
+devedor durante esse prazo. 
+Inadimplência 
+Técnica vs. 
+Financeira 
+A inadimplência financeira 
+corresponde ao não pagamento no 
+vencimento. A inadimplência 
+técnica ocorre quando o cliente 
+viola índices contratuais, como 
+aumento de endividamento além 
+do limite estabelecido, antes de 
+atrasar o pagamento. 
+Identificar a inadimplência 
+técnica permite agir 
+preventivamente antes que o 
+calote se concretize. 
+CPR (Cédula de 
+Produto Rural) 
+Título de crédito emitido pelo 
+produtor ou cooperativa, 
+prometendo a entrega futura de 
+produtos agrícolas (CPR Física) ou a 
+liquidação em dinheiro (CPR 
+Financeira). 
+Instrumento comum para 
+colateralização ou garantia 
+em operações de barter e 
+crédito direto no agro. 
+Barter / Operação 
+de Troca 
+Mecanismo de financiamento pelo 
+qual insumos ou serviços são pagos 
+com a entrega da safra futura 
+colhida pelo produtor. 
+Exige monitoramento 
+contínuo de produtividade, 
+condições climáticas e 
+integridade da área plantada. 
+Garantias: 
+Alienação 
+A alienação fiduciária transfere a 
+propriedade resolúvel do bem ao 
+credor, permanecendo fora dos 
+Créditos lastreados em 
+alienação fiduciária protegem 
+ 
+
+===== PAGE 5 =====
+ 
+ 
+ 
+Termo / 
+Conceito 
+Definição Operacional 
+Impacto no Risco da Krill 
+Tech 
+Fiduciária vs. 
+Penhor 
+efeitos da RJ (crédito 
+extraconcursal). O penhor apenas 
+vincula a safra ou a máquina como 
+garantia. 
+a Krill Tech mesmo em caso 
+de pedido de RJ pelo cliente. 
+Rating de Crédito 
+& Score 
+Classificação quantitativa e 
+qualitativa (por exemplo, de AAA a 
+D) que mensura a probabilidade de 
+inadimplência (PD – Probability of 
+Default) em até 12 meses. 
+Define se o cliente pode 
+comprar a prazo, qual o limite 
+de crédito concedido e quais 
+as taxas de juros aplicáveis. 
+ 
+5. Fontes e Bases de Dados Públicas Disponíveis 
+As equipes poderão consumir dados públicos abertos ou 
+disponibilizados via API para enriquecer seus modelos preditivos 
+e agentes de inteligência artificial: 
+Dimensão do 
+Dado 
+Base / Órgão Público 
+Dados Extraídos e Relevância 
+Cadastral & 
+Societário 
+Receita Federal (CNPJ 
+Abertos) / Portal Redesim 
+Quadro de Sócios e Administradores 
+(QSA), capital social, atividade principal 
+(CNAE), filiais e tempo de atividade. 
+Processual & 
+Jurídico 
+DataJud (CNJ) / Diários 
+de Justiça Eletrônicos 
+(DJEs) / Jusbrasil / 
+Escavador 
+Identificação de ações de execução de 
+títulos, protestos de duplicatas, pedidos 
+de falência e distribuição de Recuperação 
+Judicial. 
+Territorial & 
+Ambiental 
+SICAR (Cadastro 
+Ambiental Rural) & 
+IBAMA 
+Verificação da regularidade da 
+propriedade rural, área consolidada de 
+plantio, reservas legais e embargos por 
+infração ambiental. 
+Fiscal & 
+Trabalhista 
+PGFN (Dívida Ativa) / TST 
+(CNDT) / Caixa 
+(CRF-FGTS) 
+Certidões Negativas de Débitos (CNDs), 
+identificação de execuções fiscais federais 
+e passivos trabalhistas com trânsito em 
+julgado. 
+Agronômico & 
+Climático 
+Conab / MAPA (ZARC – 
+Zoneamento Agrícola) / 
+INMET 
+Produtividade média da região, risco 
+climático da cultura em cada safra e 
+ 
+
+===== PAGE 6 =====
+ 
+ 
+ 
+Dimensão do 
+Dado 
+Base / Órgão Público 
+Dados Extraídos e Relevância 
+séries históricas de precipitação e 
+temperatura. 
+ 
+6. Arquitetura da Solução Sugerida e Uso do 
+Ecossistema IBM 
+As equipes terão à disposição ferramentas do ecossistema IBM, 
+como watsonx.ai, watsonx Orchestrate e agentes IBM Bob. A 
+título de referência, e sem caráter de adoção obrigatória, 
+sugere-se o seguinte fluxo de solução: 
+●​ Agente Coletor & Parser (RAG / Data Ingestion): recebe o 
+CNPJ ou CPF do cliente, consulta as bases públicas 
+estruturadas e realiza o parsing de publicações dos Diários 
+Oficiais e de certidões em formato PDF. 
+●​ Agente de Risco Agro & Climático: cruza a localização do 
+imóvel, obtida via CAR, com os dados de zoneamento 
+agrícola (ZARC) e o histórico de quebra de safra da região. 
+●​ Motor de Decisão & Scoring (Predictive ML): algoritmo de 
+classificação responsável por calcular a probabilidade de 
+inadimplência (PD) e o risco de Recuperação Judicial em 
+horizontes de 6, 12 e 24 meses. 
+●​ Agente Sintetizador & Gerador de Relatórios: modelo de 
+linguagem responsável por compilar os achados técnicos 
+em uma recomendação clara, redigida em linguagem 
+natural, destinada ao tomador de decisão da Krill Tech. 
+Esse fluxo é apresentado a título de referência conceitual: a 
+equipe deve representá-lo de forma sintética no Project Canvas 
+e 
+detalhá-lo 
+durante 
+o 
+pitch, 
+não 
+sendo 
+exigida 
+a 
+ 
+
+===== PAGE 7 =====
+ 
+ 
+ 
+implementação funcional do sistema em código durante o 
+Hackathon. 
+ 
+7. Especificação dos Entregáveis 
+Para fins de avaliação no Hackathon 2026, cada equipe deverá 
+apresentar sua proposta de solução por meio de dois 
+entregáveis: um Project Canvas e um pitch de apresentação 
+perante a banca avaliadora. 
+7.1 Project Canvas da Solução 
+O Project Canvas é a síntese visual, em uma única página, da 
+proposta desenvolvida pela equipe, permitindo à banca 
+examinadora compreender rapidamente a lógica da solução 
+antes do pitch. Recomenda-se que o Canvas contemple, no 
+mínimo, os seguintes blocos: 
+●​ Problema & Diagnóstico: descrição da dor do usuário 
+identificada, com base nos dados e no contexto de 
+mercado apresentados nas Seções 2 e 3 deste documento. 
+●​ Público-Alvo / Beneficiários: identificação clara de quem 
+será impactado ou beneficiado pela solução proposta. 
+●​ Lógica de Funcionamento da Solução: fluxo geral da 
+proposta, incluindo, quando aplicável, os agentes e etapas 
+de referência descritos na Seção 6. 
+●​ Score & Classificação de Rating: proposta de nota, de 0 a 
+1000, associada a uma escala de risco — por exemplo, de 
+Baixo Risco [A] a Risco Crítico / Alerta de RJ [D]. 
+●​ Matriz de Red Flags: principais sinais de perigo que a 
+solução se propõe a identificar, como pedidos de RJ, 
+aumento de protestos e embargos ambientais. 
+ 
+
+===== PAGE 8 =====
+ 
+ 
+ 
+●​ Recomendação de Decisão Operacional: como a solução 
+orienta decisões de limite de crédito e condições de 
+pagamento para os clientes da Krill Tech. 
+●​ Monitoramento 
+Contínuo 
+(Early 
+Warning 
+System): 
+mecanismo proposto para gerar alertas automáticos 
+diante de novos processos ou eventos de risco. 
+●​ Arquitetura 
+de 
+Negócios 
+& 
+Custos: 
+modelo 
+de 
+sustentação da solução e principais custos envolvidos em 
+sua implementação e operação. 
+●​ Premissas, Restrições e Riscos: pontos de partida e 
+limites do projeto, além dos principais riscos à execução e 
+de como a equipe pretende lidar com eles. 
+●​ Próximos Passos: plano de implementação e evolução da 
+solução após o Hackathon. 
+7.2 Pitch de Apresentação 
+Cada equipe defenderá sua proposta perante a banca avaliadora 
+por meio de um pitch oral, com apoio do Project Canvas e de 
+outros recursos visuais que a equipe julgar pertinentes. O pitch 
+deve demonstrar, com clareza e segurança, o valor gerado pela 
+solução, sua lógica de funcionamento na prática e a capacidade 
+da equipe de responder a perguntas da banca avaliadora, em 
+linha com o critério “Pitch de Defesa & Articulação” do Edital 
+01/2026 (item 5.4.5). O formato, a duração e os demais detalhes 
+operacionais do pitch serão comunicados oportunamente pela 
+Comissão Organizadora. 
+ 

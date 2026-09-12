@@ -1,0 +1,22 @@
+{
+  "name": "lastro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lastro - inteligencia de risco de credito no agronegocio (Hackathon PMI-DF / Krill Tech)",
+  "scripts": {
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "cd api && .venv/Scripts/python -m flask --app app run --port 5001 --debug",
+    "dev:web": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "start": "concurrently -n api,web -c magenta,cyan \"npm:start:api\" \"npm:start:web\"",
+    "start:api": "cd api && .venv/Scripts/python -m flask --app app run --port 5001",
+    "start:web": "cd web && npm start",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "cd api && .venv/Scripts/python -m pytest -q",
+    "test:web": "cd web && npx tsc --noEmit && npm run lint",
+    "e2e": "cd web && npx playwright test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
