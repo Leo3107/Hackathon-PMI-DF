@@ -85,6 +85,7 @@ def criar_app(
 
     registrar_blueprints(app)
     _registrar_saude(app)
+    _registrar_camada_de_coleta(app)
     _registrar_camada_de_linguagem(app)
     _registrar_tratamento_de_erro(app)
     _registrar_cors(app)
@@ -103,6 +104,32 @@ def _registrar_saude(app: Flask) -> None:
             dataHora=datetime.now().astimezone().isoformat(),
         )
         return jsonify(corpo.model_dump(by_alias=True, mode="json"))
+
+
+def _registrar_camada_de_coleta(app: Flask) -> None:
+    """Registra `coleta.api.features_bp` sob `/api/coleta` (`coleta/README.md`).
+
+    Expõe `/api/coleta/saude`, `/api/coleta/fontes`, `/api/coleta/features/<cnpj>`
+    e `/api/coleta/features/lote` — o inventário de frescor por fonte é o que
+    permite à interface responder "esse dado está velho?" sem abrir o banco.
+
+    **Registro tolerante, em duas camadas.** O `ImportError` cobre a coleta não
+    estar no `sys.path` ou faltar `duckdb`; a ausência do warehouse não é
+    tratada aqui de propósito — o próprio Blueprint devolve `503` com a
+    explicação em vez de falhar na subida, que é o comportamento certo para um
+    serviço que precisa subir mesmo sem carga feita.
+    """
+    try:
+        import adaptadores  # noqa: F401, PLC0415 — põe a raiz do repo no sys.path
+        from coleta.api import features_bp  # noqa: PLC0415 — registro condicional
+    except ImportError as erro:
+        _log.warning(
+            "`coleta.api.features_bp` indisponível (%s); as rotas `/api/coleta/*` "
+            "não foram registradas. A due diligence segue com o dataset simulado.",
+            erro,
+        )
+        return
+    app.register_blueprint(features_bp, url_prefix="/api/coleta")
 
 
 def _registrar_camada_de_linguagem(app: Flask) -> None:
