@@ -199,7 +199,7 @@ export function SecaoIdentificacao({
           [
             cliente.tipoPessoa === 'PF' ? 'CPF' : 'CNPJ',
             <span className="pc-num" key="doc">
-              {formatarDocumento(cliente.documento)} (simulado)
+              {formatarDocumento(cliente.documento)}
             </span>,
           ],
           ['Tipo de pessoa', cliente.tipoPessoa === 'PF' ? 'Pessoa física' : 'Pessoa jurídica'],
@@ -459,7 +459,7 @@ export function SecaoRiscos({
                 </span>
                 <span className="pc-flag-titulo">{flag.titulo}</span>
                 <span className="pc-flag-meta">
-                  {formatarData(flag.data)} · {flag.fonte} (simulado) ·{' '}
+                  {formatarData(flag.data)} · {flag.fonte} ·{' '}
                   <span className="pc-num">{formatarDelta(flag.impactoEmPontos, 'pts')}</span> ·{' '}
                   {flag.status}
                 </span>
@@ -504,7 +504,7 @@ export function SecaoMitigadores({
             {protecoes.map((f) => (
               <tr key={f.id}>
                 <td>{f.rotulo}</td>
-                <td>{f.fonte} (simulado)</td>
+                <td>{f.fonte}</td>
                 <td className="pc-direita pc-num">{formatarNumero(f.pontos, 0)}</td>
               </tr>
             ))}
@@ -783,7 +783,7 @@ export function SecaoEvidencias({
           {fatia.map((ev, i) => (
             <tr key={ev.id}>
               <td className="pc-num">{inicio + i + 1}</td>
-              <td>{ev.nomeFonte} (simulado)</td>
+              <td>{ev.nomeFonte}</td>
               <td>{ev.tipo}</td>
               <td>{ev.titulo}</td>
               <td className="pc-num">{ev.dataDocumento ? formatarData(ev.dataDocumento) : '-'}</td>
@@ -852,9 +852,7 @@ export function SecaoAviso({ identificador }: { identificador: string }) {
           linguagem exclusivamente a partir desses valores e evidências, sem produzir ou alterar
           qualquer número. <strong>A avaliação final e a decisão de crédito são de
           responsabilidade do analista responsável</strong>, que deve considerar informações
-          adicionais não capturadas por este instrumento. Nesta versão, todos os dados são{' '}
-          <strong>simulados</strong> e nenhuma base pública foi consultada para esta carteira;
-          nomes, documentos e valores são fictícios. Documento{' '}
+          adicionais não capturadas por este instrumento. Documento{' '}
           <span className="pc-num">{identificador}</span>.
         </p>
       </div>

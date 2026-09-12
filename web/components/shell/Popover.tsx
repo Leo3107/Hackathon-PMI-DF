@@ -1,11 +1,14 @@
 'use client';
 
 /**
- * Popover de topbar — gatilho + painel ancorado à direita.
+ * Popover do shell — gatilho + painel ancorado.
  *
  * O catálogo do design system (`05` §6) tem `Modal`, `Drawer` e `Tooltip`, mas **não** tem
- * popover; os três slots da topbar que precisam de um (simulação de evento, identidade do
- * analista, busca global) são todos do shell. Por isso ele vive aqui, mínimo e sem dependência.
+ * popover; os slots que precisam de um (registro de evento, identidade do analista, busca
+ * global) são todos do shell. Por isso ele vive aqui, mínimo e sem dependência.
+ *
+ * Duas ancoragens: `inferior` (padrão, topbar — abaixo do gatilho, alinhado à direita) e
+ * `lateral` (sidebar — à direita do gatilho, para o painel não sair da viewport à esquerda).
  *
  * `Esc` fecha e devolve o foco ao gatilho — é a primeira camada da ordem exigida por §1.4:
  * popover → drawer → modal.
@@ -27,10 +30,19 @@ export interface PopoverProps {
   /** Largura do painel em px. Padrão 360, como pede §1.5. */
   largura?: number;
   rotulo: string;
+  /** Onde o painel abre em relação ao gatilho. Padrão `inferior`. */
+  ancoragem?: 'inferior' | 'lateral';
   className?: string;
 }
 
-export function Popover({ gatilho, children, largura = 360, rotulo, className }: PopoverProps) {
+export function Popover({
+  gatilho,
+  children,
+  largura = 360,
+  rotulo,
+  ancoragem = 'inferior',
+  className,
+}: PopoverProps) {
   const [aberto, setAberto] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const gatilhoRef = useRef<HTMLElement | null>(null);
@@ -78,8 +90,11 @@ export function Popover({ gatilho, children, largura = 360, rotulo, className }:
           aria-label={rotulo}
           style={{ width: largura }}
           className={cn(
-            'absolute right-0 top-[calc(100%+6px)] z-50 rounded-md border border-line-strong',
+            'absolute z-50 rounded-md border border-line-strong',
             'bg-surface-raised p-3 shadow-[var(--shadow-overlay)]',
+            ancoragem === 'lateral'
+              ? 'left-full top-0 ml-1 max-h-[calc(100vh-96px)] overflow-y-auto'
+              : 'right-0 top-[calc(100%+6px)]',
           )}
         >
           {children}

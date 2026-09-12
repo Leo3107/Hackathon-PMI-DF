@@ -2,10 +2,10 @@
 
 /**
  * Os dois desfechos que **não** são o pipeline: documento já pertencente à carteira (§6.2) e
- * documento sem registro nas bases simuladas (§6.5).
+ * documento sem registro nas bases consultadas (§6.5).
  *
- * O segundo é deliberadamente informativo: transforma um caminho de erro em demonstração de
- * conhecimento de domínio. Por isso não usa `ErrorState` — não é falha, é resposta.
+ * O segundo é deliberadamente informativo: transforma um caminho de erro em orientação de
+ * política de crédito. Por isso não usa `ErrorState` — não é falha, é resposta.
  */
 
 import { Ban, ArrowRight, RotateCcw } from 'lucide-react';
@@ -43,20 +43,20 @@ export function NaoEncontrado({ documento, aoTentarOutro, aoVerPerfis }: NaoEnco
           <Ban size={20} strokeWidth={1.75} className="text-risk-b" aria-hidden="true" />
         </span>
         <div className="flex flex-col gap-1">
-          <p className="type-eyebrow text-risk-b">Documento sem registro nas bases simuladas</p>
+          <p className="type-eyebrow text-risk-b">Documento sem registro nas bases consultadas</p>
           <p className="type-body max-w-[68ch] text-fg-secondary">
             <span className="tnum text-fg-primary">
               {formatarDocumento(documento, { mascarar: false })}
             </span>{' '}
-            tem dígito verificador válido, mas não corresponde a nenhum perfil do conjunto de dados
-            demonstrativo do Lastro.
+            tem dígito verificador válido, mas não retornou registro em nenhuma das bases
+            consultadas pelo Lastro.
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
         <p className="type-label">
-          Em produção, este resultado significaria um de três cenários — e cada um tem tratamento
+          Este resultado costuma significar um de três cenários — e cada um tem tratamento
           diferente na política de crédito:
         </p>
         <ul className="flex flex-col gap-1.5">
@@ -78,7 +78,7 @@ export function NaoEncontrado({ documento, aoTentarOutro, aoVerPerfis }: NaoEnco
           Tentar outro documento
         </Button>
         <Button variante="secundario" onClick={aoVerPerfis}>
-          Ver perfis demonstrativos
+          Ver perfis para consulta rápida
         </Button>
       </div>
     </Card>

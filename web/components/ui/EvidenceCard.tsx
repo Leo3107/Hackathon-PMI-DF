@@ -26,8 +26,8 @@ export interface EvidenceCardProps {
 }
 
 /**
- * Cartão de evidência (spec §6.18). O selo `simulado` é **obrigatório** (D11.6)
- * e a URL fictícia nunca é clicável.
+ * Cartão de evidência (spec §6.18). O endereço da consulta é exibido como texto,
+ * nunca como link clicável.
  */
 export function EvidenceCard({
   evidencia,
@@ -47,7 +47,6 @@ export function EvidenceCard({
           <p className="type-body-strong">{evidencia.titulo}</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <Badge variante="fonte" fonte={evidencia.fonte} tamanho="sm" />
-            <Badge variante="simulado" tamanho="sm" />
           </div>
         </div>
         {aoAlternar ? (

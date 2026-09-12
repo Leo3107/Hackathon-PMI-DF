@@ -3,9 +3,11 @@
 /**
  * Navegação persistente — sidebar de 240px.
  *
- * Duas telas: Nova análise e Clientes. Sem grupos, sem badges — só as duas entradas.
+ * Duas telas: Nova análise e Clientes. Sem grupos, sem badges — só as duas entradas, mais o
+ * acionador de "Registrar evento" logo abaixo de "Clientes": ele não navega, mas mora na lista
+ * porque é a terceira ação recorrente do analista.
  *
- * O rodapé fixo tem "Restaurar dados da demonstração", atrás de um `Modal` de confirmação —
+ * O rodapé fixo tem "Restaurar dados da sessão", atrás de um `Modal` de confirmação —
  * apagar decisões registradas no meio do pitch por clique acidental seria caro.
  */
 
@@ -17,7 +19,14 @@ import { Button, Modal, cn } from '@/components/ui';
 import { restaurarDemonstracao, sessaoTemAlteracoes } from '@/lib/sessao';
 
 import { GRUPO_OPERACAO, itemAtivo, type ItemDeNavegacao } from './rotas';
+import { SimularEvento } from './SimularEvento';
 import { useSessao } from './usar-sessao';
+
+/** Id do cliente da rota atual, para pré-selecionar o registro de evento. */
+function clienteDaRota(pathname: string): string | undefined {
+  const m = /^\/clientes\/([^/]+)/.exec(pathname);
+  return m?.[1];
+}
 
 export function BarraLateral() {
   const pathname = usePathname();
@@ -66,7 +75,13 @@ export function BarraLateral() {
         </Link>
       </div>
 
-      <ul className="flex flex-col gap-0.5 py-3">{GRUPO_OPERACAO.map(item)}</ul>
+      <ul className="flex flex-col gap-0.5 py-3">
+        {GRUPO_OPERACAO.map(item)}
+        {/* Não é item de navegação: sem `aria-current`, sem realce de ativo. */}
+        <li>
+          <SimularEvento clienteIdAtual={clienteDaRota(pathname)} />
+        </li>
+      </ul>
 
       <div className="flex-1" />
 
@@ -78,14 +93,14 @@ export function BarraLateral() {
           disabled={!sessaoTemAlteracoes(sessao)}
           onClick={() => setConfirmando(true)}
         >
-          Restaurar demonstração
+          Restaurar sessão
         </Button>
       </div>
 
       <Modal
         aberto={confirmando}
         aoFechar={() => setConfirmando(false)}
-        titulo="Restaurar dados da demonstração"
+        titulo="Restaurar dados da sessão"
         tamanho="sm"
         acoes={
           <>
@@ -99,7 +114,7 @@ export function BarraLateral() {
         }
       >
         <p className="type-body text-fg-secondary">
-          Isto apaga decisões registradas, eventos simulados e marcações de leitura desta sessão.
+          Isto apaga decisões registradas, eventos e marcações de leitura desta sessão.
           Os dados voltam ao estado inicial.
         </p>
       </Modal>

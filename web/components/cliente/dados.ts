@@ -7,15 +7,16 @@
  *
  * 1. **Números** — `useDossie`. Vêm do motor determinístico em uma única rodada de `fetch`
  *    paralelo e renderizam assim que chegam. Nenhum deles depende do LLM (regra R1 / exigência 5).
- * 2. **Prosa** — `useNarrativa` e `useCopiloto`. Chegam por NDJSON e degradam sozinhas: se o
- *    stream falhar, o bloco de texto entra em erro local e a página inteira continua correta.
+ * 2. **Prosa** — `useNarrativa`. Chega por NDJSON e degrada sozinha: se o stream falhar, o bloco
+ *    de texto entra em erro local e a página inteira continua correta. (O copiloto vive fora
+ *    desta camada, no widget flutuante global do shell.)
  *
  * O estado de sessão (eventos simulados, status de red flag) viaja no corpo de toda chamada que
  * recalcula risco — mudou a sessão, refaz a rodada. É por isso que marcar uma red flag como
  * analisada dispara recálculo: quem decide o efeito é o motor, não a tela (R6).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   ErroLastro,
@@ -25,7 +26,6 @@ import {
   obterCliente,
   obterEventos,
   obterHistorico,
-  streamCopiloto,
   streamNarrativa,
   type TextoAcumulado,
 } from '@/lib/api';
@@ -37,7 +37,6 @@ import type {
   EstadoDeSessaoApi,
   EventoDeRisco,
   FatosDoCliente,
-  MensagemCopiloto,
   SnapshotHistorico,
   TarefaNarrativa,
 } from '@/types';
@@ -265,127 +264,6 @@ export function useNarrativa(
     modelo: atual.modelo,
     tentarNovamente,
   };
-}
-
-/* ------------------------------------------------------------------ */
-/* Copiloto                                                            */
-/* ------------------------------------------------------------------ */
-
-export interface TurnoCopiloto {
-  id: string;
-  pergunta: string;
-  resposta: string;
-  estado: EstadoStreaming;
-  origem: 'llm' | 'deterministico';
-}
-
-export interface Copiloto {
-  turnos: TurnoCopiloto[];
-  ocupado: boolean;
-  perguntar: (pergunta: string) => void;
-  limpar: () => void;
-}
-
-/** Histórico enviado ao modelo: máximo de 6 mensagens (`03-ux-e-telas.md` §4.12). */
-const MAX_HISTORICO = 6;
-
-export function useCopiloto(clienteId: string, sessao: EstadoDeSessaoApi): Copiloto {
-  // A conversa é carimbada com o cliente a que pertence: trocar de rota zera o histórico por
-  // derivação, sem um efeito que chame `setState` só para limpar.
-  const [conversa, setConversa] = useState<{ clienteId: string; turnos: TurnoCopiloto[] }>({
-    clienteId,
-    turnos: [],
-  });
-  const [ocupado, setOcupado] = useState(false);
-  const abortar = useRef<AbortController | null>(null);
-  const turnos = useMemo(
-    () => (conversa.clienteId === clienteId ? conversa.turnos : []),
-    [conversa, clienteId],
-  );
-
-  useEffect(() => () => abortar.current?.abort(), []);
-
-  const setTurnos = useCallback(
-    (proximos: (atuais: TurnoCopiloto[]) => TurnoCopiloto[]) => {
-      setConversa((atual) => ({
-        clienteId,
-        turnos: proximos(atual.clienteId === clienteId ? atual.turnos : []),
-      }));
-    },
-    [clienteId],
-  );
-
-  const perguntar = useCallback(
-    (pergunta: string) => {
-      const texto = pergunta.trim();
-      if (!texto || ocupado) return;
-
-      const id = `turno-${Date.now()}`;
-      const historico: MensagemCopiloto[] = turnos
-        .flatMap((t): MensagemCopiloto[] => [
-          { papel: 'usuario', texto: t.pergunta },
-          { papel: 'assistente', texto: t.resposta },
-        ])
-        .slice(-MAX_HISTORICO);
-
-      setTurnos((atuais) => [
-        ...atuais,
-        { id, pergunta: texto, resposta: '', estado: 'aguardando', origem: 'deterministico' },
-      ]);
-      setOcupado(true);
-
-      const controle = new AbortController();
-      abortar.current = controle;
-
-      void (async () => {
-        let estado: TextoAcumulado = TEXTO_INICIAL;
-        try {
-          for await (const evento of streamCopiloto(
-            { clienteId, sessao, pergunta: texto, historico },
-            controle.signal,
-          )) {
-            estado = acumular(estado, evento);
-            const instantaneo = estado;
-            setTurnos((atuais) =>
-              atuais.map((t) =>
-                t.id === id
-                  ? {
-                      ...t,
-                      resposta: instantaneo.texto,
-                      origem: instantaneo.origem === 'openai' ? 'llm' : 'deterministico',
-                      estado: instantaneo.erro
-                        ? 'erro'
-                        : instantaneo.concluido
-                          ? instantaneo.degradou
-                            ? 'degradado'
-                            : 'concluido'
-                          : instantaneo.texto
-                            ? 'transmitindo'
-                            : 'aguardando',
-                    }
-                  : t,
-              ),
-            );
-          }
-        } catch {
-          setTurnos((atuais) =>
-            atuais.map((t) => (t.id === id ? { ...t, estado: 'erro' } : t)),
-          );
-        } finally {
-          if (abortar.current === controle) abortar.current = null;
-          setOcupado(false);
-        }
-      })();
-    },
-    [clienteId, sessao, ocupado, turnos, setTurnos],
-  );
-
-  const limpar = useCallback(() => {
-    abortar.current?.abort();
-    setConversa({ clienteId, turnos: [] });
-  }, [clienteId]);
-
-  return { turnos, ocupado, perguntar, limpar };
 }
 
 /* ------------------------------------------------------------------ */

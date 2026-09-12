@@ -6,7 +6,7 @@ import { ListaDeClientes } from '@/components/clientes';
 export const metadata: Metadata = {
   title: 'Clientes',
   description:
-    'Lista completa da carteira com score, rating, PD 12m, risco de recuperação judicial, tendência e alertas por cliente. Filtros, busca e ordenação com estado na URL. Dados simulados.',
+    'Lista completa da carteira com score, rating, PD 12m, risco de recuperação judicial, tendência e alertas por cliente. Filtros, busca e ordenação com estado na URL.',
 };
 
 /**

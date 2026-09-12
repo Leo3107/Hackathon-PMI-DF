@@ -42,7 +42,7 @@ function garantirCarga(): void {
     });
 }
 
-/** Invalida o cache após uma mutação que muda o cálculo (evento simulado, desfazer). */
+/** Invalida o cache após uma mutação que muda o cálculo (novo evento, desfazer). */
 export function recarregarClientes(): void {
   carregando = false;
   garantirCarga();

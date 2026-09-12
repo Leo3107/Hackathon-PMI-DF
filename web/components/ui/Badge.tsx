@@ -1,4 +1,4 @@
-import { FlaskConical, type LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { cn } from './cn';
@@ -22,8 +22,7 @@ export type VarianteBadge =
   | { variante: 'severidade'; severidade: Severidade }
   | { variante: 'natureza'; natureza: NaturezaGarantia }
   | { variante: 'status'; status: StatusRedFlag }
-  | { variante: 'fonte'; fonte: FonteId }
-  | { variante: 'simulado' };
+  | { variante: 'fonte'; fonte: FonteId };
 
 export type BadgeProps = VarianteBadge & {
   /** Sobrescreve o rótulo padrão da variante. */
@@ -83,8 +82,6 @@ function resolver(props: BadgeProps): Resolvido {
     }
     case 'fonte':
       return { ...vazio, familia: 'neutral', rotulo: NOME_CURTO_FONTE[props.fonte] };
-    case 'simulado':
-      return { ...vazio, familia: 'neutral', rotulo: 'simulado', Icone: FlaskConical };
     case 'acento':
       return { ...vazio, acento: true };
     case 'neutro':

@@ -4,11 +4,11 @@
  * Faixa global de motor indisponível (`03-ux-e-telas.md` §9.4, nível 1).
  *
  * O Next é só interface: sem o Flask não há score, PD, RJ nem exposição. Este é o estado de
- * falha mais provável durante a demonstração, e a regra é dura — **nunca tela branca, e nunca
+ * falha mais provável em operação, e a regra é dura — **nunca tela branca, e nunca
  * número em cache apresentado como atual sem esta faixa por cima**.
  *
  * Comportamento:
- * - Aparece logo abaixo do banner de dados simulados, 32px, em todas as rotas com shell.
+ * - Aparece no topo, 32px, em todas as rotas com shell.
  * - Reconecta sozinha em backoff 2s → 4s → 8s → 16s → 30s fixos, exibindo a tentativa.
  * - Botão `Tentar agora` força uma sonda imediata.
  * - Ao voltar, some e confirma com um aviso efêmero, e a rota é revalidada.

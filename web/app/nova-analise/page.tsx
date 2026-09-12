@@ -5,7 +5,7 @@ import { PaginaNovaAnalise } from '@/components/nova-analise';
 export const metadata: Metadata = {
   title: 'Nova análise',
   description:
-    'Due diligence de um CPF ou CNPJ antes de conceder crédito a prazo, barter ou CPR: coleta cadastral, jurídica, fiscal, ambiental, agroclimática e histórico interno. Dados simulados.',
+    'Due diligence de um CPF ou CNPJ antes de conceder crédito a prazo, barter ou CPR: coleta cadastral, jurídica, fiscal, ambiental, agroclimática e histórico interno.',
 };
 
 /**

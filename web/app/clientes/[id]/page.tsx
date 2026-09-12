@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Cliente',
   description:
-    'Score, probabilidade de default, risco de recuperação judicial, exposição, garantias e recomendação — com a evidência de cada número. Dados simulados.',
+    'Score, probabilidade de default, risco de recuperação judicial, exposição, garantias e recomendação — com a evidência de cada número.',
 };
 
 export default async function RotaDoCliente({

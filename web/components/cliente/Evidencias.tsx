@@ -1,178 +1,30 @@
 'use client';
 
 /**
- * Fontes e evidências, e os dois drawers de detalhe (`03-ux-e-telas.md` §4.11 e §4.5).
+ * Os dois drawers de detalhe de evidência e de fator (`03-ux-e-telas.md` §4.5).
  *
  * O laço **evidência ↔ fator** funciona nos dois sentidos e é o que responde "onde está a
  * prova?": do fator se chega às evidências que o sustentam, e da evidência se chega aos fatores
  * que ela move. Sem esse laço, o produto volta a ser uma nota sem lastro.
+ *
+ * Não há mais um card de catálogo de fontes na página: a evidência se alcança pelo número que
+ * ela sustenta — na banda de veto, nas red flags, na linha do tempo, no card de score — e nunca
+ * por uma lista solta, que é onde o analista perdia o fio do que estava conferindo.
  */
 
-import { Link2, Link as LinkIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Link as LinkIcon } from 'lucide-react';
 
 import {
-  Badge,
   Button,
   CLASSES_RISCO,
-  Card,
   Drawer,
-  EmptyState,
-  EvidenceCard,
-  FilterChips,
   ICONE_EVIDENCIA,
   NOME_CURTO_FONTE,
   NOME_DIMENSAO,
-  SectionHeader,
   Tooltip,
-  type FatorRelacionado,
 } from '@/components/ui';
 import { formatarData, formatarDelta, formatarNumero, formatarPercentual } from '@/lib/format';
-import type { AvaliacaoDeRisco, Evidencia, FatorCalculado, FonteId } from '@/types';
-
-/* ------------------------------------------------------------------ */
-/* Bloco 10 — fontes e evidências                                      */
-/* ------------------------------------------------------------------ */
-
-export interface BlocoEvidenciasProps {
-  avaliacao: AvaliacaoDeRisco;
-  indiceDeFatores: Map<string, { fator: FatorCalculado; peso: number }>;
-  aoAbrirEvidencia: (evidenciaId: string) => void;
-  aoSelecionarFator: (fatorId: string) => void;
-}
-
-export function BlocoEvidencias({
-  avaliacao,
-  indiceDeFatores,
-  aoAbrirEvidencia,
-  aoSelecionarFator,
-}: BlocoEvidenciasProps) {
-  const [abertoTodas, setAbertoTodas] = useState(false);
-  const fontes = useMemo(() => {
-    const presentes = new Set<FonteId>();
-    for (const evidencia of avaliacao.evidencias) presentes.add(evidencia.fonte);
-    return [...presentes].sort((a, b) =>
-      NOME_CURTO_FONTE[a].localeCompare(NOME_CURTO_FONTE[b], 'pt-BR'),
-    );
-  }, [avaliacao.evidencias]);
-
-  const [filtro, setFiltro] = useState<ReadonlySet<FonteId>>(new Set());
-
-  const visiveis = useMemo(() => {
-    const lista =
-      filtro.size === 0
-        ? avaliacao.evidencias
-        : avaliacao.evidencias.filter((e) => filtro.has(e.fonte));
-    return [...lista].sort((a, b) => b.dataConsulta.localeCompare(a.dataConsulta));
-  }, [avaliacao.evidencias, filtro]);
-
-  return (
-    <Card
-      id="evidencias"
-      as="section"
-      aria-labelledby="titulo-evidencias"
-      className="scroll-mt-[88px]"
-    >
-      <SectionHeader
-        nivel={2}
-        titulo="Fontes e evidências"
-        descricao={`${fontes.length} fontes consultadas · ${avaliacao.evidencias.length} documentos. Toda consulta desta demonstração é simulada.`}
-        meta={<Link2 size={14} strokeWidth={2} aria-hidden="true" />}
-        acoes={
-          avaliacao.evidencias.length > 0 ? (
-            <Button variante="fantasma" tamanho="sm" onClick={() => setAbertoTodas(true)}>
-              Ver todas as evidências
-            </Button>
-          ) : null
-        }
-      />
-      <h2 id="titulo-evidencias" className="sr-only">
-        Fontes e evidências
-      </h2>
-
-      {avaliacao.evidencias.length === 0 ? (
-        <div className="mt-3">
-          <EmptyState
-            compacto
-            titulo="Nenhuma evidência nesta seleção"
-            descricao="O motor não devolveu documentos para esta avaliação."
-          />
-        </div>
-      ) : null}
-
-      <Drawer
-        aberto={abertoTodas}
-        aoFechar={() => setAbertoTodas(false)}
-        titulo="Fontes e evidências"
-        subtitulo={`${fontes.length} fontes · ${avaliacao.evidencias.length} documentos`}
-        largura="larga"
-      >
-        <div className="flex flex-col gap-4">
-          {fontes.length > 0 ? (
-            <FilterChips<FonteId>
-              rotulo="Filtrar evidências por fonte"
-              limparRotulo="Todas as fontes"
-              selecionados={filtro}
-              aoMudar={setFiltro}
-              opcoes={fontes.map((fonte) => ({
-                valor: fonte,
-                rotulo: NOME_CURTO_FONTE[fonte],
-                contagem: avaliacao.evidencias.filter((e) => e.fonte === fonte).length,
-              }))}
-            />
-          ) : null}
-
-          {visiveis.length === 0 ? (
-            <EmptyState
-              compacto
-              titulo="Nenhuma evidência nesta seleção"
-              descricao="Nenhum documento da fonte selecionada. Limpe o filtro para ver todos."
-            />
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {visiveis.map((evidencia) => (
-                <li key={evidencia.id}>
-                  <EvidenceCard
-                    evidencia={paraEvidenciaUi(evidencia)}
-                    fatoresRelacionados={fatoresDe(evidencia, indiceDeFatores)}
-                    aoClicarFator={aoSelecionarFator}
-                    aoAlternar={() => aoAbrirEvidencia(evidencia.id)}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </Drawer>
-    </Card>
-  );
-}
-
-/**
- * `types/dominio.Evidencia` usa `null` onde o tipo estrutural do design system usa `undefined`
- * (campo ausente). A conversão é aqui, uma vez, em vez de espalhar `?? undefined` por cada uso.
- */
-function paraEvidenciaUi(evidencia: Evidencia) {
-  return {
-    ...evidencia,
-    dataDocumento: evidencia.dataDocumento ?? undefined,
-    urlFicticia: evidencia.urlFicticia ?? undefined,
-  };
-}
-
-function fatoresDe(
-  evidencia: Evidencia,
-  indice: Map<string, { fator: FatorCalculado; peso: number }>,
-): FatorRelacionado[] {
-  return evidencia.fatoresRelacionados
-    .map((id) => indice.get(id))
-    .filter((entrada): entrada is { fator: FatorCalculado; peso: number } => Boolean(entrada))
-    .map(({ fator }) => ({
-      id: fator.id,
-      rotulo: fator.rotulo,
-      impacto: fator.impactoGlobalAjustado,
-    }));
-}
+import type { Evidencia, FatorCalculado } from '@/types';
 
 /* ------------------------------------------------------------------ */
 /* Drawer de evidência                                                 */
@@ -199,7 +51,6 @@ export function DrawerDeEvidencia({
       aoFechar={aoFechar}
       titulo={evidencia?.titulo ?? 'Evidência'}
       subtitulo={evidencia ? NOME_CURTO_FONTE[evidencia.fonte] : undefined}
-      cabecalhoExtra={<Badge variante="simulado" tamanho="sm" />}
     >
       {evidencia ? (
         <div className="flex flex-col gap-4">
@@ -227,7 +78,7 @@ export function DrawerDeEvidencia({
           </section>
 
           {evidencia.urlFicticia ? (
-            <Tooltip conteudo="Endereço ilustrativo — nenhuma consulta real foi realizada.">
+            <Tooltip conteudo="Documento arquivado no dossiê da consulta.">
               <p
                 tabIndex={0}
                 className="type-mono flex cursor-not-allowed items-center gap-1.5 rounded border border-line-default bg-surface-sunken px-2 py-1.5 text-fg-disabled"
@@ -272,9 +123,6 @@ export function DrawerDeEvidencia({
             )}
           </section>
 
-          <p className="type-caption border-t border-line-subtle pt-2">
-            consulta simulada — protótipo demonstrativo, nenhuma consulta real a órgão público.
-          </p>
         </div>
       ) : null}
     </Drawer>

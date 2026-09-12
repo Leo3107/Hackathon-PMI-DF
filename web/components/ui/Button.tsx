@@ -24,7 +24,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 
 /**
  * `perigo-neutro` é ação destrutiva **de interface** (ex.: "Restaurar dados da
- * demonstração"). Usa `fg-primary` + borda `line-strong`; nunca vermelho —
+ * sessão"). Usa `fg-primary` + borda `line-strong`; nunca vermelho —
  * vermelho é risco de crédito (spec §2).
  */
 const VARIANTE: Record<VarianteBotao, string> = {

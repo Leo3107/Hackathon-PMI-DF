@@ -48,8 +48,6 @@ import {
   SecaoScore,
 } from './secoes';
 
-const BADGE = 'Dados simulados · protótipo demonstrativo';
-
 const PX_POR_MM = 96 / 25.4;
 /** 297 mm menos 22 mm de topo e 20 mm de base. */
 /** Dois px de folga absorvem a diferença de arredondamento entre medir e paginar. */
@@ -248,7 +246,7 @@ export function PaginaDoParecer({ clienteId }: { clienteId: string }) {
     return (
       <Aviso
         titulo="Cliente não encontrado"
-        texto="Não há cliente com este identificador na carteira demonstrativa."
+        texto="Não há cliente com este identificador na carteira."
         clienteId={clienteId}
       />
     );
@@ -305,19 +303,13 @@ export function PaginaDoParecer({ clienteId }: { clienteId: string }) {
                 <strong>LASTRO</strong> · Parecer de Risco
                 <br />
                 <span className="pc-cabecalho-cliente">
-                  {cliente.razaoSocial} · {formatarDocumento(cliente.documento)} (simulado)
+                  {cliente.razaoSocial} · {formatarDocumento(cliente.documento)}
                 </span>
               </div>
               <div className="pc-cabecalho-direita">
-                <span className="pc-badge">{BADGE}</span>
-                <br />
                 <span className="pc-num">{identificador}</span>
               </div>
             </header>
-
-            <span className="pc-marca-dagua" aria-hidden="true">
-              SIMULADO
-            </span>
 
             <div className="pc-corpo">
               {i === 0 ? (

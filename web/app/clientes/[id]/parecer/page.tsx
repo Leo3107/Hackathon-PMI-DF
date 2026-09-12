@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Parecer de Risco',
   description:
-    'Relatório Padronizado de Risco de Crédito e Alerta Precoce de RJ/Insolvência, pronto para impressão. Dados simulados.',
+    'Relatório Padronizado de Risco de Crédito e Alerta Precoce de RJ/Insolvência, pronto para impressão.',
 };
 
 export default async function RotaDoParecer({

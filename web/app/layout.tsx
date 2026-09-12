@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s · Lastro',
   },
   description:
-    'Protótipo demonstrativo de plataforma de inteligência de risco de crédito e prevenção à inadimplência no agronegócio. Dados simulados.',
+    'Plataforma de inteligência de risco de crédito e prevenção à inadimplência no agronegócio.',
 };
 
 /** Light (D7 revisto): declarado no `<html>` para o navegador pintar os controles nativos certo. */

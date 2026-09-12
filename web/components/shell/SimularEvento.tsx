@@ -1,25 +1,26 @@
 'use client';
 
 /**
- * Controle "Simular evento de monitoramento" (D9/D10 · `03-ux-e-telas.md` §1.5).
+ * Controle "Registrar evento de risco" (D9/D10 · `03-ux-e-telas.md` §1.5).
  *
- * Vive na topbar e está disponível em **todas** as rotas com shell, porque o pitch pode
- * precisar dele de qualquer lugar.
+ * Vive na barra lateral, logo abaixo de "Clientes", e está disponível em **todas** as rotas
+ * com shell. Desenha-se como item da lista de navegação, mas não é um item de navegação: não
+ * recebe o realce de rota ativa e abre um popover ancorado à direita da barra.
  *
  * O que este componente **não** faz: inventar número. Ele registra o evento na sessão, chama
- * `simularEvento` e o motor **recalcula de verdade** a partir dos fatos alterados (D4). O score
- * novo que a tela do cliente anima veio do Python, não daqui.
+ * o motor e ele **recalcula de verdade** a partir dos fatos alterados (D4). O score novo que a
+ * tela do cliente anima veio do Python, não daqui.
  *
- * Reversível: cada evento simulado aparece listado com ação `Desfazer`, que o remove da sessão
- * — o próximo cálculo volta ao estado anterior sozinho, porque o estado de sessão é entrada do
- * motor, não um patch aplicado sobre o resultado.
+ * Reversível: cada evento registrado aparece listado com ação `Desfazer`, que o remove da
+ * sessão — o próximo cálculo volta ao estado anterior sozinho, porque o estado de sessão é
+ * entrada do motor, não um patch aplicado sobre o resultado.
  */
 
 import { Undo2, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { Badge, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { simularEvento } from '@/lib/api';
 import { formatarDelta, formatarScore } from '@/lib/format';
 import {
@@ -36,7 +37,7 @@ import { useSessao } from './usar-sessao';
 interface OpcaoDeEvento {
   tipo: TipoEvento;
   rotulo: string;
-  /** Efeito esperado, em uma linha — o jurado precisa saber o que vai acontecer antes. */
+  /** Efeito esperado, em uma linha — o analista precisa saber o que vai acontecer antes. */
   efeito: string;
 }
 
@@ -89,7 +90,7 @@ export function SimularEvento({ clienteIdAtual }: SimularEventoProps) {
       registrarEventoSimulado({ clienteId, clienteNome: nome, tipo });
       const resposta = await simularEvento(clienteId, tipo, sessaoParaApi(clienteId));
       setAviso(
-        `Evento simulado. Score recalculado pelo motor: ${formatarScore(
+        `Evento registrado. Score recalculado pelo motor: ${formatarScore(
           resposta.scoreAnterior,
         )} → ${formatarScore(resposta.scoreAtual)} (${formatarDelta(
           resposta.deltaScore,
@@ -100,7 +101,7 @@ export function SimularEvento({ clienteIdAtual }: SimularEventoProps) {
       router.push(`/clientes/${clienteId}`);
       router.refresh();
     } catch {
-      setAviso('Não foi possível simular: o motor de risco não respondeu.');
+      setAviso('Não foi possível registrar o evento: o motor de risco não respondeu.');
     } finally {
       setEnviando(false);
     }
@@ -115,34 +116,37 @@ export function SimularEvento({ clienteIdAtual }: SimularEventoProps) {
 
   return (
     <Popover
-      rotulo="Simular evento de monitoramento"
+      rotulo="Registrar evento de risco"
+      ancoragem="lateral"
       largura={360}
+      className="mx-2"
       gatilho={({ aberto, alternar, id, controla }) => (
         <button
           id={id}
           type="button"
+          aria-label="Registrar evento de risco"
+          aria-haspopup="dialog"
           aria-expanded={aberto}
           aria-controls={controla}
           onClick={alternar}
-          className="flex h-7 items-center gap-1.5 rounded border border-line-strong bg-surface-card px-2 text-fg-secondary hover:bg-surface-hover hover:text-fg-primary"
+          className="transicao-controle flex h-9 w-full items-center gap-2 rounded-md px-3 text-fg-secondary hover:bg-surface-hover hover:text-fg-primary"
         >
-          <Zap aria-hidden className="size-3.5" />
-          <span className="type-label">Simular evento</span>
-          <Badge variante="neutro" tamanho="sm" icone={null}>
-            DEMO
-          </Badge>
+          <Zap aria-hidden className="size-4 shrink-0" />
+          <span className="type-label min-w-0 flex-1 truncate text-left text-current">
+            Registrar evento
+          </span>
         </button>
       )}
     >
       <p className="type-eyebrow mb-3 text-fg-tertiary">
-        Modo demonstração · injeta um evento e recalcula o risco de verdade
+        Registra um evento de monitoramento e recalcula o risco no motor
       </p>
 
-      <label className="type-label mb-1 block text-fg-secondary" htmlFor="simular-cliente">
+      <label className="type-label mb-1 block text-fg-secondary" htmlFor="evento-cliente">
         Cliente
       </label>
       <select
-        id="simular-cliente"
+        id="evento-cliente"
         value={clienteId}
         onChange={(e) => setEscolhido(e.target.value)}
         className="mb-3 h-8 w-full rounded border border-line-default bg-surface-input px-2 type-body text-fg-primary"
@@ -186,7 +190,7 @@ export function SimularEvento({ clienteIdAtual }: SimularEventoProps) {
         disabled={!clienteId || enviando}
         onClick={() => void confirmar()}
       >
-        Simular evento
+        Registrar evento
       </Button>
 
       {aviso && (

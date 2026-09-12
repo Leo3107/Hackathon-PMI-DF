@@ -12,7 +12,6 @@
 import { FileText, Gavel, Hourglass, Lock, LockOpen, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { SimularEvento } from '@/components/shell';
 import {
   Badge,
   Button,
@@ -75,7 +74,6 @@ export function CabecalhoDoCliente({
           >
             Gerar parecer
           </Button>
-          {prospect ? null : <SimularEvento clienteIdAtual={cliente.id} />}
         </div>
       </div>
 
@@ -83,7 +81,6 @@ export function CabecalhoDoCliente({
         <span className="type-mono text-fg-primary">
           {formatarDocumento(cliente.documento, { mascarar: cliente.tipoPessoa === 'PF' })}
         </span>
-        <Badge variante="simulado" tamanho="sm" />
         <Separador />
         <span>
           {cliente.municipio}/{cliente.uf}

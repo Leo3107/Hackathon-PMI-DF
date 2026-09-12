@@ -94,11 +94,6 @@ export { EvidenceCard, type EvidenceCardProps, type FatorRelacionado } from './E
 export { FactorBar, type FactorBarProps } from './FactorBar';
 export { RatingBadge, type RatingBadgeProps } from './RatingBadge';
 export { ScoreGauge, type ScoreGaugeProps } from './ScoreGauge';
-export {
-  SimulatedDataBanner,
-  TEXTO_DADOS_SIMULADOS,
-  type SimulatedDataBannerProps,
-} from './SimulatedDataBanner';
 export { StackedBar, type SegmentoBarra, type StackedBarProps } from './StackedBar';
 export {
   StreamingText,

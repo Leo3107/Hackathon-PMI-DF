@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import { Badge, Button, Card, ErrorState, cn } from '@/components/ui';
+import { Button, Card, ErrorState, cn } from '@/components/ui';
 import { textoDeErro } from '@/lib/api';
 import { formatarDocumento } from '@/lib/format';
 import type { Cliente } from '@/types';
@@ -123,7 +123,6 @@ export function PainelDoPipeline({
           ) : null}
         </div>
         <div className="flex items-center gap-2">
-          <Badge variante="simulado" tamanho="sm" />
           <Button variante="secundario" onClick={aoCancelar}>
             Cancelar
           </Button>
@@ -193,10 +192,6 @@ export function PainelDoPipeline({
           aoTentarNovamente={aoTentarNovamente}
         />
       ) : null}
-
-      <p className="type-caption text-fg-tertiary">
-        Simulação de coleta. Nenhuma consulta real a órgão público é realizada.
-      </p>
     </div>
   );
 }

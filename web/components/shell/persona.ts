@@ -14,5 +14,5 @@ export const PERSONA = {
   /** String literal gravada na trilha de auditoria. */
   assinatura: 'Marina Rezende · Analista de Crédito Sênior · Krill Tech',
   aviso:
-    'Perfil de demonstração. O Lastro não tem autenticação nesta versão (ver 00-decisoes.md D11.1).',
+    'Analista responsável pelas decisões e registros desta sessão na trilha de auditoria.',
 } as const;

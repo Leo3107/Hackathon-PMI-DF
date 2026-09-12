@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * Etapa 1 de `/nova-analise` — o campo de documento e os perfis demonstrativos (§6.1, §6.2, §6.7).
+ * Etapa 1 de `/nova-analise` — o campo de documento e os perfis de consulta rápida (§6.1, §6.2, §6.7).
  */
 
-import { CircleAlert, CircleCheck, Info, Search } from 'lucide-react';
+import { CircleAlert, CircleCheck, Search } from 'lucide-react';
 
-import { Badge, Button, Card, RatingBadge, Termo, cn } from '@/components/ui';
+import { Button, Card, RatingBadge, Termo, cn } from '@/components/ui';
 import { formatarDocumento, formatarScore } from '@/lib/format';
 
 import {
@@ -106,12 +106,11 @@ export function Entrada({
         </p>
       </Card>
 
-      <section aria-label="Perfis demonstrativos" className="flex flex-col gap-3">
+      <section aria-label="Perfis para consulta rápida" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="type-eyebrow text-fg-secondary">
-            Perfis demonstrativos — clique para analisar
+            Perfis para consulta rápida — clique para analisar
           </h2>
-          <Badge variante="simulado" tamanho="sm" />
         </div>
 
         {carregandoPerfis ? (
@@ -123,8 +122,8 @@ export function Entrada({
         ) : perfis.length === 0 ? (
           <Card densidade="compacta">
             <p className="type-caption">
-              Os perfis demonstrativos vêm do conjunto de dados do motor. Sem resposta do serviço
-              de cálculo, digite um documento no campo acima.
+              Os perfis vêm da base do motor de risco. Sem resposta do serviço de cálculo, digite
+              um documento no campo acima.
             </p>
           </Card>
         ) : (
@@ -178,12 +177,6 @@ export function Entrada({
           </ul>
         )}
       </section>
-
-      <p className="type-caption flex items-start gap-1.5 text-fg-tertiary">
-        <Info size={14} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
-        Nenhuma consulta real é feita a órgão público. Os dados são simulados e servem à
-        demonstração do produto.
-      </p>
     </div>
   );
 }

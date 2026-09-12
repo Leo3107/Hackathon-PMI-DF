@@ -370,7 +370,6 @@ export interface OpcoesDocumento {
 /**
  * Aceita dígitos puros ou string já formatada. Detecta pelo comprimento
  * (11 = CPF, 14 = CNPJ). Entrada inválida volta inalterada.
- * O sufixo " (simulado)" **não** é do formatador — é `<Badge variante="simulado" />`.
  */
 export function formatarDocumento(doc: string, opts: OpcoesDocumento = {}): string {
   if (typeof doc !== 'string') return String(doc ?? TRACO_LONGO);

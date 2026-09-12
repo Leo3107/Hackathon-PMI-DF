@@ -52,7 +52,7 @@ const MENSAGENS: Record<string, string> = {
   MOTOR_INDISPONIVEL: 'Motor de risco indisponível — o serviço de cálculo não está respondendo.',
   API_INDISPONIVEL: 'Motor de risco indisponível — o serviço de cálculo não está respondendo.',
   CLIENTE_NAO_ENCONTRADO: 'Cliente não encontrado.',
-  DOCUMENTO_NAO_ENCONTRADO: 'Documento não encontrado na base demonstrativa.',
+  DOCUMENTO_NAO_ENCONTRADO: 'Documento não encontrado nas bases consultadas.',
   CORPO_INVALIDO: 'A requisição foi recusada pelo motor por conter dados inválidos.',
   AVALIACAO_INCONSISTENTE:
     'O motor recusou-se a devolver uma avaliação cujos números não fecham. Nenhum número parcial é exibido.',

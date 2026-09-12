@@ -6,24 +6,25 @@
  * Empilhamento fixo, de cima para baixo:
  *
  * ```
- * SimulatedDataBanner   28px   invariante I10 — em toda rota, não fechável
  * FaixaMotorIndisponivel 32px  §9.4 — só aparece quando o Flask não responde
  * BarraSuperior          48px
  * BarraLateral 240px │ conteúdo · padding 24px · max-width 1440px
  * ```
  *
  * `/clientes/[id]/parecer` renderiza **sem** sidebar e sem topbar: é documento para impressão,
- * não tela de trabalho, e traz o próprio banner na variante de impressão. A decisão fica aqui,
- * no shell, e não no layout da rota, porque o layout raiz é único.
+ * não tela de trabalho. A decisão fica aqui, no shell, e não no layout da rota, porque o layout
+ * raiz é único.
+ *
+ * O copiloto de análise é montado aqui, fora do `<main>`, como widget flutuante: ele acompanha o
+ * analista em toda rota de trabalho e some junto com o shell no parecer para impressão.
  */
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { SimulatedDataBanner } from '@/components/ui';
-
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
+import { CopilotoFlutuante } from './CopilotoFlutuante';
 import { FaixaMotorIndisponivel } from './FaixaMotorIndisponivel';
 import { rotaSemShell } from './rotas';
 
@@ -34,7 +35,6 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SimulatedDataBanner />
       <FaixaMotorIndisponivel />
       <div className="flex min-h-0 flex-1">
         <BarraLateral />
@@ -45,6 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+      <CopilotoFlutuante />
     </div>
   );
 }

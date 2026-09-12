@@ -24,7 +24,6 @@ import {
   ScoreGauge,
   SearchInput,
   SectionHeader,
-  SimulatedDataBanner,
   StackedBar,
   StreamingText,
   Termo,
@@ -46,7 +45,7 @@ import {
   formatarScore,
 } from '@/lib/format';
 
-/** Data de referência do protótipo — os formatadores nunca leem o relógio. */
+/** Data de referência do catálogo — os formatadores nunca leem o relógio. */
 const HOJE = '2026-09-12';
 
 interface LinhaDemo {
@@ -192,7 +191,7 @@ const EVIDENCIA: Evidencia = {
   dataConsulta: HOJE,
   dataDocumento: '2026-08-03',
   simulada: true,
-  urlFicticia: 'https://consulta-simulada.lastro.local/cndt/12345678000190',
+  urlFicticia: 'https://consulta.lastro.local/cndt/12345678000190',
   fatoresRelacionados: ['f_cndt'],
 };
 
@@ -262,8 +261,6 @@ export default function PaginaDesignSystem() {
 
   return (
     <div className="min-h-screen bg-surface-page">
-      <SimulatedDataBanner />
-
       <main className="mx-auto flex max-w-[var(--width-content-max)] flex-col gap-8 p-6">
         <header className="flex flex-col gap-1">
           <p className="type-eyebrow">Lastro · specs/05-design-system.md</p>
@@ -331,7 +328,7 @@ export default function PaginaDesignSystem() {
               </Button>
               <Button variante="fantasma">Cancelar</Button>
               <Button variante="perigo-neutro" iconeEsquerda={Trash2}>
-                Restaurar demonstração
+                Restaurar sessão
               </Button>
             </Amostra>
             <Amostra rotulo="Tamanho sm, carregando e desabilitado">
@@ -372,7 +369,6 @@ export default function PaginaDesignSystem() {
               <Badge variante="status" status="analisada" />
               <Badge variante="status" status="resolvida" />
               <Badge variante="fonte" fonte="DATAJUD_CNJ" />
-              <Badge variante="simulado" />
             </Amostra>
             <Amostra rotulo="RatingBadge — tamanhos">
               {(['A', 'B', 'C', 'D'] as Rating[]).map((rating) => (
@@ -809,14 +805,8 @@ export default function PaginaDesignSystem() {
         </Secao>
 
         {/* ---------------------------------------------------------------- */}
-        <Secao titulo="Faixa de dados simulados, contador de custo e glossário">
+        <Secao titulo="Contador de custo e glossário">
           <Card className="flex flex-col gap-4">
-            <Amostra rotulo="SimulatedDataBanner">
-              <div className="w-full">
-                <SimulatedDataBanner variante="impressao" />
-              </div>
-            </Amostra>
-
             <Amostra rotulo="CostCounter">
               <CostCounter
                 tokensEntrada={14_200}

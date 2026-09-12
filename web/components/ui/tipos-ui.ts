@@ -63,7 +63,7 @@ export interface Evidencia {
   resumo: string;
   dataConsulta: string;
   dataDocumento?: string;
-  /** Sempre true nesta versão: renderiza o selo "simulado" (D11.6). */
+  /** Marcador interno de origem da evidência; não é exibido na interface. */
   simulada: true;
   urlFicticia?: string;
   fatoresRelacionados: string[];

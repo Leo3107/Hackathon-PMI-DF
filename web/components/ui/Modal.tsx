@@ -28,7 +28,7 @@ const LARGURA = { sm: '400px', md: '560px', lg: '760px' } as const;
 /**
  * Diálogo modal (spec §6.12). Um por vez; modal sobre drawer é permitido
  * (z-60 vs z-50). Uso canônico: "Registrar decisão do analista" e
- * "Simular evento de monitoramento".
+ * "Registrar evento de risco".
  */
 export function Modal({
   aberto,

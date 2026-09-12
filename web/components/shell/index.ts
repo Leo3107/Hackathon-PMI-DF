@@ -4,6 +4,7 @@ export { Shell } from './Shell';
 export { BarraLateral } from './BarraLateral';
 export { BarraSuperior } from './BarraSuperior';
 export { BuscaGlobal } from './BuscaGlobal';
+export { CopilotoFlutuante } from './CopilotoFlutuante';
 export { CustoDoLlm } from './CustoDoLlm';
 export { FaixaMotorIndisponivel } from './FaixaMotorIndisponivel';
 export { IdentidadeDoAnalista } from './IdentidadeDoAnalista';
@@ -19,4 +20,5 @@ export {
   rotuloDaRota,
   type ItemDeNavegacao,
 } from './rotas';
+export { useCopiloto, type Copiloto, type TurnoCopiloto } from './usar-copiloto';
 export { useSessao, useSessaoParaApi } from './usar-sessao';

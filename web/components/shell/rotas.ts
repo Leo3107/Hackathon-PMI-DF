@@ -20,7 +20,6 @@ export const GRUPO_OPERACAO: ItemDeNavegacao[] = [
 
 /**
  * Rotas que renderizam **sem** sidebar e sem topbar: são documentos, não telas de trabalho.
- * Mantêm o banner de dados simulados na variante de impressão, por conta própria.
  */
 export function rotaSemShell(pathname: string): boolean {
   return /^\/clientes\/[^/]+\/parecer\/?$/.test(pathname);

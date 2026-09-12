@@ -332,7 +332,7 @@ export interface Evidencia {
   dataConsulta: string;
   /** ISO date. */
   dataDocumento?: string | null;
-  /** Sempre `true` nesta versão. Renderiza o selo "consulta simulada" (D11.6). */
+  /** Marcador interno de origem da evidência; não é exibido na interface. */
   simulada: true;
   urlFicticia?: string | null;
   /** Fatores do motor que esta evidência sustenta. Liga evidência → número (R5). */

@@ -24,7 +24,7 @@ export interface ItemTimeline {
   scoreApos?: number;
   icone?: LucideIcon;
   evidenciaIds?: string[];
-  /** Evento injetado pela demonstração (D10). */
+  /** Evento registrado nesta sessão (D10). */
   destaque?: boolean;
 }
 
@@ -127,7 +127,7 @@ export function Timeline({
                     {item.fonte ? <Badge variante="fonte" fonte={item.fonte} tamanho="sm" /> : null}
                     {item.destaque ? (
                       <Badge variante="acento" tamanho="sm">
-                        simulado agora
+                        registrado agora
                       </Badge>
                     ) : null}
                   </div>
