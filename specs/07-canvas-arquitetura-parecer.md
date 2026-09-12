@@ -36,7 +36,8 @@ esta spec faz a substituição mecânica.
 1. **Banner global** `DADOS SIMULADOS — protótipo demonstrativo` permanece visível em tela (D11.7). Em impressão,
    é reproduzido no cabeçalho de **toda** página gerada.
 2. **Nenhuma menção** a fornecedores de nuvem/IA de terceiros como parte da arquitetura conceitual, e **zero
-   menção** ao ecossistema IBM em qualquer ponto (D6). Quando for preciso nomear o modelo de linguagem, usar
+   menção** ao ecossistema do parceiro tecnológico citado no documento de desafio (ferramentas e agentes
+   nomeados na §1 e na §6 daquele documento) em qualquer ponto (D6). Quando for preciso nomear o modelo de linguagem, usar
    "modelo de linguagem via API, intercambiável" — o nome do modelo pode aparecer **apenas** no contador de custo
    já previsto em D5, nunca nestas três superfícies.
 3. **Nomes oficiais**: "Krill Tech" (duas palavras), "Lastro", "Parecer de Risco" na UI e "Relatório Padronizado
@@ -368,22 +369,48 @@ Elementos gráficos obrigatórios (legíveis a distância, sem depender de texto
 
 ## 2.1 Propósito
 
-Mostrar o pipeline conceitual **e** provar três coisas em uma tela: (1) o fluxo reproduz os quatro agentes de
+Mostrar o pipeline conceitual **e** provar quatro coisas em uma tela: (1) o fluxo reproduz os quatro agentes de
 referência da §6 do desafio com implementação própria; (2) **ML quantitativo e LLM são camadas distintas com
 fronteira explícita** — números só saem do motor, texto só sai do LLM; (3) cada etapa tem um lugar concreto no
-produto que está rodando ao lado. Nada aqui depende de biblioteca de diagramação: é grid CSS + SVG autoral para
-conectores.
+produto que está rodando ao lado; (4) **o diagrama descreve o que está de fato em execução na máquina durante o
+pitch** — dois serviços reais (Python/Flask e Next.js), não uma ilustração. Nada aqui depende de biblioteca de
+diagramação: é grid CSS + SVG autoral para conectores.
+
+### 2.1.1 Topologia real de execução (D3)
+
+```
+Browser ──HTTP──► web/  Next.js 15 (porta 3000)        ──HTTP interno──► api/  Flask · Python 3.13 (porta 5001)
+                  interface + proxy server-side                            Motor de Decisão & Scoring
+                  não recalcula nada                                       Agente Sintetizador (LLM, streaming)
+                                                                           dataset simulado em api/data/
+```
+
+- O browser **nunca** fala com o Flask. Route handlers em `web/app/api/*` fazem apenas proxy, inclusive do
+  stream de texto, sem bufferizar.
+- A chave do provedor de LLM vive só no Flask. A interface não contém lógica de risco.
+- O contrato entre os dois é o `01-modelo-de-dados.md`: tipos TypeScript no `web/`, modelos pydantic espelhados
+  no `api/`, teste de contrato comparando o JSON real.
 
 ## 2.2 Cabeçalho da página (texto final)
 
 ```
 Arquitetura da solução
-Pipeline de referência do desafio (§6), implementação própria da equipe.
+Pipeline de referência do desafio (§6), implementação própria da equipe — e é isto que está rodando agora.
 ```
 
-Faixa de estado logo abaixo, três pastilhas de fatos:
+Faixa de estado logo abaixo, quatro pastilhas de fatos:
 
-`0 integrações reais nesta versão` · `14 fontes mapeadas` · `{{carteira.total}} clientes simulados`
+`0 integrações reais nesta versão` · `14 fontes mapeadas` · `{{carteira.total}} clientes simulados` · `2 serviços em execução: Python/Flask (motor + IA) e Next.js (interface)`
+
+A quarta pastilha é **viva**: o Next consulta `GET /api/saude` (proxy para o `health` do Flask) ao montar a
+página e exibe `Flask · Python 3.13 · respondeu em {ms} ms` em verde-neutro (não é cor de risco: usar o acento de
+marca) ou `Flask indisponível` em cinza com ícone de alerta. É a prova, em tela, de que o motor é um processo real.
+
+**Nota fixa na página** (caixa discreta sob o cabeçalho, texto final):
+
+> **Este diagrama não é ilustrativo.** Cada card das camadas ML e LLM aponta para código Python em execução no
+> serviço `api/` (Flask); cada card de interface aponta para a aplicação Next.js que você está usando agora.
+> Os números que aparecem nas telas foram calculados pelo motor deste diagrama, nesta máquina, nesta sessão.
 
 Legenda fixa (canto superior direito, sempre visível):
 
@@ -395,23 +422,29 @@ Legenda fixa (canto superior direito, sempre visível):
 ## 2.3 As onze etapas
 
 Cada etapa é um **card** com: número, nome, agente de referência (pílula), camada (ML / LLM / Dados / Humano),
-"o que entra → o que sai", fontes, tecnologia e **"Onde aparece no produto"** (link). O texto abaixo é o texto
-final do card e do painel lateral que abre ao clicar.
+"o que entra → o que sai", fontes, **serviço + tecnologia** (onde o código realmente roda) e **"Onde aparece no
+produto"** (link). O texto abaixo é o texto final do card e do painel lateral que abre ao clicar.
 
-| # | Etapa | Agente de referência (§6) | Camada | Entra → Sai | Fontes | Tecnologia (stack próprio) | Onde aparece no produto |
+Convenção da coluna "Serviço · Tecnologia": `api/` = Flask, Python 3.13 (motor, LLM, dados); `web/` = Next.js 15,
+TypeScript (interface e proxy). Cada card exibe uma **pílula de serviço** com o logotipo textual `PY` (fundo
+`--surface-3`, borda sólida) ou `TS` (fundo `--surface-3`, borda fina no acento de marca) — a banca vê de relance
+que motor e LLM vivem no serviço Python e que a interface não calcula.
+
+| # | Etapa | Agente de referência (§6) | Camada | Entra → Sai | Fontes | Serviço · Tecnologia (stack próprio) | Onde aparece no produto |
 |---|---|---|---|---|---|---|---|
-| 1 | **FONTES** | Agente Coletor & Parser | Dados (externo, simulado) | CPF/CNPJ → documentos, certidões, publicações, séries | As 14 fontes da §2.5 | Conectores por fonte; nesta versão, dataset em TypeScript em `lib/data/` | `/due-diligence` (busca por documento) · `/clientes/[id]` › seção **Evidências consultadas** |
-| 2 | **COLETA / INGESTÃO** | Agente Coletor & Parser | Dados | Documentos brutos → `Evidencia[]` com fonte, data de consulta, tipo | Todas | Repositório assíncrono `RepositorioLastro` (`lib/repository/`), fronteira para API real | `/clientes/[id]` › Evidências (selo "consulta simulada" + data) |
-| 3 | **NORMALIZAÇÃO** | Agente Coletor & Parser | Dados | Evidências heterogêneas → `FatosDoCliente` tipado (interno, jurídico, fiscal, agro, cadastral, ambiental, operações, garantias) | Todas | Tipos em `types/`; parsing de PDF/DJE por regras + extrator de linguagem (fase 2) | `/clientes/[id]` › cabeçalho e painéis de fatos; `/metodologia` › "Do fato ao fator" |
-| 4 | **FEATURE ENGINEERING** | Agente Coletor & Parser **+** Agente de Risco Agro & Climático | ML | `FatosDoCliente` → `FatorCalculado[]` por dimensão (pontos, direção, evidência) | Interno, DataJud/DJE, cartórios, PGFN, TST, CRF, SICAR, IBAMA, CONAB, ZARC, INMET, RFB | Featurizers puros, um por dimensão, em `lib/scoring/`; o Agente Agro cruza CAR × ZARC × quebra de safra × precipitação × produtividade | `/clientes/[id]` › **Decomposição por dimensão** (fatores com pontos e fonte) |
-| 5 | **MOTOR PREDITIVO** | Motor de Decisão & Scoring | ML | Fatores → score por dimensão → score 0–1000 → PD 6/12/24 m → índice e probabilidade de RJ | — (consome a etapa 4) | Motor determinístico proprietário: média ponderada, curva logística de PD, hazard por tendência, índice de RJ com elegibilidade (Lei 14.112/2020) | `/carteira` › coluna Score/Rating · `/clientes/[id]` › **gauge de score, PD nos três horizontes, Risco de RJ** |
-| 6 | **REGRAS E RED FLAGS** | Motor de Decisão & Scoring | ML / regras | Fatos + score → vetos (força D / teto C) → red flags por severidade → rating final | — | Tabela de gatilhos em `lib/scoring/config.ts`; red flags derivadas dos mesmos fatos | `/clientes/[id]` › **Score calculado × Classificação final após regras**, lista de red flags · `/alertas` |
-| 7 | **SCORE / PD / RJ** | Motor de Decisão & Scoring | ML | Saída consolidada `AvaliacaoDeRisco` com auditoria de fechamento (`diferenca = 0`) | — | Função pura `calcularRisco(fatos, config)`; testes de invariantes I1–I6 | `/carteira` · `/clientes/[id]` · `/metodologia` › **Auditoria de fechamento** ("a soma dos fatores reconstrói o score") |
-| — | **FRONTEIRA** | — | — | **Só números e evidências passam para a direita. Só texto volta para a esquerda.** | — | Contrato JSON de entrada do LLM; validador de saída rejeita números ausentes da entrada | Visível na própria aba como faixa vertical entre 7 e 8 |
-| 8 | **CAMADA DE EXPLICAÇÃO** | Agente Sintetizador & Gerador de Relatórios | LLM | `AvaliacaoDeRisco` + evidências → texto "por que este score", "por que mudou", resumo executivo | — | Modelo de linguagem via API, prompts e guardas próprios; streaming; timeout 25 s; fallback determinístico (D5) | `/clientes/[id]` › **Por que este score** · **Por que mudou** · Copiloto "Pergunte sobre este cliente" |
-| 9 | **RECOMENDAÇÃO** | Motor de Decisão & Scoring (decide) **+** Agente Sintetizador (redige) | ML **→** LLM | Regra escolhe código e ações parametrizadas → LLM redige a justificativa | — | Tabela de decisão da §12 do motor; LLM recebe as ações prontas | `/clientes/[id]` › card **Recomendação operacional** · `/clientes/[id]/parecer` |
-| 10 | **ANALISTA** | — (humano no circuito) | Humano | Recomendação → decisão (aprovar, restringir, revisar, suspender, recusar) + justificativa | — | Registro em `RegistroAuditoria`; persistência de sessão | `/clientes/[id]` › **Registrar decisão** · `/auditoria` |
-| 11 | **MONITORAMENTO CONTÍNUO** | Agente Coletor & Parser (revarredura) **+** Motor (recálculo) | Dados → ML | Novo evento → novos fatos → recálculo → delta por fator → alerta | Todas, em ciclos por fonte | `simularEvento()` no repositório; snapshots recalculados; Σ deltas = Δ score (I6) | `/alertas` › central · `/clientes/[id]` › **timeline** e "Por que mudou" · botão **Simular evento de monitoramento** |
+| 1 | **FONTES** | Agente Coletor & Parser | Dados (externo, simulado) | CPF/CNPJ → documentos, certidões, publicações, séries | As 14 fontes da §2.5 | `api/` **PY** — conectores por fonte como contrato; nesta versão, dataset simulado em `api/data/` (Python/JSON) | `/due-diligence` (busca por documento) · `/clientes/[id]` › seção **Evidências consultadas** |
+| 2 | **COLETA / INGESTÃO** | Agente Coletor & Parser | Dados | Documentos brutos → `Evidencia[]` com fonte, data de consulta, tipo | Todas | `api/` **PY** — camada de repositório do Flask (`api/repository/`), fronteira para integração real; exposta ao `web/` por rota HTTP e consumida via proxy `web/app/api/*` | `/clientes/[id]` › Evidências (selo "consulta simulada" + data) |
+| 3 | **NORMALIZAÇÃO** | Agente Coletor & Parser | Dados | Evidências heterogêneas → `FatosDoCliente` tipado (interno, jurídico, fiscal, agro, cadastral, ambiental, operações, garantias) | Todas | `api/` **PY** — modelos pydantic v2 espelhando `types/` do `web/` (contrato da API); parsing de PDF/DJE por regras + extrator de linguagem (fase 2) | `/clientes/[id]` › cabeçalho e painéis de fatos; `/metodologia` › "Do fato ao fator" |
+| 4 | **FEATURE ENGINEERING** | Agente Coletor & Parser **+** Agente de Risco Agro & Climático | ML | `FatosDoCliente` → `FatorCalculado[]` por dimensão (pontos, direção, evidência) | Interno, DataJud/DJE, cartórios, PGFN, TST, CRF, SICAR, IBAMA, CONAB, ZARC, INMET, RFB | `api/` **PY** — featurizers puros, um por dimensão, em `api/scoring/`; o Agente Agro cruza CAR × ZARC × quebra de safra × precipitação × produtividade | `/clientes/[id]` › **Decomposição por dimensão** (fatores com pontos e fonte) |
+| 5 | **MOTOR PREDITIVO** | Motor de Decisão & Scoring | ML | Fatores → score por dimensão → score 0–1000 → PD 6/12/24 m → índice e probabilidade de RJ | — (consome a etapa 4) | `api/` **PY** — motor determinístico proprietário em Python: média ponderada, curva logística de PD, hazard por tendência, índice de RJ com elegibilidade (Lei 14.112/2020); coeficientes em `api/scoring/config.py` | `/carteira` › coluna Score/Rating · `/clientes/[id]` › **gauge de score, PD nos três horizontes, Risco de RJ** |
+| 6 | **REGRAS E RED FLAGS** | Motor de Decisão & Scoring | ML / regras | Fatos + score → vetos (força D / teto C) → red flags por severidade → rating final | — | `api/` **PY** — tabela de gatilhos em `api/scoring/config.py`; red flags derivadas dos mesmos fatos | `/clientes/[id]` › **Score calculado × Classificação final após regras**, lista de red flags · `/alertas` |
+| 7 | **SCORE / PD / RJ** | Motor de Decisão & Scoring | ML | Saída consolidada `AvaliacaoDeRisco` com auditoria de fechamento (`diferenca = 0`) | — | `api/` **PY** — função pura `calcular_risco(fatos, config)`; invariantes I1–I6 em `pytest` (`api/tests/`); JSON devolvido ao `web/` bate campo a campo com o tipo TypeScript | `/carteira` · `/clientes/[id]` · `/metodologia` › **Auditoria de fechamento** ("a soma dos fatores reconstrói o score") |
+| — | **FRONTEIRA** | — | — | **Só números e evidências passam para a direita. Só texto volta para a esquerda.** | — | `api/` **PY** — contrato JSON de entrada do LLM montado a partir de `AvaliacaoDeRisco`; validador de saída rejeita números ausentes da entrada | Visível na própria aba como faixa vertical entre 7 e 8 |
+| 8 | **CAMADA DE EXPLICAÇÃO** | Agente Sintetizador & Gerador de Relatórios | LLM | `AvaliacaoDeRisco` + evidências → texto "por que este score", "por que mudou", resumo executivo | — | `api/` **PY** — modelo de linguagem via API (SDK Python), prompts e guardas próprios; **streaming** repassado pelo proxy do `web/` sem bufferizar; timeout 25 s; teto de orçamento; fallback determinístico (D5) | `/clientes/[id]` › **Por que este score** · **Por que mudou** · Copiloto "Pergunte sobre este cliente" |
+| 9 | **RECOMENDAÇÃO** | Motor de Decisão & Scoring (decide) **+** Agente Sintetizador (redige) | ML **→** LLM | Regra escolhe código e ações parametrizadas → LLM redige a justificativa | — | `api/` **PY** — tabela de decisão da §12 do motor; o LLM recebe as ações prontas no mesmo serviço | `/clientes/[id]` › card **Recomendação operacional** · `/clientes/[id]/parecer` |
+| 10 | **ANALISTA** | — (humano no circuito) | Humano | Recomendação → decisão (aprovar, restringir, revisar, suspender, recusar) + justificativa | — | `web/` **TS** — formulário de decisão e `RegistroAuditoria` em `localStorage` (D11.3); enviado ao Flask junto da requisição quando altera o cálculo | `/clientes/[id]` › **Registrar decisão** · `/auditoria` |
+| 11 | **MONITORAMENTO CONTÍNUO** | Agente Coletor & Parser (revarredura) **+** Motor (recálculo) | Dados → ML | Novo evento → novos fatos → recálculo → delta por fator → alerta | Todas, em ciclos por fonte | `api/` **PY** — rota `simular_evento` no Flask injeta o evento e recalcula; snapshots recalculados; Σ deltas = Δ score (I6). `web/` **TS** — dispara e exibe | `/alertas` › central · `/clientes/[id]` › **timeline** e "Por que mudou" · botão **Simular evento de monitoramento** |
+| ◦ | **INTERFACE** (transversal) | — | Apresentação | JSON do Flask → telas; stream de texto → prosa token a token | — | `web/` **TS** — Next.js 15, React 19, Tailwind v4, Recharts, SVG autoral do gauge; route handlers só fazem proxy; **não recalcula nada** | Todas as rotas; renderizada como faixa fina sob o trilho, ver §2.4.2 |
 
 Texto do painel lateral que abre em qualquer card de camada LLM (8, 9 à direita), sempre presente:
 
@@ -447,7 +480,11 @@ CAMADA          DADOS (simulado) ───────────────�
                                                                                                                                                         │
               ◄─────────────────────────────────── novo evento → revarredura → recálculo → delta por fator → alerta ────────────────────────────────────┘
 
+SERVIÇO       ├──────────────────────── api/  Flask · Python 3.13  (motor + LLM + dados) ─────────────────────────────────────────────────┤  web/ TS  ├ api/ PY + web/ TS ┤
+
 TELA          due-diligence  cliente›Evid. cliente›Fatos  cliente›Dimens. carteira·gauge cliente›Regras  metodologia›Aud.  cliente›Por quê  cliente›Recom.  auditoria     alertas·timeline
+
+              ═══════════════════════════════ web/  Next.js 15 · interface + proxy server-side · não recalcula nada ══════════════════════════════════════════
 ```
 
 ### 2.4.2 Especificação para implementação (grid + SVG, sem biblioteca)
@@ -461,7 +498,9 @@ TELA          due-diligence  cliente›Evid. cliente›Fatos  cliente›Dimens. 
 2. **Faixa de camadas** — 5 spans coloridos por camada: `DADOS (simulado)` cinza · `ML QUANTITATIVO` azul-aço ·
    `FRONTEIRA` (largura fixa 56 px) · `LLM` roxo-acinzentado · `HUMANO` neutro · `LOOP` cinza. Estes spans
    são a separação visual inequívoca exigida: **não** dependem só de cor — trazem rótulo textual e o
-   pictograma da legenda (▰ ▱ ◌ ●).
+   pictograma da legenda (▰ ▱ ◌ ●). Nota: ML e LLM são camadas **conceituais** distintas que vivem no **mesmo
+   serviço** (`api/`, Python); a distinção de camada é sobre o que cada uma produz (número × texto), a distinção de
+   serviço (faixa do item 7) é sobre onde o código roda. As duas faixas coexistem sem se confundir.
 3. **Trilho de etapas** — `display: grid; grid-template-columns: repeat(7, 1fr) 56px repeat(4, 1fr)`; cada card
    `min-width: 150px`; altura 168 px; conteúdo: numeral (20 px, 800), nome (13 px, 700, caixa alta), pílula do
    agente (10 px), linha "entra → sai" (11 px, 2 linhas máx., `text-overflow: ellipsis`), e rodapé com o link
@@ -480,8 +519,15 @@ TELA          due-diligence  cliente›Evid. cliente›Fatos  cliente›Dimens. 
    etc.), clicável, cor do acento de marca. Este é o elo entre a arquitetura e o produto rodando: o jurado clica e
    cai na tela correspondente do cliente atualmente em foco (parâmetro `?cliente=[id]`, padrão: primeiro cliente
    com rating C).
-7. **Painel lateral** (380 px, à direita, `position: sticky`) — abre ao clicar em qualquer card, com todas as
-   colunas da tabela §2.3 em formato de ficha e o texto de camada (ML ou LLM) correspondente.
+7. **Faixa de serviço** — imediatamente acima da faixa "onde aparece": dois spans com rótulo textual e pílula
+   `PY`/`TS`. `api/ · Flask · Python 3.13 — motor, LLM e dados` cobre as etapas 1–9 e 11; `web/ · Next.js 15 —
+   interface e proxy` cobre a etapa 10 e a faixa transversal de INTERFACE. Sob todo o trilho, uma barra contínua
+   com borda dupla: `web/ Next.js 15 · interface + proxy server-side · não recalcula nada`, com uma seta vertical
+   única rotulada `HTTP interno (proxy)` ligando-a ao span `api/`. Isso materializa a topologia de D3 no próprio
+   diagrama: o browser toca só a barra de baixo; a barra de baixo toca o Flask.
+8. **Painel lateral** (380 px, à direita, `position: sticky`) — abre ao clicar em qualquer card, com todas as
+   colunas da tabela §2.3 em formato de ficha, o texto de camada (ML ou LLM) correspondente e uma linha
+   `Executa em: api/ (Flask, Python 3.13)` ou `Executa em: web/ (Next.js 15, TypeScript)`.
 
 **Responsividade:** abaixo de 1280 px de largura útil, o trilho vira um container `overflow-x: auto` com
 `scroll-snap-type: x mandatory`; faixas de agentes e camadas rolam junto (mesmo container). Painel lateral vira
@@ -516,20 +562,38 @@ final abaixo. Ordem = ordem da §5 do desafio, com dados internos por último.
 
 Rodapé da seção (texto final):
 
-> Nesta versão, **nenhuma destas fontes é consultada**. Os fatos vêm de um conjunto de dados fictício, com
-> documentos gerados e razões sociais inventadas, e toda evidência na aplicação traz o selo "consulta simulada"
-> com a data. A camada de repositório é assíncrona desde já: trocar o mock por integração real não altera nenhuma tela.
+> Nesta versão, **nenhuma destas fontes é consultada**. Os fatos vêm de um conjunto de dados fictício em
+> `api/data/`, com documentos gerados e razões sociais inventadas, e toda evidência na aplicação traz o selo
+> "consulta simulada" com a data. A camada de repositório do serviço Python já é a fronteira para integração real:
+> trocar o dataset por conectores não altera nenhuma tela do Next.js.
 
 ## 2.6 Marcação de "nenhuma integração real"
 
 Regras visuais, todas obrigatórias e simultâneas (não depender de uma só):
 
 1. Card 1 (FONTES) e todos os 14 cards de fonte: borda **pontilhada** + badge `SIMULADO — sem integração`.
-2. Conector 1→2 desenhado tracejado (os demais são sólidos), com rótulo `mock em lib/data/`.
+2. Conector 1→2 desenhado tracejado (os demais são sólidos), com rótulo `dataset simulado em api/data/`.
 3. Faixa de estado no topo: `0 integrações reais nesta versão`.
 4. Banner global da aplicação (D11.7) permanece visível.
-5. Painel lateral do card 1 abre com a frase: *"Nenhuma chamada externa é feita por esta aplicação. Os conectores
-   existem como contrato (`RepositorioLastro`), não como implementação."*
+5. Painel lateral do card 1 abre com a frase: *"Nenhuma chamada a órgão público é feita por esta aplicação. Os
+   conectores existem como contrato na camada de repositório do serviço Python, não como implementação. A única
+   chamada externa do sistema é a do modelo de linguagem, feita pelo Flask, com orçamento controlado."*
+
+## 2.7 Honestidade do diagrama — o que está rodando de fato
+
+Seção final da página, título **"O que está em execução agora"**. Três colunas, texto final:
+
+| Componente | Estado nesta versão | Como o jurado confere |
+|---|---|---|
+| **Motor de Decisão & Scoring** — `api/scoring/` (Python) | **Real.** Função pura, determinística, com testes de invariantes (a soma dos fatores reconstrói o score). Coeficientes calibrados por especialista; treinamento estatístico sobre histórico real é Fase 2. | Aba Metodologia › Auditoria de fechamento mostra `diferença = 0` para cada cliente; pastilha viva `Flask · respondeu em {ms} ms` nesta página |
+| **Agente Sintetizador** — `api/llm/` (Python) | **Real.** Chamada ao vivo ao modelo de linguagem via API, com streaming, timeout e teto de orçamento; fallback determinístico. | Página do cliente › "Por que este score" chega token a token; contador de custo acumulado visível na interface |
+| **Agente Coletor & Parser** e **Agente de Risco Agro & Climático** — `api/repository/`, `api/scoring/agro.py` | **Parcial.** A lógica de normalização e de cruzamento (CAR × ZARC × safra × clima) roda de verdade sobre fatos simulados; os conectores às fontes públicas são contrato, não implementação. | Evidências com selo "consulta simulada"; cards de fonte com badge `SIMULADO — sem integração` |
+| **Interface** — `web/` (Next.js 15) | **Real.** Consome exclusivamente o JSON do Flask via proxy server-side; não recalcula nada. | Desligar o Flask: a interface exibe estado de erro identificado, nunca números — porque não tem como produzi-los |
+
+Frase de encerramento da página (texto final):
+
+> A diferença entre este diagrama e um slide é que ele pode ser desligado: pare o serviço Python e nenhum número
+> aparece em tela nenhuma.
 
 ---
 
