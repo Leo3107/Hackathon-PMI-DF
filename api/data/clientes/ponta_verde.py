@@ -88,7 +88,8 @@ FATOS = FatosDoCliente(
         covenants_rompidos=[_COV_1, _COV_2],
     ),
     juridico=FatosJuridicos(
-        execucoes_titulo_12m=2,
+        # V7: quatro credores distintos exigem ao menos quatro execuções ajuizadas.
+        execucoes_titulo_12m=4,
         valor_total_em_execucao=4_800_000.0,
         credores_distintos_executando=4,
         protestos_ativos=3,
@@ -190,13 +191,13 @@ SNAPSHOTS = serie_de_snapshots(
         },
         {
             "interno": {"atraso_medio_dias_12m": 22, "atraso_medio_dias_90d": 32, "pior_atraso_dias_12m": 79, "pct_titulos_pagos_em_dia_12m": 0.60, "covenants_rompidos": [_COV_1, _COV_2]},
-            "juridico": {"execucoes_titulo_12m": 2, "valor_total_em_execucao": 3_100_000.0, "credores_distintos_executando": 3, "protestos_ativos": 2, "protestos_12m": 3, "credores_protestantes_180d": 2, "recuperacao_judicial": None},
+            "juridico": {"execucoes_titulo_12m": 3, "valor_total_em_execucao": 3_100_000.0, "credores_distintos_executando": 3, "protestos_ativos": 2, "protestos_12m": 3, "credores_protestantes_180d": 2, "recuperacao_judicial": None},
             "fiscal": {"divida_ativa_pgfn": 1_700_000.0, "divida_ativa_pgfn_90d_atras": 1_300_000.0, "execucoes_fiscais": 1, "valor_execucoes_fiscais": 900_000.0},
             "agro": {"quebra_safra_regional_pct": 14, "desvio_precipitacao_pct": -17, "produtividade_vs_media_regional_pct": -8},
         },
         {
             "interno": {"atraso_medio_dias_12m": 24, "atraso_medio_dias_90d": 36, "pior_atraso_dias_12m": 96, "pct_titulos_pagos_em_dia_12m": 0.55},
-            "juridico": {"execucoes_titulo_12m": 2, "valor_total_em_execucao": 4_100_000.0, "credores_distintos_executando": 3, "recuperacao_judicial": None},
+            "juridico": {"execucoes_titulo_12m": 3, "valor_total_em_execucao": 4_100_000.0, "credores_distintos_executando": 3, "recuperacao_judicial": None},
             "fiscal": {"divida_ativa_pgfn": 1_700_000.0, "divida_ativa_pgfn_90d_atras": 1_700_000.0},
             "agro": {"quebra_safra_regional_pct": 15, "desvio_precipitacao_pct": -18},
         },

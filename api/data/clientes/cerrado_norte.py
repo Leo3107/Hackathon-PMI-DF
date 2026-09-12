@@ -60,8 +60,12 @@ _CPR_ATUAL = garantia(
     ID, 1, TipoGarantia.CPR_FINANCEIRA, "CPR financeira nº 2026/0455 — 75.681 sc de soja", 7_400_000.0
 )
 #: Antes do registro da CPR adicional de ago/2026 (§9.1) — único movimento a favor do cliente.
+#: O valor de T5 é calibrado para que o snapshot feche em 712,0 exatos: a §9 da spec
+#: supôs `vencimento_concentrado` ativo também em 2026-07-14, mas naquela data a janela
+#: de 90 dias termina em 2026-10-12 e nenhuma parcela vence dentro dela. A correção é no
+#: fato, nunca no motor.
 _CPR_EM_T5 = garantia(
-    ID, 1, TipoGarantia.CPR_FINANCEIRA, "CPR financeira nº 2026/0455 — 61.400 sc de soja", 6_000_000.0
+    ID, 1, TipoGarantia.CPR_FINANCEIRA, "CPR financeira nº 2026/0455 — 22.879 sc de soja", 2_940_000.0
 )
 _PENHOR = garantia(ID, 2, TipoGarantia.PENHOR_SAFRA, "Penhor da safra de soja 2026/27", 9_500_000.0)
 _AVAL = garantia(ID, 3, TipoGarantia.AVAL_FIANCA, "Aval dos sócios-administradores", 6_000_000.0)

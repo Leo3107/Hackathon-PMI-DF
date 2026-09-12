@@ -35,6 +35,7 @@ __all__ = [
     "evidencias_padrao",
     "serie_de_snapshots",
     "normalizar_documento",
+    "SEM_RECALCULO",
 ]
 
 #: Data de referência de todo o dataset. O motor nunca lê o relógio.
@@ -51,6 +52,11 @@ DATAS_SNAPSHOT: tuple[str, ...] = (
 )
 
 DATA_AVALIACAO_GARANTIA = "2026-07-31"
+
+#: Sentinela de `EventoDeRisco.scoreApos` e `deltaScore`. O pacote `data/` **não
+#: escreve** valor derivado (§3): quem preenche esses dois campos é a camada de
+#: serviço, recalculando os snapshots anterior e posterior ao evento.
+SEM_RECALCULO: float = 0.0
 
 #: Preços de referência de agosto/2026 usados nas operações de barter (§6.2).
 PRECO_SACA: dict[str, float] = {

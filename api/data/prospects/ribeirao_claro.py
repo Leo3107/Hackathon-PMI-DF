@@ -51,7 +51,8 @@ FATOS = FatosDoCliente(
     data_referencia=DATA_REFERENCIA,
     interno=FatosInternos(),
     juridico=FatosJuridicos(
-        execucoes_titulo_12m=2,
+        # V7: três credores distintos exigem ao menos três execuções ajuizadas.
+        execucoes_titulo_12m=3,
         execucoes_titulo_90d=2,
         valor_total_em_execucao=900_000.0,
         credores_distintos_executando=3,
@@ -62,9 +63,9 @@ FATOS = FatosDoCliente(
     fiscal=FatosFiscais(divida_ativa_pgfn=1_400_000.0, divida_ativa_pgfn_90d_atras=950_000.0),
     agro=FatosAgro(
         risco_zarc=RiscoZarc.CRITICO,
-        quebra_safra_regional_pct=24,
-        desvio_precipitacao_pct=-40,
-        produtividade_vs_media_regional_pct=-20,
+        quebra_safra_regional_pct=20,
+        desvio_precipitacao_pct=-36,
+        produtividade_vs_media_regional_pct=-19,
         area_total_ha=1_600,
         safra_referencia="2026/27",
         culturas=CULTURAS,
@@ -98,7 +99,7 @@ FATOS = FatosDoCliente(
             data_avaliacao=DATA_REFERENCIA,
         ),
     ],
-    limite_aprovado=4_500_000.0,
+    limite_aprovado=5_000_000.0,
     patrimonio_declarado=6_200_000.0,
     faturamento_estimado_anual=11_200_000.0,
     evidencias=evidencias_padrao(
