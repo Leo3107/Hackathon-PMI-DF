@@ -1,0 +1,77 @@
+LASTRO · CONTEXTO DE AVALIAÇÃO · dados simulados · referência 12/09/2026
+[CLIENTE] id=vale-do-araguaia | Agropecuária Vale do Araguaia Ltda | PJ | CNPJ 12.345.678/0001-95 (simulado) | Barra do Garças/MT | Produtor rural — grãos | culturas: Soja, Milho safrinha | relacionamento desde 10/03/2020 | estado: EM_OBSERVACAO | origem: CARTEIRA
+[SCORE] calculado=604 | rating_calculado=B | rating_final=B | tendencia=deteriorando | vetos=nenhum | auditoria: soma_impactos=-396,0 diferenca=0,0
+[VARIACAO_90D] 666 -> 604 (-62) | referencia anterior 14/06/2026
+- Covenant contratual rompido (novo): -26,4
+- Aceleração judicial: 2 execuções em 90 dias (novo): -20,0
+- Atraso médio dos últimos 90 dias acima da média de 12 meses (3 -> 19 dias): -17,6
+- Dívida ativa PGFN em crescimento (novo): -12,6
+- Seguro agrícola contratado (novo, proteção): +15,0
+[DIMENSOES] id | score | peso | contribuicao | tendencia
+- comportamental | 450 | 22% | 99,0 | deteriorando
+- juridico | 538 | 20% | 107,6 | deteriorando
+- fiscal | 835 | 14% | 116,9 | deteriorando
+- agroclimatico | 622 | 15% | 93,3 | estavel
+- cadastral | 800 | 10% | 80,0 | estavel
+- ambiental | 670 | 9% | 60,3 | estavel
+- garantias | 469 | 10% | 46,9 | estavel
+[FATORES] id | dimensao | impacto no score (negativo = risco, positivo = proteção) | descricao | fonte | evidencias
+- execucoes_titulo | juridico | -42,0 | 3 execuções de título em 12 meses | DATAJUD_CNJ | E-01
+- pior_atraso | comportamental | -37,4 | pior atraso em 12 meses: 34 dias | INTERNO_KRILLTECH | E-10
+- zarc_risco | agroclimatico | -30,0 | risco ZARC alto para soja na região | MAPA_ZARC | E-04
+- atraso_medio | comportamental | -29,0 | atraso médio de pagamento em 12 meses: 11 dias | INTERNO_KRILLTECH | E-10
+- descoberto_extraconcursal | garantias | -28,6 | 71,4% da exposição sem cobertura extraconcursal | INTERNO_KRILLTECH | E-11
+- inadimplencia_tecnica | comportamental | -26,4 | 1 covenant contratual rompido e vigente: endividamento total acima de 2,5x o patrimônio (apurado 3,1x) | INTERNO_KRILLTECH | E-09
+- quebra_safra_regional | agroclimatico | -22,5 | quebra de safra regional de 25% no último ciclo | CONAB | E-05
+- aceleracao_judicial | juridico | -20,0 | 2 execuções ajuizadas nos últimos 90 dias | DATAJUD_CNJ | E-01
+- protestos | juridico | -18,0 | 2 protestos ativos | CARTORIO_PROTESTO | E-02
+- tendencia_atraso | comportamental | -17,6 | atraso médio subiu de 3 para 19 dias nos últimos 90 dias | INTERNO_KRILLTECH | E-10
+- pontualidade | comportamental | -17,2 | 74,0% dos títulos pagos em dia em 12 meses | INTERNO_KRILLTECH | E-10
+- sobreposicao_app | ambiental | -16,2 | sobreposição com área de preservação permanente | SICAR | E-08
+- car_irregular | ambiental | -13,5 | CAR em situação PENDENTE | SICAR | E-08
+- renegociacoes | comportamental | -13,2 | 1 renegociação em 12 meses | INTERNO_KRILLTECH | E-10
+- divida_ativa_crescente | fiscal | -12,6 | dívida ativa PGFN cresceu nos últimos 90 dias | PGFN | E-03
+- desvio_precipitacao | agroclimatico | -12,6 | precipitação acumulada 28% abaixo da normal climatológica | INMET | E-06
+- descoberto_total | garantias | -12,5 | 50,0% da exposição sem cobertura total | INTERNO_KRILLTECH | E-11
+- materialidade_execucao | juridico | -12,4 | R$ 650.000 em execução, 15,5% da exposição | DATAJUD_CNJ | E-01
+- alteracao_societaria | cadastral | -12,0 | alteração societária relevante nos últimos 180 dias | RECEITA_FEDERAL | E-07
+- utilizacao_limite | garantias | -12,0 | 91,3% do limite aprovado utilizado | INTERNO_KRILLTECH | E-11
+- divida_ativa | fiscal | -10,5 | R$ 630.000 inscritos em dívida ativa, 15,0% da exposição | PGFN | E-03
+- capital_vs_exposicao | cadastral | -8,0 | capital social de R$ 2.500.000 inferior à exposição | RECEITA_FEDERAL | E-07
+- produtividade_abaixo | agroclimatico | -6,6 | produtividade 11% abaixo da média regional | CONAB | E-05
+- relacionamento | comportamental | +19,8 | 6 anos de relacionamento | INTERNO_KRILLTECH | E-10
+- irrigacao_ou_seguro | agroclimatico | +15,0 | seguro agrícola vigente para a safra 2025/26 | INTERNO_KRILLTECH | E-12
+[PD] 6m=10,2% | 12m=17,1% | 24m=33,9% | metodo: curva logística sobre o score; 6m e 24m por hazard ajustado pela tendência
+[RJ] risco_12m=6,8% | evento_ocorrido=nao | rj_index=39,5 | rj_index_efetivo=39,5 | elegivel=sim (pessoa jurídica) | sinais: endividamento judicializado sobre exposição +7,7; protestos de credores distintos em 180 dias +8,0; risco ZARC alto +8,0; covenant rompido +8,0; alteração de administrador em período de crise +5,0; dívida ativa sobre faturamento +2,8
+[STAY_PERIOD] nao_aplicavel
+[EXPOSICAO] total=R$ 4.200.000 | limite_aprovado=R$ 4.600.000 | limite_utilizado=91,3% | a_vencer_90d=R$ 1.900.000 | em_atraso=R$ 140.000 | por_tipo: VENDA_A_PRAZO=R$ 2.600.000; BARTER=R$ 0; CPR=R$ 1.600.000
+[GARANTIAS] extraconcursal=R$ 1.200.000 | cobertura_extraconcursal=28,6% | concursal=R$ 900.000 | cobertura_total=50,0% | exposicao_protegida=R$ 2.100.000 | exposicao_em_risco=R$ 2.100.000 | exposicao_em_risco_em_RJ=R$ 3.000.000
+- G-01 | ALIENACAO_FIDUCIARIA | EXTRACONCURSAL | Colheitadeira axial, ano 2022 | declarado R$ 1.500.000 | atualizado R$ 1.200.000 | registrada=sim | avaliada em 15/02/2026
+- G-02 | PENHOR_SAFRA | CONCURSAL | Penhor de safra de soja 2025/26, 12.000 sacas | declarado R$ 1.500.000 | atualizado R$ 900.000 | registrada=sim | avaliada em 20/01/2026
+[RED_FLAGS] severidade | titulo | data | fonte | impacto | status | evidencias
+- ALTA | Covenant contratual rompido (inadimplência técnica) | 20/08/2026 | INTERNO_KRILLTECH | -26,4 | nova | E-09
+- ALTA | 2 execuções de título ajuizadas em 90 dias | 02/09/2026 | DATAJUD_CNJ | -20,0 | nova | E-01
+- ALTA | Dívida ativa PGFN em crescimento | 28/08/2026 | PGFN | -12,6 | nova | E-03
+- MEDIA | Risco ZARC elevado para alto | 05/08/2026 | MAPA_ZARC | -30,0 | analisada | E-04
+- MEDIA | Quebra de safra regional de 25% | 30/07/2026 | CONAB | -22,5 | analisada | E-05
+- MEDIA | CAR em situação pendente | 11/07/2026 | SICAR | -13,5 | analisada | E-08
+- MEDIA | Alteração societária relevante em 180 dias | 22/06/2026 | RECEITA_FEDERAL | -12,0 | analisada | E-07
+[RECOMENDACAO] codigo=APROVAR_COM_RESTRICOES | rotulo=Aprovar com restrições | reavaliar_em=90 dias | motivo_da_regra: rating B com exposição em risco em cenário de RJ acima de 40% da exposição
+1. Reduzir limite aprovado de R$ 4.600.000 para R$ 3.220.000 (-30%)
+2. Exigir garantia adicional de R$ 2.100.000 para cobrir a exposição desprotegida
+3. Converter penhor de safra (R$ 900.000) em alienação fiduciária para blindar o crédito em cenário de RJ
+4. Reavaliar em 90 dias
+aviso: Decisão final sujeita à avaliação do analista responsável.
+[EVIDENCIAS] id | fonte | tipo | titulo | consulta | resumo
+- E-01 | DataJud — CNJ | PROCESSO | 3 execuções de título em 12 meses, 2 delas nos últimos 90 dias | 11/09/2026 | Execuções distribuídas por 2 credores distintos; valor somado R$ 650.000
+- E-02 | Cartório de Protesto | CERTIDAO | 2 protestos ativos | 11/09/2026 | Duplicatas mercantis protestadas em 07/2026 e 08/2026
+- E-03 | PGFN — Dívida Ativa | CERTIDAO | Inscrição em dívida ativa da União | 11/09/2026 | Saldo de R$ 630.000, superior ao saldo de 90 dias atrás
+- E-04 | MAPA — ZARC | SERIE_HISTORICA | Zoneamento agrícola de risco climático — soja | 10/09/2026 | Risco alto para a janela de plantio na região
+- E-05 | CONAB | SERIE_HISTORICA | Levantamento de safra regional | 10/09/2026 | Quebra de 25% na safra 2025/26; produtividade do cliente 11% abaixo da média regional
+- E-06 | INMET | SERIE_HISTORICA | Precipitação acumulada | 10/09/2026 | Acumulado 28% abaixo da normal climatológica
+- E-07 | Receita Federal — CNPJ | CADASTRO | Quadro societário | 11/09/2026 | Alteração de administrador registrada em 22/06/2026
+- E-08 | SICAR | CADASTRO | Cadastro Ambiental Rural | 10/09/2026 | Situação PENDENTE com sobreposição em área de preservação permanente
+- E-09 | Krill Tech — interno | INTERNO | Monitoramento de covenants | 12/09/2026 | Endividamento total apurado em 3,1x o patrimônio; limite contratual 2,5x
+- E-10 | Krill Tech — interno | INTERNO | Histórico de pagamentos | 12/09/2026 | Atraso médio 11 dias (12m) e 19 dias (90d); pior atraso 34 dias; 74,0% dos títulos em dia
+- E-11 | Krill Tech — interno | INTERNO | Garantias e exposição | 12/09/2026 | Exposição R$ 4.200.000; garantias atualizadas R$ 2.100.000
+- E-12 | Krill Tech — interno | LAUDO | Apólice de seguro agrícola | 12/09/2026 | Seguro vigente para a safra 2025/26

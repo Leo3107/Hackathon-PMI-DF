@@ -1,0 +1,1 @@
+[STAY_PERIOD] ativo=sim | deferimento 03/07/2026 | dias_decorridos=71 | dias_restantes=109 | bloqueado: executar garantias; protestar títulos; cobrar judicialmente | permitido: excutir alienação fiduciária (crédito extraconcursal)
