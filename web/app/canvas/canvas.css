@@ -1,0 +1,725 @@
+/* ------------------------------------------------------------------------- */
+/* /canvas — Project Canvas (entregável oficial nº 1, D1)                      */
+/* Folha única A4 paisagem, grade 12 × 3 (spec 07 §1.4.2).                     */
+/* Os tokens abaixo são os da spec 05 §1/§2, redeclarados localmente como      */
+/* fallback: esta rota não depende de app/globals.css estar pronto.            */
+/* ------------------------------------------------------------------------- */
+
+.canvas-raiz {
+  --color-surface-page: #0b0f14;
+  --color-surface-card: #11161d;
+  --color-surface-raised: #171e27;
+  --color-surface-sunken: #080b0f;
+  --color-surface-overlay: rgb(4 6 9 / 0.72);
+  --color-line-subtle: #1e2833;
+  --color-line-default: #283442;
+  --color-line-strong: #3a4756;
+  --color-fg-primary: #e6ebf0;
+  --color-fg-secondary: #a3aebb;
+  --color-fg-tertiary: #7b889a;
+  --color-fg-inverse: #0b0f14;
+  --color-accent-300: #7ccdf0;
+  --color-accent-400: #4db8e5;
+  --color-accent-500: #2fa4d6;
+  --color-accent-tint: #192d39;
+  --color-accent-line: #2a5a73;
+  --color-risk-a: #3dd68c;
+  --color-risk-a-tint: #17312d;
+  --color-risk-a-line: #23694a;
+  --color-risk-b: #f2c037;
+  --color-risk-b-tint: #312e21;
+  --color-risk-b-line: #6e5a22;
+  --color-risk-c: #f28c3b;
+  --color-risk-c-tint: #312721;
+  --color-risk-c-line: #6e4623;
+  --color-risk-d: #f47474;
+  --color-risk-d-tint: #312329;
+  --color-risk-d-line: #6f3a3e;
+  --color-risk-neutral: #a3aebb;
+  --color-risk-neutral-tint: #252b33;
+  --color-risk-neutral-line: #3a4756;
+
+  --canvas-escala: 1;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-surface-page);
+  color: var(--color-fg-primary);
+  font-family: var(--font-sans, var(--font-geist-sans), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif);
+  font-feature-settings: "tnum";
+}
+
+/* Palco e escala ---------------------------------------------------------- */
+
+.canvas-palco {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px 32px;
+  overflow: hidden;
+}
+
+.canvas-escala {
+  transform: scale(var(--canvas-escala));
+  transform-origin: top center;
+  will-change: transform;
+}
+
+/* A folha: 297 × 210 mm menos margens de 8 mm = 281 × 194 mm ---------------- */
+
+.canvas-folha {
+  width: 281mm;
+  height: 194mm;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  padding: 0;
+  background: var(--color-surface-card);
+  border: 0.4mm solid var(--color-line-default);
+  border-radius: 2mm;
+  padding: 3mm 3.4mm;
+  box-sizing: border-box;
+}
+
+.canvas-grade {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 30fr 38fr 32fr;
+  gap: 1.8mm;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.canvas-bloco {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8mm;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1.6mm 1.8mm;
+  border: 0.3mm solid var(--color-line-default);
+  border-radius: 1.4mm;
+  background: var(--color-surface-page);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  break-inside: avoid;
+  transition: border-color 120ms cubic-bezier(0.2, 0, 0, 1), transform 120ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.canvas-bloco:hover,
+.canvas-bloco:focus-visible {
+  border-color: var(--color-accent-line);
+  transform: translateY(-0.4mm);
+  outline: none;
+}
+
+.canvas-bloco:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent-400);
+}
+
+/* Tipografia em pontos (spec 07 §1.4.3) ------------------------------------ */
+
+.canvas-marca {
+  font-size: 22pt;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--color-accent-400);
+}
+
+.canvas-subtitulo {
+  font-size: 9pt;
+  font-weight: 500;
+  color: var(--color-fg-secondary);
+}
+
+.canvas-tagline {
+  font-size: 11pt;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--color-fg-primary);
+}
+
+.canvas-contexto {
+  font-size: 7pt;
+  font-weight: 400;
+  color: var(--color-fg-tertiary);
+}
+
+.canvas-titulo-bloco {
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  color: var(--color-fg-primary);
+}
+
+.canvas-numeral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.6mm;
+  height: 4.6mm;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-accent-500);
+  color: var(--color-fg-inverse);
+  font-size: 7pt;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.canvas-manchete {
+  font-size: 8pt;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-fg-primary);
+}
+
+.canvas-corpo {
+  font-size: 6.4pt;
+  line-height: 1.3;
+  color: var(--color-fg-secondary);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+.canvas-corpo strong {
+  color: var(--color-fg-primary);
+  font-weight: 700;
+}
+
+.canvas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.canvas-lista > li {
+  position: relative;
+  padding-left: 0.85em;
+}
+
+.canvas-lista > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: var(--color-fg-tertiary);
+}
+
+ol.canvas-lista > li {
+  padding-left: 0;
+}
+
+ol.canvas-lista > li::before {
+  display: none;
+}
+
+.canvas-bloco--denso .canvas-corpo {
+  font-size: 5.8pt;
+}
+
+.canvas-bloco--denso .canvas-tabela {
+  font-size: 5.5pt;
+}
+
+.canvas-leitura .canvas-bloco--denso .canvas-corpo,
+.canvas-leitura .canvas-corpo {
+  font-size: 15px;
+}
+
+.canvas-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 6pt;
+  line-height: 1.25;
+}
+
+.canvas-tabela th,
+.canvas-tabela td {
+  border-bottom: 0.25pt solid var(--color-line-subtle);
+  padding: 0.22em 0.35em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.canvas-tabela th {
+  color: var(--color-fg-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.canvas-rodape-bloco {
+  font-size: 6.4pt;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-fg-primary);
+}
+
+.canvas-nota {
+  font-size: 6pt;
+  font-style: italic;
+  color: var(--color-fg-tertiary);
+  line-height: 1.25;
+}
+
+.canvas-badge-simulado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 7pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25em 0.6em;
+  border: 0.5pt solid var(--color-risk-b-line);
+  border-radius: 1mm;
+  background: var(--color-risk-b-tint);
+  color: var(--color-risk-b);
+  white-space: nowrap;
+}
+
+/* Elementos gráficos obrigatórios ------------------------------------------ */
+
+.canvas-cadeia {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25em;
+}
+
+.canvas-pastilha {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15em;
+  padding: 0.4em 0.35em;
+  border-radius: 0.35em;
+  font-size: 0.95em;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  background: var(--color-surface-card);
+}
+
+.canvas-pastilha--ml {
+  border: 1.2pt solid var(--color-accent-400);
+  color: var(--color-fg-primary);
+}
+
+.canvas-pastilha--llm {
+  border: 1.2pt dashed #a48bf2;
+  color: var(--color-fg-primary);
+}
+
+.canvas-pastilha--humano {
+  border: 0.8pt solid var(--color-line-strong);
+  color: var(--color-fg-primary);
+}
+
+.canvas-pastilha small {
+  display: block;
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.canvas-seta {
+  align-self: center;
+  font-size: 1em;
+  color: var(--color-fg-tertiary);
+}
+
+.canvas-barra-rating {
+  display: flex;
+  width: 100%;
+  border-radius: 0.25em;
+  overflow: hidden;
+  border: 0.25pt solid var(--color-line-default);
+}
+
+.canvas-segmento {
+  padding: 0.35em 0.3em;
+  font-size: 0.95em;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--color-fg-inverse);
+}
+
+.canvas-barra-pesos {
+  display: flex;
+  width: 100%;
+  gap: 1px;
+}
+
+.canvas-peso {
+  min-width: 0;
+  padding: 0.25em 0.2em;
+  font-size: 0.82em;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--color-fg-primary);
+  background: var(--color-accent-tint);
+  border-top: 1.2pt solid var(--color-accent-400);
+  overflow: hidden;
+}
+
+.canvas-faixa-severidade {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45em;
+  padding: 0.3em 0.45em;
+  border-left: 1.4pt solid currentColor;
+  border-radius: 0.2em;
+}
+
+.canvas-faixa-severidade > span:first-child {
+  font-weight: 800;
+  white-space: nowrap;
+  font-size: 0.95em;
+}
+
+.canvas-degraus {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2em;
+}
+
+.canvas-degrau {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.3em 0.25em;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--color-fg-inverse);
+  border-radius: 0.2em 0.2em 0 0;
+}
+
+.canvas-cascata {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35em;
+  height: 5.2em;
+}
+
+.canvas-cascata-barra {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.15em;
+  height: 100%;
+}
+
+.canvas-cascata-barra > i {
+  display: block;
+  width: 100%;
+  background: var(--color-risk-c);
+  border-radius: 0.15em 0.15em 0 0;
+}
+
+.canvas-cascata-barra > span {
+  font-size: 0.8em;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--color-fg-tertiary);
+}
+
+.canvas-delta-grande {
+  font-size: 11pt;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-risk-c);
+  white-space: nowrap;
+}
+
+.canvas-numero-grande {
+  font-size: 13pt;
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+}
+
+.canvas-multiplicador {
+  font-size: 10pt;
+  font-weight: 800;
+  color: var(--color-accent-400);
+}
+
+.canvas-timeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0.3em;
+}
+
+.canvas-marco {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-top: 0.8em;
+  position: relative;
+}
+
+.canvas-marco::before {
+  content: "";
+  position: absolute;
+  top: 0.25em;
+  left: 0;
+  right: 0;
+  height: 1pt;
+  background: var(--color-line-strong);
+}
+
+.canvas-marco::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--color-accent-400);
+}
+
+/* Barra de ferramentas e sobreposição -------------------------------------- */
+
+.canvas-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-line-subtle);
+}
+
+.canvas-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 4px;
+  border: 1px solid var(--color-line-strong);
+  background: transparent;
+  color: var(--color-fg-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.canvas-botao:hover {
+  border-color: var(--color-accent-line);
+  background: var(--color-accent-tint);
+}
+
+.canvas-botao--primario {
+  background: var(--color-accent-500);
+  border-color: var(--color-accent-500);
+  color: var(--color-fg-inverse);
+  font-weight: 600;
+}
+
+.canvas-botao--primario:hover {
+  background: var(--color-accent-400);
+  border-color: var(--color-accent-400);
+}
+
+.canvas-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-surface-overlay);
+}
+
+.canvas-leitura {
+  width: min(900px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 24px 28px 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface-raised);
+  box-shadow: 0 8px 8px -4px rgb(0 0 0 / 0.55);
+}
+
+.canvas-leitura .canvas-corpo {
+  font-size: 15px;
+  line-height: 1.5;
+  overflow: visible;
+  gap: 0.8em;
+}
+
+.canvas-leitura .canvas-manchete {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.canvas-leitura .canvas-titulo-bloco {
+  font-size: 13px;
+}
+
+.canvas-leitura .canvas-numeral {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.canvas-leitura .canvas-tabela {
+  font-size: 13px;
+}
+
+.canvas-leitura .canvas-delta-grande {
+  font-size: 22px;
+}
+
+.canvas-leitura .canvas-numero-grande {
+  font-size: 26px;
+}
+
+.canvas-leitura .canvas-multiplicador {
+  font-size: 20px;
+}
+
+.canvas-leitura .canvas-rodape-bloco,
+.canvas-leitura .canvas-nota {
+  font-size: 13px;
+}
+
+/* Modo apresentação -------------------------------------------------------- */
+
+.canvas-raiz[data-apresentacao="true"] .canvas-toolbar {
+  display: none;
+}
+
+.canvas-raiz[data-apresentacao="true"] {
+  background: #05070a;
+}
+
+/* Impressão — A4 paisagem, uma única página (spec 07 §1.4.5) ---------------- */
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    min-width: 0 !important;
+  }
+
+  body > header,
+  body > nav,
+  body > aside,
+  body > footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .canvas-raiz {
+    --color-surface-page: #ffffff;
+    --color-surface-card: #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-surface-sunken: #eef1f4;
+    --color-line-subtle: #e2e6ea;
+    --color-line-default: #c9d0d8;
+    --color-line-strong: #9aa5b1;
+    --color-fg-primary: #111111;
+    --color-fg-secondary: #333a42;
+    --color-fg-tertiary: #5b6672;
+    --color-fg-inverse: #ffffff;
+    --color-accent-400: #0e7490;
+    --color-accent-500: #0e7490;
+    --color-accent-tint: #e0f2fe;
+    --color-accent-line: #7dd3fc;
+    --color-risk-a: #1f7a3a;
+    --color-risk-a-tint: #dcfce7;
+    --color-risk-a-line: #86efac;
+    --color-risk-b: #b26b00;
+    --color-risk-b-tint: #fef3c7;
+    --color-risk-b-line: #fcd34d;
+    --color-risk-c: #c2410c;
+    --color-risk-c-tint: #ffedd5;
+    --color-risk-c-line: #fdba74;
+    --color-risk-d: #b91c1c;
+    --color-risk-d-tint: #fee2e2;
+    --color-risk-d-line: #fca5a5;
+    --color-risk-neutral: #4b5563;
+    --color-risk-neutral-tint: #f3f4f6;
+    --color-risk-neutral-line: #d1d5db;
+    min-height: 0;
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .canvas-palco {
+    padding: 0;
+    overflow: visible;
+    height: auto !important;
+  }
+
+  .canvas-escala {
+    transform: none !important;
+    height: auto !important;
+  }
+
+  .canvas-folha {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    width: 281mm;
+    height: 194mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .canvas-corpo {
+    font-size: 6pt;
+  }
+
+  .canvas-bloco {
+    transform: none !important;
+    border-color: #9aa5b1;
+  }
+
+  .canvas-scrim {
+    display: none !important;
+  }
+
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

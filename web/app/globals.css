@@ -1,26 +1,366 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   Lastro — design system (specs/05-design-system.md §1, §4, §5, §9, §10)
+   Dark-only. Todo valor abaixo é literal: copiar, não interpretar.
+   ========================================================================== */
+
+@theme {
+  /* ------------------------------------------------------------------ */
+  /* 1.1 Superfícies — escala fria, quase-preta, nunca #000               */
+  /* ------------------------------------------------------------------ */
+  --color-surface-page:     #0B0F14;  /* fundo da aplicação                         */
+  --color-surface-card:     #11161D;  /* card padrão                                */
+  --color-surface-raised:   #171E27;  /* drawer, modal, popover, tooltip, dropdown  */
+  --color-surface-input:    #0D1218;  /* campos de formulário (mais fundo que card) */
+  --color-surface-hover:    #1B232E;  /* hover de linha/item                        */
+  --color-surface-sunken:   #080B0F;  /* trilhos de progresso, código, área de log  */
+  --color-surface-overlay:  rgb(4 6 9 / 0.64); /* scrim atrás de modal/drawer       */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.2 Bordas                                                          */
+  /* ------------------------------------------------------------------ */
+  --color-line-subtle:   #1E2833;  /* divisórias internas, grid de gráfico          */
+  --color-line-default:  #283442;  /* borda de card e input                          */
+  --color-line-strong:   #3A4756;  /* borda de hover/ativo, cabeçalho de tabela      */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.3 Texto                                                           */
+  /* ------------------------------------------------------------------ */
+  --color-fg-primary:    #E6EBF0;  /* 16,0:1 sobre page · 15,1:1 sobre card          */
+  --color-fg-secondary:  #A3AEBB;  /* 8,5:1 · 8,1:1                                  */
+  --color-fg-tertiary:   #7B889A;  /* 5,3:1 · 5,0:1 · 4,7:1 sobre raised             */
+  --color-fg-disabled:   #66727F;  /* 3,7:1 — isento (WCAG 1.4.3, componente inativo)*/
+  --color-fg-inverse:    #0B0F14;  /* texto sobre botão de acento e badges sólidos   */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.4 Acento de marca — azul-aço / ciano técnico                       */
+  /* ------------------------------------------------------------------ */
+  --color-accent-300:  #7CCDF0;  /* hover de link, texto sobre tint          10,3:1 */
+  --color-accent-400:  #4DB8E5;  /* texto/ícone de acento, link, foco         8,1:1 */
+  --color-accent-500:  #2FA4D6;  /* fundo de botão primário (texto inverse)   6,8:1 */
+  --color-accent-600:  #1F86B3;  /* botão primário :active (texto inverse)    4,7:1 */
+  --color-accent-tint: #192D39;  /* linha selecionada, nav ativa                    */
+  --color-accent-line: #2A5A73;  /* borda de item ativo/selecionado                 */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.5 Semântica de risco — EXCLUSIVA. Ver §2.                          */
+  /* ------------------------------------------------------------------ */
+  --color-risk-a:        #3DD68C;  /* A · Baixo risco  · melhorando                 */
+  --color-risk-a-tint:   #17312D;
+  --color-risk-a-line:   #23694A;
+
+  --color-risk-b:        #F2C037;  /* B · Risco moderado · severidade MÉDIA         */
+  --color-risk-b-tint:   #312E21;
+  --color-risk-b-line:   #6E5A22;
+
+  --color-risk-c:        #F28C3B;  /* C · Risco elevado · ALTA · deteriorando       */
+  --color-risk-c-tint:   #312721;
+  --color-risk-c-line:   #6E4623;
+
+  --color-risk-d:        #F47474;  /* D · Risco crítico · CRÍTICA · veto            */
+  --color-risk-d-tint:   #312329;
+  --color-risk-d-line:   #6F3A3E;
+
+  --color-risk-neutral:      #A3AEBB;  /* BAIXA/informativa · estável                */
+  --color-risk-neutral-tint: #252B33;
+  --color-risk-neutral-line: #3A4756;
+
+  /* ------------------------------------------------------------------ */
+  /* 1.6 Paleta categórica — séries SEM significado de risco (§8.4)      */
+  /* ------------------------------------------------------------------ */
+  --color-cat-1: #4DB8E5;  /* ciano (acento)   8,1:1 sobre card */
+  --color-cat-2: #7D8CF0;  /* índigo           6,0:1 */
+  --color-cat-3: #A48BF2;  /* violeta          6,5:1 */
+  --color-cat-4: #D98BC7;  /* orquídea         7,3:1 */
+  --color-cat-5: #8FA3B8;  /* ardósia          7,0:1 */
+  --color-cat-6: #C9B79C;  /* areia            9,3:1 — último recurso */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.7 Tipografia (famílias vêm do next/font, ver components/ui/fontes.ts) */
+  /* ------------------------------------------------------------------ */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* ------------------------------------------------------------------ */
+  /* 1.8 Raios — teto 8px                                                 */
+  /* ------------------------------------------------------------------ */
+  --radius-xs: 2px;   /* barras, ticks                        */
+  --radius-sm: 4px;   /* badge, chip, input, botão            */
+  --radius-md: 6px;   /* card, tile, tooltip                  */
+  --radius-lg: 8px;   /* modal, drawer, gauge container       */
+
+  /* ------------------------------------------------------------------ */
+  /* 1.9 Sombras — apenas duas, sem blur difuso                           */
+  /* ------------------------------------------------------------------ */
+  --shadow-raised:  0 0 0 1px var(--color-line-default), 0 1px 2px 0 rgb(0 0 0 / 0.40);
+  --shadow-overlay: 0 0 0 1px var(--color-line-strong), 0 8px 8px -4px rgb(0 0 0 / 0.55);
+
+  /* ------------------------------------------------------------------ */
+  /* 1.10 Movimento (§9)                                                  */
+  /* ------------------------------------------------------------------ */
+  --duration-fast:  120ms;  /* hover, foco, tooltip                */
+  --duration-base:  200ms;  /* drawer, modal, chips, expand        */
+  --duration-slow:  320ms;  /* pipeline steps, troca de rota       */
+  --duration-gauge: 600ms;  /* preenchimento do gauge              */
+  --ease-standard:  cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-gauge:     cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ------------------------------------------------------------------ */
+  /* 1.11 Layout                                                          */
+  /* ------------------------------------------------------------------ */
+  --width-sidebar:            240px;
+  --width-sidebar-collapsed:  56px;
+  --width-content-max:        1440px;
+  --width-drawer:             520px;
+  --width-drawer-wide:        720px;
+  --height-topbar:            48px;
+  --height-banner:            28px;
+  --height-row-dense:         36px;
+  --height-row-comfortable:   44px;
+  --height-table-header:      32px;
+  --height-control:           32px;  /* input, botão, chip: altura única */
+  --height-control-sm:        24px;
+
+  /* ------------------------------------------------------------------ */
+  /* 1.12 Escala de espaçamento (§5.1)                                   */
+  /* A base tipográfica é 13px; fixar --spacing em 4px preserva o grid    */
+  /* de 4px exigido pela spec independentemente do font-size raiz.        */
+  /* ------------------------------------------------------------------ */
+  --spacing: 4px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base ------------------------------------------------------------------ */
+html {
+  color-scheme: dark;                 /* scrollbars, inputs nativos, seleção */
+  background: var(--color-surface-page);
+  color: var(--color-fg-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;                    /* base densa (§4.2) */
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-width: 1024px;                  /* abaixo disso o produto não é suportado (D9) */
+  background: var(--color-surface-page);
+  color: var(--color-fg-primary);
 }
+
+::selection { background: var(--color-accent-tint); color: var(--color-fg-primary); }
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-400);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+button, [role="button"] { cursor: pointer; }
+[disabled], [aria-disabled="true"] { cursor: not-allowed; }
+
+/* Utilitários do sistema ------------------------------------------------- */
+@utility tnum { font-variant-numeric: tabular-nums lining-nums; }
+
+@utility eyebrow {
+  font-size: 11px; line-height: 16px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-fg-secondary);
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* Escala tipográfica (§4.2) ---------------------------------------------- */
+@utility type-score-xl {
+  font-size: 56px; line-height: 56px; font-weight: 600; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums lining-nums; font-optical-sizing: auto;
+}
+@utility type-score-md {
+  font-size: 40px; line-height: 40px; font-weight: 600; letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+@utility type-score-sm {
+  font-size: 28px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+@utility type-kpi {
+  font-size: 24px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+@utility type-kpi-sm {
+  font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+@utility type-page-title {
+  font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--color-fg-primary);
+}
+@utility type-section-title {
+  font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -0.005em;
+  color: var(--color-fg-primary);
+}
+@utility type-eyebrow {
+  font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--color-fg-secondary);
+}
+@utility type-label {
+  font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.01em;
+  color: var(--color-fg-secondary);
+}
+@utility type-table-header {
+  font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--color-fg-secondary);
+}
+@utility type-body {
+  font-size: 13px; line-height: 20px; font-weight: 400; color: var(--color-fg-primary);
+}
+@utility type-body-strong {
+  font-size: 13px; line-height: 20px; font-weight: 500;
+}
+@utility type-prose {
+  font-size: 14px; line-height: 22px; font-weight: 400; max-width: 68ch;
+}
+@utility type-caption {
+  font-size: 12px; line-height: 16px; font-weight: 400; color: var(--color-fg-tertiary);
+}
+@utility type-num {
+  font-weight: 500; font-variant-numeric: tabular-nums lining-nums; text-align: right;
+}
+@utility type-mono {
+  font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 400;
+  color: var(--color-fg-secondary);
+}
+@utility type-badge {
+  font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Transições de estado de controle (§9.2.5) ------------------------------- */
+@utility transicao-controle {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-standard);
+}
+@utility transicao-base {
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
+}
+
+/* Animações permitidas (§9.2) -------------------------------------------- */
+@keyframes lastro-pulso     { 0%, 100% { opacity: 0.6 } 50% { opacity: 1 } }
+@keyframes lastro-cursor    { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
+@keyframes lastro-flash     { from { background-color: var(--color-accent-tint) } to { background-color: transparent } }
+@keyframes lastro-girar     { to { transform: rotate(360deg) } }
+
+@utility esqueleto {
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-xs);
+  animation: lastro-pulso 1.6s linear infinite alternate;
+}
+@utility streaming-cursor {
+  display: inline-block; width: 2px; height: 1em; vertical-align: text-bottom;
+  background-color: var(--color-accent-400);
+  animation: lastro-cursor 1s steps(2, end) infinite;
+}
+@utility girando { animation: lastro-girar 1s linear infinite; }
+@utility flash-recalculo { animation: lastro-flash 800ms var(--ease-exit) 1; }
+
+/* Movimento reduzido (§9.4) ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms; --duration-base: 0ms; --duration-slow: 0ms; --duration-gauge: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .streaming-cursor { animation: none; opacity: 1; }
+  .pipeline-spinner { animation: none; }
+}
+
+/* ==========================================================================
+   10. Impressão — o dark vira claro no papel (§10)
+   ========================================================================== */
+@media print {
+  :root {
+    color-scheme: light;
+    --color-surface-page:   #FFFFFF;
+    --color-surface-card:   #FFFFFF;
+    --color-surface-raised: #FFFFFF;
+    --color-surface-input:  #F5F7F9;
+    --color-surface-hover:  #FFFFFF;
+    --color-surface-sunken: #EEF1F4;
+    --color-surface-overlay: transparent;
+    --color-line-subtle:    #E2E6EA;
+    --color-line-default:   #C9D0D8;
+    --color-line-strong:    #9AA5B1;
+    --color-fg-primary:     #111827;   /* 17,7:1 sobre branco */
+    --color-fg-secondary:   #4B5563;   /*  7,6:1 */
+    --color-fg-tertiary:    #6B7280;   /*  4,8:1 */
+    --color-fg-disabled:    #9CA3AF;
+    --color-fg-inverse:     #FFFFFF;
+    --color-accent-300:     #0E7490;
+    --color-accent-400:     #0E7490;   /*  5,4:1 */
+    --color-accent-500:     #0E7490;
+    --color-accent-600:     #0E7490;
+    --color-accent-tint:    #E0F2FE;
+    --color-accent-line:    #7DD3FC;
+    --color-risk-a: #15803D; --color-risk-a-tint: #DCFCE7; --color-risk-a-line: #86EFAC;
+    --color-risk-b: #854D0E; --color-risk-b-tint: #FEF3C7; --color-risk-b-line: #FCD34D;
+    --color-risk-c: #C2410C; --color-risk-c-tint: #FFEDD5; --color-risk-c-line: #FDBA74;
+    --color-risk-d: #B91C1C; --color-risk-d-tint: #FEE2E2; --color-risk-d-line: #FCA5A5;
+    --color-risk-neutral: #4B5563; --color-risk-neutral-tint: #F3F4F6; --color-risk-neutral-line: #D1D5DB;
+    --color-cat-1: #0E7490; --color-cat-2: #4338CA; --color-cat-3: #6D28D9;
+    --color-cat-4: #A21CAF; --color-cat-5: #475569; --color-cat-6: #78350F;
+    --shadow-raised: none; --shadow-overlay: none;
+  }
+
+  html { font-size: 11px; line-height: 16px; background: #FFFFFF; color: #111827; }
+  body { min-width: 0; background: #FFFFFF; padding-top: 48px; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  a { color: inherit; text-decoration: none; }
+
+  /* 10.2 O que é escondido */
+  .no-print { display: none !important; }
+
+  /* 10.3 Cabeçalho e rodapé de página */
+  .print-header { display: flex !important; }
+  .print-footer { display: block !important; }
+
+  /* 10.4 Quebras de página */
+  @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+  .print-section, .card, tr, .evidence-card, .timeline-item, .kpi-tile { break-inside: avoid; }
+  h1, h2, h3, .section-header { break-after: avoid; }
+  .print-break-before { break-before: page; }
+  table { break-inside: auto; }
+  thead { display: table-header-group; }
+  .score-gauge { width: 200px; }
+
+  /* 10.5 Project Canvas */
+  .canvas-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr);
+    gap: 4mm; height: 180mm; break-inside: avoid;
+  }
+  .canvas-block {
+    border: 1px solid var(--color-line-strong); padding: 3mm; overflow: hidden;
+    font-size: 8.5px; line-height: 12px;
+  }
+  .canvas-block h3 {
+    font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2mm;
+  }
+}
+
+/* Cabeçalho/rodapé de impressão: existem sempre no DOM, invisíveis na tela */
+.print-header, .print-footer { display: none; }
+.print-header {
+  position: fixed; top: 0; left: 0; right: 0; height: 40px;
+  flex-direction: column; gap: 2px;
+  border-bottom: 1px solid var(--color-line-strong);
+}
+.print-footer { position: fixed; bottom: 0; left: 0; right: 0; }
