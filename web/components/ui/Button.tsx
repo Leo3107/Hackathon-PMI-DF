@@ -1,7 +1,7 @@
 'use client';
 
 import { LoaderCircle, type LucideIcon } from 'lucide-react';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 
 import { cn } from './cn';
 
@@ -17,6 +17,8 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   /** Troca o ícone da esquerda por um `LoaderCircle` girando e marca `aria-busy`. */
   carregando?: boolean;
   larguraTotal?: boolean;
+  /** React 19 passa `ref` como prop — sem `forwardRef` legado (spec §6). */
+  ref?: Ref<HTMLButtonElement>;
   children: ReactNode;
 }
 

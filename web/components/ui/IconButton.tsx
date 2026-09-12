@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, Ref } from 'react';
 
 import { cn } from './cn';
 import { Tooltip } from './Tooltip';
@@ -12,6 +12,8 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   rotulo: string;
   variante?: 'secundario' | 'fantasma';
   tamanho?: 'sm' | 'md';
+  /** React 19 passa `ref` como prop — sem `forwardRef` legado (spec §6). */
+  ref?: Ref<HTMLButtonElement>;
 }
 
 const VARIANTE = {
