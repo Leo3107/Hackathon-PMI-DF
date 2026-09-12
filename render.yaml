@@ -1,0 +1,38 @@
+# Blueprint do serviço de cálculo do Lastro no Render.
+#
+# A interface (Next.js) não está aqui: ela vai para a Vercel, e conversa com
+# este serviço pelo proxy de servidor, via LASTRO_API_URL.
+#
+# Para subir: Render → New → Blueprint → apontar para este repositório. A única
+# variável que precisa ser preenchida à mão é OPENAI_API_KEY (`sync: false`);
+# sem ela o serviço sobe igual e a camada de linguagem cai no gerador
+# determinístico.
+
+services:
+  - type: web
+    name: lastro-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    # O contexto é a raiz do repositório porque a imagem copia api/, coleta/ e data/.
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /api/saude
+    envVars:
+      # Preenchida no painel do Render, nunca no repositório.
+      - key: OPENAI_API_KEY
+        sync: false
+      # Desliga o CORS aberto do modo de desenvolvimento: em produção quem fala
+      # com o Flask é o proxy do Next, do lado do servidor, não o navegador.
+      - key: LASTRO_ENV
+        value: production
+      - key: LASTRO_LLM_ENABLED
+        value: "true"
+      - key: LASTRO_LLM_MODEL
+        value: gpt-5.4-mini
+      - key: LASTRO_LLM_BUDGET_USD
+        value: "8"
+      # Sem disco persistente no plano free, o warehouse da coleta não existe —
+      # as rotas /api/coleta/* respondem dizendo isso, em vez de falhar na subida.
+      - key: COLETA_SOMENTE_LEITURA
+        value: "1"

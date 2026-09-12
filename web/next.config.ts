@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
   // evita o aviso de inferencia do Next e o empacotamento de arquivos de fora.
   outputFileTracingRoot: __dirname,
   // Empacotamento minimo para a imagem Docker: o Next copia so o que a app usa.
-  output: 'standalone',
+  // Na Vercel quem empacota e a propria plataforma, e o modo standalone so
+  // atrapalha — por isso ele vale apenas fora dela.
+  output: process.env.VERCEL ? undefined : 'standalone',
   /* config options here */
 };
 

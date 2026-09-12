@@ -44,4 +44,8 @@ WORKDIR /app/api
 EXPOSE 5001
 
 # Sem --debug: o reloader do Flask duplicaria o processo e, com ele, o ledger.
-CMD ["python", "-m", "flask", "--app", "app", "run", "--host", "0.0.0.0", "--port", "5001"]
+#
+# A porta vem de $PORT porque hospedagens gerenciadas (Render, Fly, Cloud Run)
+# injetam a porta em runtime e ignoram o EXPOSE. Local e no compose, o ENV acima
+# já define 5001, então nada muda.
+CMD ["sh", "-c", "python -m flask --app app run --host 0.0.0.0 --port ${PORT:-5001}"]
