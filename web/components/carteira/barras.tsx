@@ -73,7 +73,7 @@ export function ListaDeBarras({
               ) : null}
             </span>
 
-            <span className="relative block h-2 w-full overflow-hidden rounded-xs border border-line-subtle bg-surface-sunken">
+            <span className="relative block h-2 w-full overflow-hidden rounded-xs bg-surface-sunken">
               <span
                 className="absolute inset-y-0 left-0 rounded-xs"
                 style={{ width: `${largura}%`, background: item.cor }}
@@ -116,7 +116,7 @@ export function ListaDeBarras({
                 onClick={() => aoClicar(item)}
                 aria-label={descricao}
                 className={cn(
-                  'transicao-controle grid w-full grid-cols-[112px_1fr_auto] items-center gap-3 rounded-sm px-1 py-1 text-left',
+                  'transicao-controle grid w-full grid-cols-[120px_1fr_auto] items-center gap-3 rounded-sm px-1 py-1 text-left',
                   'hover:bg-surface-hover',
                 )}
               >
@@ -125,7 +125,7 @@ export function ListaDeBarras({
             ) : (
               <span
                 aria-label={descricao}
-                className="grid w-full grid-cols-[112px_1fr_auto] items-center gap-3 px-1 py-1"
+                className="grid w-full grid-cols-[120px_1fr_auto] items-center gap-3 px-1 py-1"
               >
                 {conteudo}
               </span>

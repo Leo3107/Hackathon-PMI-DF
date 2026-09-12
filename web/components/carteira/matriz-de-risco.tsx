@@ -59,7 +59,7 @@ export function MatrizDeRisco({ pontos }: MatrizDeRiscoProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <MolduraDeGrafico altura={ALTURA_GRAFICO.card} descricao={descricao}>
+      <MolduraDeGrafico altura={ALTURA_GRAFICO.pagina} descricao={descricao}>
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
             <CartesianGrid vertical={false} stroke={CHART.grid.stroke} strokeWidth={CHART.grid.strokeWidth} />

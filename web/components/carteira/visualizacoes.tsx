@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 
-import { EmptyState, RatingBadge, SectionHeader, Card, Tooltip, cn } from '@/components/ui';
+import { EmptyState, RatingBadge, SectionHeader, Tooltip, cn } from '@/components/ui';
 import { formatarMoedaCompacta, formatarNumero, formatarPercentual } from '@/lib/format';
 import type { FatiaDeConcentracao, Rating, ResumoCarteira } from '@/types';
 
@@ -115,7 +115,10 @@ export function Concentracao({
       valor: fatia.exposicao,
       valorFormatado: formatarMoedaCompacta(fatia.exposicao),
       detalhe: `${formatarPercentual(fatia.pct, 0)} · ${formatarNumero(fatia.clientes)} cli.`,
-      cor: CHART.series.categoricas[indice % CHART.series.categoricas.length],
+      // Rampa monocromática de azul-aço: a posição no ranking define só a luminosidade.
+      // Verde, âmbar, laranja e vermelho continuam reservados a risco, e a paleta categórica
+      // não pode competir com eles — o que comunica magnitude aqui é o comprimento da barra.
+      cor: CHART.series.categoricas[Math.min(indice, CHART.series.categoricas.length - 1)],
       parcela:
         typeof fatia.exposicaoEmRisco === 'number' && fatia.exposicaoEmRisco > 0
           ? {
@@ -129,6 +132,8 @@ export function Concentracao({
         : null,
     };
   });
+
+  const temParcela = itens.some((item) => item.parcela != null);
 
   return (
     <div className="flex flex-col gap-3">
@@ -175,13 +180,26 @@ export function Concentracao({
               aba === 'cultura' ? aoAbrirCultura(item.id) : aoAbrirUf(item.id)
             }
           />
-          {restantes > 0 ? (
-            <p className="type-caption">
-              {aba === 'cultura'
-                ? `+${formatarNumero(restantes)} outras culturas`
-                : `+${formatarNumero(restantes)} outras UFs`}
-            </p>
-          ) : null}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            {temParcela ? (
+              <p className="type-caption inline-flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-2 w-3 rounded-xs bg-risk-c"
+                />
+                Trecho colorido no início da barra: parcela já em risco
+              </p>
+            ) : (
+              <span />
+            )}
+            {restantes > 0 ? (
+              <p className="type-caption">
+                {aba === 'cultura'
+                  ? `+${formatarNumero(restantes)} outras culturas`
+                  : `+${formatarNumero(restantes)} outras UFs`}
+              </p>
+            ) : null}
+          </div>
         </>
       )}
     </div>
@@ -189,18 +207,19 @@ export function Concentracao({
 }
 
 // ---------------------------------------------------------------------------
-// Card que embrulha V3/V4 com o cabeçalho e a pergunta que o gráfico responde
+// Bloco V3/V4 com o cabeçalho e a pergunta que o gráfico responde — sem card: o que separa
+// esta seção da de cima é a régua de 1px do próprio SectionHeader.
 // ---------------------------------------------------------------------------
 
-export function CardDeConcentracao(props: ConcentracaoProps) {
+export function BlocoDeConcentracao(props: ConcentracaoProps) {
   return (
-    <Card className="flex flex-col gap-3">
+    <section className="flex flex-col gap-3">
       <SectionHeader
         nivel={3}
         titulo="Concentração"
         descricao="Se uma cultura ou uma região quebrar, quanto da carteira é atingido?"
         acoes={
-          <Tooltip conteudo="Barras ordenadas por exposição. Clique para filtrar a lista de clientes.">
+          <Tooltip conteudo="Barras ordenadas por exposição, em uma única rampa de azul: quanto mais alto no ranking, mais clara a barra. Clique para filtrar a lista de clientes.">
             <span
               tabIndex={0}
               role="note"
@@ -213,6 +232,6 @@ export function CardDeConcentracao(props: ConcentracaoProps) {
         }
       />
       <Concentracao {...props} />
-    </Card>
+    </section>
   );
 }

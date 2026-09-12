@@ -68,13 +68,18 @@
 
   /* ------------------------------------------------------------------ */
   /* 1.6 Paleta categórica — séries SEM significado de risco (§8.4)      */
+  /* Rampa MONOCROMÁTICA derivada do acento azul-aço: a posição no        */
+  /* ranking varia só a luminosidade. Arco-íris categórico competia com   */
+  /* a semântica de risco e roubava do comprimento da barra o papel de    */
+  /* comunicar magnitude. Piso em 3,2:1 sobre card, para a barra mais     */
+  /* escura continuar legível como gráfico (WCAG 1.4.11).                 */
   /* ------------------------------------------------------------------ */
-  --color-cat-1: #4DB8E5;  /* ciano (acento)   8,1:1 sobre card */
-  --color-cat-2: #7D8CF0;  /* índigo           6,0:1 */
-  --color-cat-3: #A48BF2;  /* violeta          6,5:1 */
-  --color-cat-4: #D98BC7;  /* orquídea         7,3:1 */
-  --color-cat-5: #8FA3B8;  /* ardósia          7,0:1 */
-  --color-cat-6: #C9B79C;  /* areia            9,3:1 — último recurso */
+  --color-cat-1: #9AD9F2;  /* 1º do ranking  12,3:1 sobre card */
+  --color-cat-2: #7CC6E6;  /*  9,6:1 */
+  --color-cat-3: #5FB2D6;  /*  7,4:1 */
+  --color-cat-4: #4C9BBE;  /*  5,7:1 */
+  --color-cat-5: #4185A5;  /*  4,3:1 */
+  --color-cat-6: #35708C;  /* último do ranking e "outras"  3,2:1 */
 
   /* ------------------------------------------------------------------ */
   /* 1.7 Tipografia (famílias vêm do next/font, ver components/ui/fontes.ts) */
@@ -316,8 +321,8 @@ button, [role="button"] { cursor: pointer; }
     --color-risk-c: #C2410C; --color-risk-c-tint: #FFEDD5; --color-risk-c-line: #FDBA74;
     --color-risk-d: #B91C1C; --color-risk-d-tint: #FEE2E2; --color-risk-d-line: #FCA5A5;
     --color-risk-neutral: #4B5563; --color-risk-neutral-tint: #F3F4F6; --color-risk-neutral-line: #D1D5DB;
-    --color-cat-1: #0E7490; --color-cat-2: #4338CA; --color-cat-3: #6D28D9;
-    --color-cat-4: #A21CAF; --color-cat-5: #475569; --color-cat-6: #78350F;
+    --color-cat-1: #0B4A61; --color-cat-2: #14607C; --color-cat-3: #1E7697;
+    --color-cat-4: #2F8CAF; --color-cat-5: #4FA2C0; --color-cat-6: #74B8CF;
     --shadow-raised: none; --shadow-overlay: none;
   }
 

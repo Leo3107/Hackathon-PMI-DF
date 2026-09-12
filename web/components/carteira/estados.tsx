@@ -100,26 +100,37 @@ export function EstadoDeFalha({
 }
 
 /**
- * Esqueleto da carteira com a **forma real** do conteúdo (§9.1): três blocos de atenção de
- * 132px, oito tiles de KPI, duas áreas de gráfico e oito linhas fantasma de tabela.
+ * Esqueleto da carteira com a **forma real** do conteúdo (§9.1): a lista de atenção imediata
+ * com a primeira linha maior, o número-herói com as duas barras de cobertura ao lado dos seis
+ * satélites, as duas colunas de gráfico e oito linhas fantasma de tabela.
  */
 export function EsqueletoDaCarteira() {
   return (
-    <div className="flex flex-col gap-6" aria-hidden="true">
-      <div className="grid gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="esqueleto h-[132px] rounded-md" />
-        ))}
+    <div className="flex flex-col gap-8" aria-hidden="true">
+      <div className="flex flex-col gap-2">
+        <div className="esqueleto h-5 w-48" />
+        <div className="esqueleto h-[76px] w-full" />
+        <div className="esqueleto h-12 w-full" />
+        <div className="esqueleto h-12 w-full" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className={cn('esqueleto rounded-md', i === 3 ? 'h-[184px]' : 'h-[88px]')} />
-        ))}
+
+      <div className="grid items-start gap-x-10 gap-y-6 xl:grid-cols-[minmax(300px,0.85fr)_minmax(0,1.6fr)]">
+        <div className="flex flex-col gap-4">
+          <div className="esqueleto h-14 w-64" />
+          <div className="esqueleto h-24 w-full" />
+        </div>
+        <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="esqueleto h-[68px] w-full" />
+          ))}
+        </div>
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="esqueleto h-[300px] rounded-md" />
-        <div className="esqueleto h-[300px] rounded-md" />
+
+      <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        <div className="esqueleto h-[300px]" />
+        <div className="esqueleto h-[260px]" />
       </div>
+
       <div className="esqueleto h-[320px] rounded-md" />
     </div>
   );

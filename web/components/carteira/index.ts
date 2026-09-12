@@ -24,7 +24,7 @@ export type { KpisDaCarteiraProps } from './kpis';
 export { MatrizDeRisco } from './matriz-de-risco';
 export type { MatrizDeRiscoProps } from './matriz-de-risco';
 
-export { CardDeConcentracao, Concentracao, ExposicaoPorRating } from './visualizacoes';
+export { BlocoDeConcentracao, Concentracao, ExposicaoPorRating } from './visualizacoes';
 export type { ConcentracaoProps, ExposicaoPorRatingProps } from './visualizacoes';
 
 export { DinheiroEmRisco } from './dinheiro-em-risco';

@@ -65,7 +65,7 @@ export function CustoDoLlm() {
 
   if (indisponivel || !custo) {
     return (
-      <span className="type-mono whitespace-nowrap text-fg-tertiary" title="Ledger de custo do LLM">
+      <span className="type-mono whitespace-nowrap text-[11px]/[16px] text-fg-tertiary" title="Ledger de custo do LLM">
         {indisponivel ? 'LLM · motor indisponível' : 'LLM · —'}
       </span>
     );
@@ -78,6 +78,7 @@ export function CustoDoLlm() {
   return (
     <span className="flex items-center gap-2">
       <CostCounter
+        compacto
         tokensEntrada={custo.tokens.entrada}
         tokensSaida={custo.tokens.saida}
         custoUsd={custo.custoAcumuladoUsd}

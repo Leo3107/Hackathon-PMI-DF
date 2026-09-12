@@ -15,6 +15,12 @@ export interface CostCounterProps {
   orcamentoUsd: number;
   llmAtivo: boolean;
   chamadas: number;
+  /**
+   * Instrumentação, não navegação: na topbar o contador fica reduzido ao ícone e ao gasto
+   * acumulado, em `fg-tertiary`. A quebra completa — entrada, saída, chamadas, orçamento —
+   * continua inteira no tooltip, e o orçamento volta a aparecer escrito quando passa de 80%.
+   */
+  compacto?: boolean;
   className?: string;
 }
 
@@ -31,6 +37,7 @@ export function CostCounter({
   orcamentoUsd,
   llmAtivo,
   chamadas,
+  compacto = false,
   className,
 }: CostCounterProps) {
   const total = tokensEntrada + tokensSaida;
@@ -55,11 +62,39 @@ export function CostCounter({
           tabIndex={0}
           className={cn(
             'type-mono inline-flex items-center gap-1.5 rounded-sm text-[11px]/[16px]',
+            compacto && 'transicao-controle text-fg-tertiary hover:text-fg-secondary',
             className,
           )}
         >
           <CircuitBoard size={12} strokeWidth={2} className="shrink-0" aria-hidden="true" />
           LLM desligado
+        </span>
+      </Tooltip>
+    );
+  }
+
+  if (compacto) {
+    return (
+      <Tooltip conteudo={detalhe}>
+        <span
+          tabIndex={0}
+          aria-label={`Custo do LLM: US$ ${formatarNumero(custoUsd, 2)} de US$ ${formatarNumero(orcamentoUsd, 2)}`}
+          className={cn(
+            'type-mono transicao-controle inline-flex items-center gap-1 rounded-sm text-[11px]/[16px]',
+            alerta ? 'text-fg-secondary' : 'text-fg-tertiary hover:text-fg-secondary',
+            className,
+          )}
+        >
+          {alerta ? (
+            <TriangleAlert size={12} strokeWidth={2} className="shrink-0" aria-hidden="true" />
+          ) : (
+            <Coins size={12} strokeWidth={2} className="shrink-0" aria-hidden="true" />
+          )}
+          <span className="tnum whitespace-nowrap">
+            {alerta
+              ? `US$ ${formatarNumero(custoUsd, 2)} / ${formatarNumero(orcamentoUsd, 2)}`
+              : `US$ ${formatarNumero(custoUsd, 2)}`}
+          </span>
         </span>
       </Tooltip>
     );

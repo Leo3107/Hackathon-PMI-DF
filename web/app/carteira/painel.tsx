@@ -6,16 +6,22 @@
  * Tela de abertura da aplicação e do pitch: precisa ser legível sem rolagem em 1440×900 e
  * responder, em segundos, "onde está o risco da minha carteira agora?".
  *
- * Ordem fixa: faixa de atenção imediata → KPIs → matriz de risco e concentração → tabela
+ * Ordem fixa: faixa de atenção imediata → indicadores → matriz de risco e concentração → tabela
  * "onde está o dinheiro em risco". Cada bloco é clicável e leva a `/clientes` com o filtro já
  * aplicado (contrato de drill-down, §2.7); nenhum abre modal.
+ *
+ * **Hierarquia**: um único elemento lidera a página — a exposição em risco em cenário de RJ, em
+ * `type-score-xl`. Tudo o mais é satélite. Por isso o card quase desapareceu daqui: a única
+ * superfície elevada que resta é a da tabela, onde a borda separa a grade de dados do resto. O
+ * agrupamento das demais seções é feito por espaço, régua de 1px e proximidade. As colunas usam
+ * `items-start`: cada bloco tem a altura do seu conteúdo, nunca a do vizinho mais alto.
  */
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import {
-  CardDeConcentracao,
+  BlocoDeConcentracao,
   DinheiroEmRisco,
   EsqueletoDaCarteira,
   EstadoDeFalha,
@@ -72,7 +78,7 @@ export function PainelDaCarteira() {
   const semClientes = resumo.totalClientes === 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <FaixaDeAtencao
         cartoes={resumo.atencaoImediata ?? []}
         ultimaVarredura={resumo.ultimaVarredura}
@@ -90,8 +96,8 @@ export function PainelDaCarteira() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="flex flex-col gap-3">
+          <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            <section className="flex flex-col gap-3">
               <SectionHeader
                 nivel={3}
                 titulo="Matriz de risco da carteira"
@@ -118,22 +124,22 @@ export function PainelDaCarteira() {
               ) : (
                 <MatrizDeRisco pontos={resumo.matrizDeRisco} />
               )}
-            </Card>
+            </section>
 
-            <div className="flex flex-col gap-4">
-              <Card className="flex flex-col gap-3">
+            <div className="flex flex-col gap-7 lg:border-l lg:border-line-subtle lg:pl-10">
+              <section className="flex flex-col gap-3">
                 <SectionHeader
                   nivel={3}
                   titulo="Exposição por rating"
-                  descricao="Quanto do meu dinheiro está em cada faixa de risco — não quantos clientes, quanto dinheiro."
+                  descricao="Quanto do meu dinheiro está em cada faixa de risco. Não quantos clientes: quanto dinheiro."
                 />
                 <ExposicaoPorRating
                   porRating={resumo.clientesPorRating}
                   aoAbrirRating={(rating) => router.push(`/clientes?rating=${rating}`)}
                 />
-              </Card>
+              </section>
 
-              <CardDeConcentracao
+              <BlocoDeConcentracao
                 porCultura={resumo.concentracaoPorCultura ?? []}
                 porUf={resumo.concentracaoPorUf ?? []}
                 aoAbrirCultura={(cultura) =>
@@ -144,22 +150,22 @@ export function PainelDaCarteira() {
             </div>
           </div>
 
-          <Card semPadding className="flex flex-col">
-            <div className="p-4 pb-3">
-              <SectionHeader
-                nivel={3}
-                divisor={false}
-                titulo="Onde está o dinheiro em risco"
-                descricao="As oito maiores exposições desprotegidas em cenário de recuperação judicial."
-                meta={
-                  <span className="type-caption">
-                    <Termo sigla="EXTRACONCURSAL" /> já descontada
-                  </span>
-                }
-              />
-            </div>
-            <DinheiroEmRisco linhas={resumo.dinheiroEmRisco ?? []} />
-          </Card>
+          <section className="flex flex-col gap-3">
+            <SectionHeader
+              nivel={3}
+              titulo="Onde está o dinheiro em risco"
+              descricao="As oito maiores exposições desprotegidas em cenário de recuperação judicial."
+              meta={
+                <span className="type-caption">
+                  <Termo sigla="EXTRACONCURSAL" /> já descontada
+                </span>
+              }
+            />
+            {/* Única superfície elevada da tela: aqui a borda separa a grade de dados do resto. */}
+            <Card semPadding className="flex flex-col">
+              <DinheiroEmRisco linhas={resumo.dinheiroEmRisco ?? []} />
+            </Card>
+          </section>
         </>
       )}
     </div>
