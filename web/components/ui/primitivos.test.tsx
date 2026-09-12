@@ -44,7 +44,7 @@ describe('ScoreGauge — modo veto', () => {
     // O número calculado nunca é escondido.
     expect(texto).toContain('520');
     // O rótulo do veto é textual, não apenas cor.
-    expect(texto).toContain('VETO · RJ DEFERIDA');
+    expect(texto).toContain('Veto · RJ deferida');
 
     const rotulo = screen.getByRole('img').getAttribute('aria-label') ?? '';
     expect(rotulo).toContain('Score calculado 520');

@@ -195,7 +195,7 @@ describe('honestidade do pipeline', () => {
     const linhas = linhasDoRegistro(ambiental, semAchados, new Date('2026-09-12T14:32:07'));
     expect(linhas).toHaveLength(1);
     expect(linhas[0].texto).toBe('Nenhum registro encontrado');
-    expect(linhas[0].estagio).toBe('AMBIENTAL');
+    expect(linhas[0].estagio).toBe('Ambiental');
   });
 });
 

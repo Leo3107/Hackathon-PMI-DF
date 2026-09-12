@@ -115,10 +115,10 @@ export function CabecalhoDoCliente({
             <span>Cliente desde {formatarData(cliente.inicioRelacionamento, 'mes')}</span>
             <Separador />
             <span
-              className={CLASSES_RISCO[FAMILIA_ESTADO[cliente.estado]].texto}
+              className={`type-body-strong ${CLASSES_RISCO[FAMILIA_ESTADO[cliente.estado]].texto}`}
               data-estado={cliente.estado}
             >
-              {ROTULO_ESTADO[cliente.estado].toUpperCase()}
+              {ROTULO_ESTADO[cliente.estado]}
             </span>
             {ultimaVarredura ? (
               <>
@@ -176,7 +176,7 @@ export function BandaDeVeto({
           className="type-section-title inline-flex items-center gap-2 text-risk-d"
         >
           <Gavel size={16} strokeWidth={2} aria-hidden="true" />
-          {vetos.length === 1 ? 'VETO ATIVO' : `${vetos.length} VETOS ATIVOS`}
+          {vetos.length === 1 ? 'Veto ativo' : `${vetos.length} vetos ativos`}
         </h2>
         <p className="type-body text-fg-secondary">
           O motor calculou <strong className="text-fg-primary">{scoreCalculado}</strong> (rating{' '}
@@ -242,7 +242,7 @@ export function PainelStayPeriod({ stayPeriod }: PainelStayPeriodProps) {
           className="type-section-title inline-flex items-center gap-2 text-risk-d"
         >
           <Hourglass size={16} strokeWidth={2} aria-hidden="true" />
-          <Termo sigla="STAY_PERIOD">STAY PERIOD</Termo> ATIVO
+          <Termo sigla="STAY_PERIOD">Stay Period</Termo> ativo
         </h2>
         <p className="type-body text-fg-secondary">
           <Termo sigla="RJ" /> deferida em {formatarData(stayPeriod.dataDeferimento)} · decorridos{' '}

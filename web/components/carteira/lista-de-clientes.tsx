@@ -44,6 +44,7 @@ import {
   formatarNumero,
   formatarPercentual,
   formatarProbabilidadeRJ,
+  formatarScore,
 } from '@/lib/format';
 import { assinarSessao, sessaoParaApi } from '@/lib/sessao';
 import type { ClienteAvaliado } from '@/types';
@@ -183,12 +184,11 @@ export function ListaDeClientes() {
           <span className="flex min-w-0 flex-col">
             <span className="flex min-w-0 items-center gap-1.5">
               {linha.tipoPessoa === 'PF' ? (
-                <Sprout
-                  size={13}
-                  strokeWidth={2}
-                  aria-label="Produtor rural pessoa física"
-                  className="shrink-0 text-fg-tertiary"
-                />
+                <Tooltip conteudo="Produtor rural pessoa física">
+                  <span tabIndex={0} className="shrink-0 rounded-sm">
+                    <Sprout size={13} strokeWidth={2} aria-hidden="true" className="text-fg-tertiary" />
+                  </span>
+                </Tooltip>
               ) : null}
               <Link
                 href={`/clientes/${encodeURIComponent(linha.id)}`}
@@ -198,20 +198,12 @@ export function ListaDeClientes() {
                 {linha.razaoSocial}
               </Link>
             </span>
-            {linha.nomeFantasia ? (
-              <span className="truncate text-[11px]/[14px] text-fg-tertiary">
-                {linha.nomeFantasia}
+            <Tooltip conteudo={`Documento: ${formatarDocumento(linha.documento)}`}>
+              <span tabIndex={0} className="type-mono truncate text-[11px]/[14px] text-fg-tertiary">
+                {linha.nomeFantasia ?? formatarDocumento(linha.documento)}
               </span>
-            ) : null}
+            </Tooltip>
           </span>
-        ),
-      },
-      {
-        id: 'documento',
-        cabecalho: 'CPF/CNPJ',
-        largura: 150,
-        celula: (linha) => (
-          <span className="type-mono text-[12px]">{formatarDocumento(linha.documento)}</span>
         ),
       },
       {
@@ -224,13 +216,6 @@ export function ListaDeClientes() {
             {linha.municipio} <span className="text-fg-secondary">· {linha.uf}</span>
           </span>
         ),
-      },
-      {
-        id: 'tipo',
-        cabecalho: 'Tipo',
-        alinhamento: 'centro',
-        largura: 56,
-        celula: (linha) => <Badge variante="neutro">{linha.tipoPessoa}</Badge>,
       },
       {
         id: 'cultura',
@@ -290,7 +275,9 @@ export function ListaDeClientes() {
         ordenavel: true,
         valorOrdenacao: (linha) => linha.score,
         celula: (linha) => (
-          <span className="tnum text-[15px] font-medium text-fg-primary">{linha.score}</span>
+          <span className="tnum text-[15px] font-medium text-fg-primary">
+            {formatarScore(linha.score)}
+          </span>
         ),
       },
       {
@@ -418,7 +405,6 @@ export function ListaDeClientes() {
     <div className="flex flex-col gap-4">
       <SectionHeader
         titulo="Clientes"
-        descricao="Qual cliente atende a este critério? Busque, filtre e ordene a carteira inteira."
         meta={
           <span className="type-caption tnum">
             {carregando

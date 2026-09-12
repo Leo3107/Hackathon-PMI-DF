@@ -126,7 +126,7 @@ const NARRATIVA_AGUARDANDO: Narrativa = {
 /* ------------------------------------------------------------------ */
 
 describe('Exigência 1 — veto nunca esconde o score calculado', () => {
-  it('exibe SCORE CALCULADO e CLASSIFICAÇÃO FINAL lado a lado, com o motivo nomeado', () => {
+  it('exibe Score calculado e Classificação final lado a lado, com o motivo nomeado', () => {
     const { container } = render(
       <CardDeScore avaliacao={AVALIACAO} variacao={null} aoVerEvidencia={() => {}} />,
     );
@@ -134,8 +134,8 @@ describe('Exigência 1 — veto nunca esconde o score calculado', () => {
     expect(par).not.toBeNull();
 
     const texto = textoDe(par);
-    expect(texto).toContain('SCORE CALCULADO');
-    expect(texto).toContain('CLASSIFICAÇÃO FINAL');
+    expect(texto).toContain('Score calculado');
+    expect(texto).toContain('Classificação final');
     // O número calculado continua em tela mesmo com o veto forçando D.
     expect(texto).toContain('604');
 
@@ -180,7 +180,7 @@ describe('Exigência 2 — risco de RJ é indicador separado da PD', () => {
       />,
     );
     const texto = textoDe(container);
-    expect(texto).toContain('NÃO ELEGÍVEL A RJ');
+    expect(texto).toContain('Não elegível a RJ');
     expect(texto).toContain('Lei 14.112/2020');
     expect(texto).toContain('inelegibilidade legal');
   });

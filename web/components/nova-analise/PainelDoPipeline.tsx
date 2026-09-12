@@ -169,7 +169,7 @@ export function PainelDoPipeline({
                 >
                   <span className="type-mono tnum shrink-0 text-fg-tertiary">··:··:··</span>
                   <span className="type-eyebrow w-[104px] shrink-0 text-fg-secondary">
-                    {corrente.definicao.rotulo.toUpperCase()}
+                    {corrente.definicao.rotulo}
                   </span>
                   <span className="type-caption min-w-0 text-fg-secondary">
                     {corrente.definicao.fontesExibidas.join(' · ')} · consultando…

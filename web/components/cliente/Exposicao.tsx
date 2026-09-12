@@ -189,7 +189,7 @@ export function BlocoExposicao({ exposicao, fatos }: BlocoExposicaoProps) {
       >
         <p className="type-eyebrow inline-flex items-center gap-1.5 text-risk-d">
           <ShieldAlert size={14} strokeWidth={2.5} aria-hidden="true" />
-          EM RISCO SE PEDIR RJ AMANHÃ
+          Em risco se pedir RJ amanhã
         </p>
         <p className="type-kpi tnum flex flex-wrap items-baseline gap-x-3 text-fg-primary">
           {formatarMoeda(exposicao.exposicaoEmRiscoEmRJ, { casas: 0 })}
@@ -334,7 +334,7 @@ function colunasDeGarantia(temEmbargada: boolean): Coluna<Garantia>[] {
       cabecalho: 'Natureza',
       celula: (g) => (
         <Badge variante="natureza" natureza={g.natureza} tamanho="sm">
-          {NATUREZA_GARANTIA[g.natureza].rotulo.toUpperCase()}
+          {NATUREZA_GARANTIA[g.natureza].rotulo}
         </Badge>
       ),
       minLargura: 140,

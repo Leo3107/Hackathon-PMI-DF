@@ -105,7 +105,7 @@ describe('divergência', () => {
 
   it('monta a linha "recomendado → decidido" exigida por §8.2', () => {
     expect(resumoDaDivergencia(TRILHA[0])).toBe(
-      'Recomendado: SUSPENDER NOVA EXPOSIÇÃO A PRAZO  →  Decidido: APROVAR COM RESTRIÇÕES',
+      'Recomendado: Suspender nova exposição a prazo  →  Decidido: Aprovar com restrições',
     );
   });
 });

@@ -89,6 +89,7 @@ export function BlocoLinhaDoTempo({
   const [focado, setFocado] = useState(0);
   const [comparando, setComparando] = useState<PontoDaSerie | null>(null);
   const [eventoDestacado, setEventoDestacado] = useState<string | null>(null);
+  const [expandido, setExpandido] = useState(false);
   const grafico = useRef<SVGSVGElement>(null);
 
   const todosOsPontos = useMemo(
@@ -129,38 +130,15 @@ export function BlocoLinhaDoTempo({
         `faixa ${ratingDoScore(primeiro.score)} para faixa ${ratingDoScore(ultimo.score)}.`
       : 'Série de score indisponível.';
 
-  return (
-    <Card id="timeline" as="section" aria-labelledby="titulo-timeline" className="scroll-mt-[88px]">
-      <SectionHeader
-        nivel={2}
-        titulo="Linha do tempo"
-        descricao="A série do score e os eventos que a moveram, no mesmo eixo."
-        meta={<Clock size={14} strokeWidth={2} aria-hidden="true" />}
-        acoes={
-          <div className="flex gap-1" role="group" aria-label="Janela da linha do tempo">
-            {(Object.keys(ROTULO_JANELA) as Janela[]).map((opcao) => (
-              <Button
-                key={opcao}
-                tamanho="sm"
-                variante={janela === opcao ? 'secundario' : 'fantasma'}
-                aria-pressed={janela === opcao}
-                onClick={() => {
-                  setJanela(opcao);
-                  setFocado(0);
-                }}
-              >
-                {ROTULO_JANELA[opcao]}
-              </Button>
-            ))}
-          </div>
-        }
-      />
-      <h2 id="titulo-timeline" className="sr-only">
-        Linha do tempo
-      </h2>
+  const resumoCompacto =
+    pontos.length < 2
+      ? `Histórico insuficiente para série temporal — ${pontos.length} ponto de score registrado.`
+      : `${descricaoDaSerie} ${eventosNaJanela.length} evento(s) na janela de ${ROTULO_JANELA[janela]}.`;
 
+  const conteudoDaSerie = (
+    <>
       {pontos.length < 2 ? (
-        <div className="mt-3">
+        <div>
           <EmptyState
             compacto
             titulo="Histórico insuficiente para série temporal"
@@ -347,6 +325,53 @@ export function BlocoLinhaDoTempo({
           }
         />
       </div>
+    </>
+  );
+
+  return (
+    <Card id="timeline" as="section" aria-labelledby="titulo-timeline" className="scroll-mt-[88px]">
+      <SectionHeader
+        nivel={2}
+        titulo="Linha do tempo"
+        descricao="A série do score e os eventos que a moveram, no mesmo eixo."
+        meta={<Clock size={14} strokeWidth={2} aria-hidden="true" />}
+        acoes={
+          <Button variante="fantasma" tamanho="sm" onClick={() => setExpandido(true)}>
+            Ver linha do tempo completa
+          </Button>
+        }
+      />
+      <h2 id="titulo-timeline" className="sr-only">
+        Linha do tempo
+      </h2>
+
+      <p className="type-body mt-3 text-fg-secondary">{resumoCompacto}</p>
+
+      <Drawer
+        aberto={expandido}
+        aoFechar={() => setExpandido(false)}
+        titulo="Linha do tempo"
+        subtitulo="A série do score e os eventos que a moveram, no mesmo eixo"
+        largura="larga"
+      >
+        <div className="mb-3 flex gap-1" role="group" aria-label="Janela da linha do tempo">
+          {(Object.keys(ROTULO_JANELA) as Janela[]).map((opcao) => (
+            <Button
+              key={opcao}
+              tamanho="sm"
+              variante={janela === opcao ? 'secundario' : 'fantasma'}
+              aria-pressed={janela === opcao}
+              onClick={() => {
+                setJanela(opcao);
+                setFocado(0);
+              }}
+            >
+              {ROTULO_JANELA[opcao]}
+            </Button>
+          ))}
+        </div>
+        {conteudoDaSerie}
+      </Drawer>
 
       <DrawerDeComparacao
         ponto={comparando}

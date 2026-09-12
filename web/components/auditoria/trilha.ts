@@ -112,7 +112,7 @@ export function clientesDaTrilha(registros: RegistroAuditoria[]): ClienteDaTrilh
  * recomendou uma coisa, a pessoa decidiu outra, e o registro guarda as duas.
  */
 export function resumoDaDivergencia(registro: RegistroAuditoria): string {
-  return `Recomendado: ${ROTULO_RECOMENDACAO[registro.recomendacaoGerada].toUpperCase()}  →  Decidido: ${ROTULO_DECISAO[registro.decisaoAnalista].toUpperCase()}`;
+  return `Recomendado: ${ROTULO_RECOMENDACAO[registro.recomendacaoGerada]}  →  Decidido: ${ROTULO_DECISAO[registro.decisaoAnalista]}`;
 }
 
 export function justificativaCurta(texto: string): string {

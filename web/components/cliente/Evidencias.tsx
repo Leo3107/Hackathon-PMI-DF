@@ -47,6 +47,7 @@ export function BlocoEvidencias({
   aoAbrirEvidencia,
   aoSelecionarFator,
 }: BlocoEvidenciasProps) {
+  const [abertoTodas, setAbertoTodas] = useState(false);
   const fontes = useMemo(() => {
     const presentes = new Set<FonteId>();
     for (const evidencia of avaliacao.evidencias) presentes.add(evidencia.fonte);
@@ -77,53 +78,72 @@ export function BlocoEvidencias({
         titulo="Fontes e evidências"
         descricao={`${fontes.length} fontes consultadas · ${avaliacao.evidencias.length} documentos. Toda consulta desta demonstração é simulada.`}
         meta={<Link2 size={14} strokeWidth={2} aria-hidden="true" />}
+        acoes={
+          avaliacao.evidencias.length > 0 ? (
+            <Button variante="fantasma" tamanho="sm" onClick={() => setAbertoTodas(true)}>
+              Ver todas as evidências
+            </Button>
+          ) : null
+        }
       />
       <h2 id="titulo-evidencias" className="sr-only">
         Fontes e evidências
       </h2>
 
-      {fontes.length > 0 ? (
-        <div className="mt-3">
-          <FilterChips<FonteId>
-            rotulo="Filtrar evidências por fonte"
-            limparRotulo="Todas as fontes"
-            selecionados={filtro}
-            aoMudar={setFiltro}
-            opcoes={fontes.map((fonte) => ({
-              valor: fonte,
-              rotulo: NOME_CURTO_FONTE[fonte],
-              contagem: avaliacao.evidencias.filter((e) => e.fonte === fonte).length,
-            }))}
-          />
-        </div>
-      ) : null}
-
-      {visiveis.length === 0 ? (
+      {avaliacao.evidencias.length === 0 ? (
         <div className="mt-3">
           <EmptyState
             compacto
             titulo="Nenhuma evidência nesta seleção"
-            descricao={
-              avaliacao.evidencias.length === 0
-                ? 'O motor não devolveu documentos para esta avaliação.'
-                : 'Nenhum documento da fonte selecionada. Limpe o filtro para ver todos.'
-            }
+            descricao="O motor não devolveu documentos para esta avaliação."
           />
         </div>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {visiveis.map((evidencia) => (
-            <li key={evidencia.id}>
-              <EvidenceCard
-                evidencia={paraEvidenciaUi(evidencia)}
-                fatoresRelacionados={fatoresDe(evidencia, indiceDeFatores)}
-                aoClicarFator={aoSelecionarFator}
-                aoAlternar={() => aoAbrirEvidencia(evidencia.id)}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      ) : null}
+
+      <Drawer
+        aberto={abertoTodas}
+        aoFechar={() => setAbertoTodas(false)}
+        titulo="Fontes e evidências"
+        subtitulo={`${fontes.length} fontes · ${avaliacao.evidencias.length} documentos`}
+        largura="larga"
+      >
+        <div className="flex flex-col gap-4">
+          {fontes.length > 0 ? (
+            <FilterChips<FonteId>
+              rotulo="Filtrar evidências por fonte"
+              limparRotulo="Todas as fontes"
+              selecionados={filtro}
+              aoMudar={setFiltro}
+              opcoes={fontes.map((fonte) => ({
+                valor: fonte,
+                rotulo: NOME_CURTO_FONTE[fonte],
+                contagem: avaliacao.evidencias.filter((e) => e.fonte === fonte).length,
+              }))}
+            />
+          ) : null}
+
+          {visiveis.length === 0 ? (
+            <EmptyState
+              compacto
+              titulo="Nenhuma evidência nesta seleção"
+              descricao="Nenhum documento da fonte selecionada. Limpe o filtro para ver todos."
+            />
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {visiveis.map((evidencia) => (
+                <li key={evidencia.id}>
+                  <EvidenceCard
+                    evidencia={paraEvidenciaUi(evidencia)}
+                    fatoresRelacionados={fatoresDe(evidencia, indiceDeFatores)}
+                    aoClicarFator={aoSelecionarFator}
+                    aoAlternar={() => aoAbrirEvidencia(evidencia.id)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </Drawer>
     </Card>
   );
 }

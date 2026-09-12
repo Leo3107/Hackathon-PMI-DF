@@ -190,7 +190,7 @@ export function ScoreGauge({
 
   const vetoPrincipal = emVeto ? vetos![0] : null;
   const rotuloVeto = vetoPrincipal
-    ? `VETO · ${vetoPrincipal.rotulo.toUpperCase()}${vetos!.length > 1 ? ` +${vetos!.length - 1}` : ''}`
+    ? `Veto · ${vetoPrincipal.rotulo}${vetos!.length > 1 ? ` +${vetos!.length - 1}` : ''}`
     : null;
 
   const descricao = emVeto
@@ -372,7 +372,7 @@ export function ScoreGauge({
           <span
             className={cn(
               'absolute left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap',
-              'text-[11px]/[16px] font-semibold tracking-[0.08em] uppercase text-fg-primary',
+              'text-[11px]/[16px] font-semibold text-fg-primary',
             )}
             style={{ top: `${Y.rodape}%` }}
           >

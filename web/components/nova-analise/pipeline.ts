@@ -238,7 +238,7 @@ export function linhasDoRegistro(
   return textos.map((texto, indice) => ({
     id: `${definicao.id}-${indice}`,
     hora,
-    estagio: definicao.rotulo.toUpperCase(),
+    estagio: definicao.rotulo,
     texto,
   }));
 }

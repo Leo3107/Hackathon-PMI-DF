@@ -171,7 +171,7 @@ button, [role="button"] { cursor: pointer; }
 
 @utility eyebrow {
   font-size: 11px; line-height: 16px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-fg-secondary);
+  letter-spacing: 0.01em; color: var(--color-fg-secondary);
 }
 
 @utility scrollbar-thin {
@@ -209,8 +209,8 @@ button, [role="button"] { cursor: pointer; }
   color: var(--color-fg-primary);
 }
 @utility type-eyebrow {
-  font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--color-fg-secondary);
+  font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.01em;
+  color: var(--color-fg-secondary);
 }
 @utility type-label {
   font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.01em;

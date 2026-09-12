@@ -137,7 +137,7 @@ function ParCalculadoFinal({
     <div className="flex w-full flex-col gap-3">
       <div className="grid grid-cols-2 gap-2" data-teste="par-veto">
         <div className="flex flex-col items-center gap-1 rounded border border-line-default bg-surface-sunken px-2 py-3">
-          <p className="type-eyebrow text-fg-tertiary">SCORE CALCULADO</p>
+          <p className="type-eyebrow text-fg-tertiary">Score calculado</p>
           <p className="type-score-md tnum text-fg-secondary">
             {formatarScore(avaliacao.scoreCalculado)}
           </p>
@@ -145,7 +145,7 @@ function ParCalculadoFinal({
           <p className="type-caption">pelo motor</p>
         </div>
         <div className="flex flex-col items-center gap-1 rounded border border-risk-d-line bg-risk-d-tint px-2 py-3">
-          <p className="type-eyebrow text-fg-tertiary">CLASSIFICAÇÃO FINAL</p>
+          <p className="type-eyebrow text-fg-tertiary">Classificação final</p>
           <p className="type-score-md tnum text-fg-primary">{avaliacao.ratingFinal}</p>
           <RatingBadge rating={avaliacao.ratingFinal} tamanho="sm" aparencia="solido" />
           <p className="type-caption">por veto</p>
@@ -209,7 +209,7 @@ export function CardDePd({ pd }: { pd: ProbabilidadeDeDefault }) {
   return (
     <Card as="section" aria-labelledby="titulo-pd" className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <p className="type-eyebrow text-fg-tertiary">PROBABILIDADES</p>
+        <p className="type-eyebrow text-fg-tertiary">Probabilidades</p>
         <h2 id="titulo-pd" className="type-section-title">
           <Termo sigla="PD" /> — probabilidade de default
         </h2>
@@ -296,7 +296,7 @@ export function CardDeRiscoRj({ risco }: { risco: RiscoRJ }) {
         </>
       ) : (
         <div className="flex flex-col gap-1 rounded border border-line-default bg-surface-sunken px-3 py-2">
-          <p className="type-body-strong text-fg-primary">NÃO ELEGÍVEL A RJ</p>
+          <p className="type-body-strong text-fg-primary">Não elegível a RJ</p>
           <p className="type-caption text-fg-secondary">
             {risco.motivoInelegibilidade ??
               'Sem comprovação dos requisitos da Lei 14.112/2020 para produtor rural pessoa física.'}{' '}
@@ -365,7 +365,7 @@ export function CardDeRecomendacao({ recomendacao, narrativa }: CardDeRecomendac
       className="flex flex-col gap-3"
     >
       <div className="flex flex-col gap-1">
-        <p className="type-eyebrow text-fg-tertiary">RECOMENDAÇÃO DO MOTOR</p>
+        <p className="type-eyebrow text-fg-tertiary">Recomendação do motor</p>
         <h2
           id="titulo-recomendacao"
           className={`type-section-title inline-flex items-start gap-2 ${classes.texto}`}
@@ -400,7 +400,7 @@ export function CardDeRecomendacao({ recomendacao, narrativa }: CardDeRecomendac
       ) : null}
 
       <div className="border-t border-line-subtle pt-3">
-        <p className="type-eyebrow mb-1.5 text-fg-tertiary">JUSTIFICATIVA</p>
+        <p className="type-eyebrow mb-1.5 text-fg-tertiary">Justificativa</p>
         <StreamingText
           texto={narrativa.texto || recomendacao.explicacao || ''}
           estado={narrativa.estado}

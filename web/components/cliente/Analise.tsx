@@ -219,7 +219,7 @@ export function BlocoPorQue({
       </div>
 
       <div className="mt-4 border-t border-line-subtle pt-3">
-        <p className="type-eyebrow mb-1.5 text-fg-tertiary">ANÁLISE</p>
+        <p className="type-eyebrow mb-1.5 text-fg-tertiary">Análise</p>
         <StreamingText
           texto={narrativa.texto}
           estado={narrativa.estado}
@@ -381,6 +381,9 @@ const ORDEM_SEVERIDADE: Record<RedFlag['severidade'], number> = {
 
 type FiltroStatus = 'todas' | StatusRedFlag;
 
+/** Acima disso, a lista completa vira "aprofundamento": some por trás de "Mostrar todas". */
+const LIMITE_INICIAL_RED_FLAGS = 5;
+
 export interface BlocoRedFlagsProps {
   redFlags: RedFlag[];
   dataReferencia: string;
@@ -395,6 +398,7 @@ export function BlocoRedFlags({
   aoSelecionarFator,
 }: BlocoRedFlagsProps) {
   const [filtro, setFiltro] = useState<ReadonlySet<FiltroStatus>>(new Set(['todas']));
+  const [mostrarTodas, setMostrarTodas] = useState(false);
   const escolhido = [...filtro][0] ?? 'todas';
 
   const ordenadas = useMemo(
@@ -408,6 +412,10 @@ export function BlocoRedFlags({
   );
   const visiveis =
     escolhido === 'todas' ? ordenadas : ordenadas.filter((f) => f.status === escolhido);
+  const exibidas =
+    mostrarTodas || visiveis.length <= LIMITE_INICIAL_RED_FLAGS
+      ? visiveis
+      : visiveis.slice(0, LIMITE_INICIAL_RED_FLAGS);
 
   const contar = (status: StatusRedFlag) => redFlags.filter((f) => f.status === status).length;
 
@@ -458,16 +466,30 @@ export function BlocoRedFlags({
           />
         </div>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {visiveis.map((flag) => (
-            <LinhaRedFlag
-              key={flag.id}
-              flag={flag}
-              aoVerEvidencia={aoVerEvidencia}
-              aoSelecionarFator={aoSelecionarFator}
-            />
-          ))}
-        </ul>
+        <>
+          <ul className="mt-3 flex flex-col gap-2">
+            {exibidas.map((flag) => (
+              <LinhaRedFlag
+                key={flag.id}
+                flag={flag}
+                aoVerEvidencia={aoVerEvidencia}
+                aoSelecionarFator={aoSelecionarFator}
+              />
+            ))}
+          </ul>
+          {visiveis.length > LIMITE_INICIAL_RED_FLAGS ? (
+            <Button
+              variante="fantasma"
+              tamanho="sm"
+              className="mt-2"
+              onClick={() => setMostrarTodas((atual) => !atual)}
+            >
+              {mostrarTodas
+                ? 'Mostrar menos'
+                : `Mostrar todas as ${visiveis.length} red flags`}
+            </Button>
+          ) : null}
+        </>
       )}
 
       <p className="type-caption mt-2 border-t border-line-subtle pt-2">
@@ -497,7 +519,7 @@ function LinhaRedFlag({
       <div className="flex flex-wrap items-center gap-2">
         <span className={`type-eyebrow inline-flex items-center gap-1 ${classes.texto}`}>
           <Icone size={13} strokeWidth={2.5} aria-hidden="true" />
-          {apresentacao.rotulo.toUpperCase()}
+          {apresentacao.rotulo}
         </span>
         <span className="type-body-strong min-w-0 text-fg-primary">{flag.titulo}</span>
         <span className="tnum type-body-strong ml-auto shrink-0 text-fg-primary">
