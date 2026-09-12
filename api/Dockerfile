@@ -25,6 +25,13 @@ RUN pip install -r /tmp/requirements-api.txt -r /tmp/requirements-coleta.txt
 COPY api/ /app/api/
 COPY coleta/ /app/coleta/
 
+# A base de fatos do produto. Sem isto a aplicação sobe, responde 200 em tudo e
+# serve uma carteira vazia, sem erro nenhum: o carregador não encontra o CSV e
+# devolve zero cliente. Falha silenciosa, e foi exatamente o que aconteceu.
+# Os dados baixados das fontes públicas (data/raw, warehouse) continuam fora da
+# imagem pelo .dockerignore; só o dataset versionado entra.
+COPY data/ /app/data/
+
 ENV PYTHONPATH=/app:/app/api \
     FLASK_APP=app \
     PORT=5001 \

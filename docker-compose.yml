@@ -24,11 +24,15 @@ services:
       LASTRO_LLM_BUDGET_USD: ${LASTRO_LLM_BUDGET_USD:-8}
       # Warehouse da camada de coleta. Vazio é estado válido: as rotas de
       # coleta respondem dizendo quais fontes ainda não foram carregadas.
-      COLETA_WAREHOUSE: /app/data/warehouse.duckdb
+      #
+      # Fica em /app/var, FORA de /app/data, de propósito: /app/data carrega o
+      # dataset versionado que vem na imagem, e um volume montado ali o
+      # esconderia inteiro, deixando a carteira vazia sem erro nenhum.
+      COLETA_WAREHOUSE: /app/var/warehouse.duckdb
       COLETA_SOMENTE_LEITURA: "1"
     volumes:
       # Persiste o warehouse da coleta e o diário de custo do LLM entre execuções.
-      - lastro-dados:/app/data
+      - lastro-dados:/app/var
       - lastro-custo:/app/api/.lastro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5001/api/saude', timeout=3).status==200 else 1)"]
