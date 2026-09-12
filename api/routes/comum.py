@@ -107,6 +107,8 @@ def serializar_agregado(modelo: ModeloLastro) -> dict[str, Any]:
 def data_de_referencia() -> str:
     """Data do dataset (ISO). O motor nunca lê o relógio; a carteira, só aqui."""
     repo = repositorio()
+    if repo.fonte.data_referencia:
+        return repo.fonte.data_referencia
     for fatos in repo.fonte.fatos_por_cliente.values():
         return fatos.data_referencia
     return date.today().isoformat()

@@ -25,7 +25,7 @@ from models.enums import (
 )
 from models.eventos import Alerta
 from models.fatos import FatosDoCliente
-from repository import EstadoDeSessao, RepositorioEmMemoria
+from repository import ClienteNaoEncontrado, EstadoDeSessao, RepositorioEmMemoria
 from scoring.formatacao import moeda, numero
 from scoring.util import para_data
 
@@ -80,8 +80,9 @@ def avaliar_carteira(
     severidades = _severidade_maxima_por_cliente(alertas)
     linhas: list[ClienteAvaliado] = []
     for cliente in repo.listar_clientes():
-        fatos = repo.fonte.fatos_por_cliente.get(cliente.id)
-        if fatos is None:
+        try:
+            fatos = repo.obter_fatos_atuais(cliente.id)
+        except ClienteNaoEncontrado:
             continue
         avaliacao = repo.avaliar_fatos(fatos, sessao)
         linhas.append(
@@ -518,7 +519,11 @@ def _cartoes_de_atencao(
 
 def zarc_por_cliente(repo: RepositorioEmMemoria) -> dict[str, RiscoZarc]:
     """Risco ZARC de cada cliente, lido dos fatos - o motor nao o republica."""
-    return {
-        cliente_id: fatos.agro.risco_zarc
-        for cliente_id, fatos in repo.fonte.fatos_por_cliente.items()
-    }
+    resultado: dict[str, RiscoZarc] = {}
+    for cliente in repo.listar_clientes():
+        try:
+            fatos = repo.obter_fatos_atuais(cliente.id)
+        except ClienteNaoEncontrado:
+            continue
+        resultado[cliente.id] = fatos.agro.risco_zarc
+    return resultado

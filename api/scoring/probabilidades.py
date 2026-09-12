@@ -20,6 +20,7 @@ from .util import NEUTRO, arredondar, clamp, limitar, razao_segura
 
 __all__ = [
     "pd12_do_score",
+    "calcular_pd_a_partir_de_pd12",
     "calcular_pd",
     "Elegibilidade",
     "elegibilidade_para_rj",
@@ -38,18 +39,22 @@ def pd12_do_score(score: float, config: ScoringConfig | None = None) -> float:
     return cfg.pd_l / (_TOTAL + exp((score - cfg.pd_s0) / cfg.pd_k))
 
 
-def calcular_pd(
-    score: float,
+def calcular_pd_a_partir_de_pd12(
+    pd12: float,
     tendencia: Tendencia,
     config: ScoringConfig | None = None,
 ) -> ProbabilidadeDeDefault:
-    """PD 6/12/24 por hazard constante ajustado pela tendência — §6.
+    """PD 6/24 por hazard constante ajustado pela tendência, a partir de um PD12 já dado — §6.
 
     `PD6 < PD12 < PD24` vale por construção: o expoente de 6 meses é sempre
     menor que 1 e o de 24 meses sempre maior que 1.
+
+    Separado de `calcular_pd` para que o PD12 possa vir de **qualquer** fonte —
+    da sigmoide sobre o score (`pd12_do_score`, o caso geral do motor) ou do
+    modelo preditivo de `scoring.modelo_pd` (a base real de CNPJs, Tarefa 1). A
+    derivação de PD6/PD24 por hazard é a mesma nos dois casos.
     """
     cfg = resolver_config(config)
-    pd12 = pd12_do_score(score, cfg)
     sobrevivencia = _TOTAL - pd12
     psi = cfg.psi_por_tendencia[tendencia]
     theta = cfg.theta_por_tendencia[tendencia]
@@ -63,6 +68,23 @@ def calcular_pd(
         pd24m=arredondar(pd24, cfg.casas_probabilidade),
         metodo=cfg.texto_metodo_pd,
     )
+
+
+def calcular_pd(
+    score: float,
+    tendencia: Tendencia,
+    config: ScoringConfig | None = None,
+) -> ProbabilidadeDeDefault:
+    """PD 6/12/24 por hazard constante ajustado pela tendência — §6.
+
+    Caso geral do motor: deriva o PD12 do score via sigmoide (`pd12_do_score`).
+    Quando há um modelo de PD dedicado (Tarefa 1, base real de CNPJs), quem
+    chama `calcular_risco` passa `modelo_pd=...` e esta função **não** é usada
+    — ver `calcular_pd_a_partir_de_pd12`.
+    """
+    cfg = resolver_config(config)
+    pd12 = pd12_do_score(score, cfg)
+    return calcular_pd_a_partir_de_pd12(pd12, tendencia, cfg)
 
 
 # ---------------------------------------------------------------------------

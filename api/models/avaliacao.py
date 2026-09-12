@@ -35,6 +35,8 @@ __all__ = [
     "AuditoriaDeFechamento",
     "AvaliacaoDeRisco",
     "AVISO_DO_ANALISTA",
+    "ContribuicaoPd",
+    "ModeloPdInfo",
 ]
 
 #: Texto não dispensável exigido pela §12 da spec do motor.
@@ -81,6 +83,29 @@ class ProbabilidadeDeDefault(ModeloLastro):
     pd24m: float
     #: texto curto explicando a derivação, exibido em tooltip
     metodo: str
+
+
+class ContribuicaoPd(ModeloLastro):
+    """Uma linha da explicação do modelo preditivo de PD — `scoring.modelo_pd`."""
+
+    termo: str
+    coeficiente: float
+    valor: float
+    contribuicao_log_odds: float
+
+
+class ModeloPdInfo(ModeloLastro):
+    """Metadados do modelo preditivo de PD que alimentou `AvaliacaoDeRisco.pd` (Tarefa 1).
+
+    Presente só quando a PD veio do modelo logístico sobre a base real de
+    CNPJs — `None` para avaliações do motor que não passam `modelo_pd` a
+    `scoring.calcular_risco` (ex.: os perfis de teste do motor).
+    """
+
+    #: `alvo_sintetico` do dataset é FABRICADO — este aviso é obrigatório na
+    #: interface sempre que esta PD for exibida.
+    aviso: str
+    contribuicoes: list[ContribuicaoPd] = Field(default_factory=list)
 
 
 class SinalRJ(ModeloLastro):
@@ -179,3 +204,7 @@ class AvaliacaoDeRisco(ModeloLastro):
     recomendacao: Recomendacao
     evidencias: list[Evidencia] = Field(default_factory=list)
     auditoria: AuditoriaDeFechamento
+    #: Só presente quando a PD veio do modelo preditivo da Tarefa 1 (base real
+    #: de CNPJs). Campo acrescentado — nunca substitui `pd`, que continua o
+    #: contrato original.
+    modelo_pd: ModeloPdInfo | None = None

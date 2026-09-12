@@ -401,6 +401,49 @@ def test_valor_pretendido_nulo_ou_negativo_nao_cria_operacao():
 
 
 # ---------------------------------------------------------------------------
+# Garantias e prazo declarados pelo analista (Tarefa 3)
+# ---------------------------------------------------------------------------
+
+
+def test_garantias_declaradas_viram_fato_e_abrem_a_dimensao():
+    from models.enums import TipoGarantia
+    from models.exposicao import Garantia
+
+    garantia = Garantia(id="g1", tipo=TipoGarantia.CPR_FINANCEIRA, valor_declarado=100_000.0)
+    resultado = _adaptar(features_completo(), garantias=[garantia])
+    assert resultado.fatos.garantias == [garantia]
+    assert resultado.cobertura.de(DimensaoId.GARANTIAS).status is not StatusDimensao.CEGA
+
+
+def test_sem_garantia_nem_valor_pretendido_fatos_ficam_vazios():
+    resultado = _adaptar(features_completo())
+    assert resultado.fatos.garantias == []
+    assert resultado.fatos.operacoes == []
+
+
+def test_prazo_meses_gera_parcela_a_vencer_no_prazo():
+    resultado = _adaptar(
+        features_completo(), valor_operacao_pretendida=1_000_000.0, prazo_meses=6
+    )
+    (operacao,) = resultado.fatos.operacoes
+    assert len(operacao.parcelas) == 1
+    assert operacao.parcelas[0].vencimento > DATA_REF
+
+
+def test_sem_prazo_meses_operacao_nao_tem_parcela():
+    resultado = _adaptar(features_completo(), valor_operacao_pretendida=1_000_000.0)
+    (operacao,) = resultado.fatos.operacoes
+    assert operacao.parcelas == []
+
+
+def test_resultado_da_adaptacao_expoe_a_features_de_origem():
+    features = features_completo()
+    resultado = _adaptar(features)
+    assert resultado.features is features
+    assert resultado.modelo_pd.pd12 >= 0.0
+
+
+# ---------------------------------------------------------------------------
 # Pureza e determinismo
 # ---------------------------------------------------------------------------
 

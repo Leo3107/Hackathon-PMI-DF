@@ -174,6 +174,7 @@ O QUE NÃO FOI MAPEADO, E POR QUÊ
 
 from __future__ import annotations
 
+import datetime as dt
 from dataclasses import dataclass
 
 from coleta.models import Features
@@ -183,10 +184,11 @@ from models.enums import (
     OrigemCliente,
     SituacaoCar,
     SituacaoRfb,
+    StatusParcela,
     TipoOperacao,
     TipoPessoa,
 )
-from models.exposicao import Operacao
+from models.exposicao import Garantia, Operacao, Parcela
 from models.fatos import (
     FatosAgro,
     FatosAmbientais,
@@ -197,6 +199,7 @@ from models.fatos import (
     FatosJuridicos,
 )
 from scoring.config import ScoringConfig
+from scoring.modelo_pd import ResultadoModeloPd, avaliar_modelo_pd
 
 from .cobertura import (
     CampoNaoApurado,
@@ -326,6 +329,11 @@ class ResultadoDaAdaptacao:
 
     fatos: FatosDoCliente
     cobertura: RelatorioDeCobertura
+    #: A `Features` de origem — o que `modelo_pd` precisa (Tarefa 1). Os
+    #: coeficientes do modelo usam nomes de campo de `Features`, não de
+    #: `FatosDoCliente`, e alguns (`n_empresas_do_socio_inaptas`,
+    #: `anomalia_na_fase_critica`) não têm fato correspondente no motor.
+    features: Features
 
     @property
     def config(self) -> ScoringConfig:
@@ -334,6 +342,11 @@ class ResultadoDaAdaptacao:
     @property
     def analisavel(self) -> bool:
         return self.cobertura.analisavel
+
+    @property
+    def modelo_pd(self) -> ResultadoModeloPd:
+        """PD12 e a explicação termo a termo do modelo preditivo (Tarefa 1)."""
+        return avaliar_modelo_pd(self.features)
 
 
 # ---------------------------------------------------------------------------
@@ -464,11 +477,33 @@ def _fatos_agro(features: Features) -> FatosAgro:
 
 
 def _operacoes_pretendidas(
-    valor: float | None, data_referencia: str
+    valor: float | None,
+    data_referencia: str,
+    prazo_meses: int | None = None,
 ) -> list[Operacao]:
-    """A operação que o analista pretende fazer. **Nunca** inventada."""
+    """A operação que o analista pretende fazer. **Nunca** inventada.
+
+    `prazo_meses`, quando informado (declaração do analista — Tarefa 3), vira
+    uma única parcela a vencer naquele prazo: é o que faz a operação aparecer
+    em "próximo vencimento" e em `aVencer90d`, em vez de existir só como saldo
+    devedor sem cronograma algum.
+    """
     if valor is None or valor <= 0:
         return []
+    parcelas: list[Parcela] = []
+    vencimento = data_referencia
+    if prazo_meses is not None and prazo_meses > 0:
+        vencimento = (
+            dt.date.fromisoformat(data_referencia) + dt.timedelta(days=30 * prazo_meses)
+        ).isoformat()
+        parcelas = [
+            Parcela(
+                id="parcela-operacao-pretendida",
+                vencimento=vencimento,
+                valor=float(valor),
+                status=StatusParcela.A_VENCER,
+            )
+        ]
     return [
         Operacao(
             id="operacao-pretendida",
@@ -476,6 +511,7 @@ def _operacoes_pretendidas(
             descricao="Operação pretendida em análise de due diligence",
             saldo_devedor=float(valor),
             data_contratacao=data_referencia,
+            parcelas=parcelas,
         )
     ]
 
@@ -491,18 +527,28 @@ def adaptar(
     cliente_id: str,
     data_referencia: str,
     valor_operacao_pretendida: float | None = None,
+    prazo_meses: int | None = None,
+    garantias: list[Garantia] | None = None,
 ) -> ResultadoDaAdaptacao:
     """`Features` → `FatosDoCliente` + relatório de cobertura. Função pura.
 
     `data_referencia` é obrigatória: o adaptador não lê relógio, nem o de
     `Features.gerado_em` — dois recálculos do mesmo documento têm de dar o
     mesmo número.
+
+    `valor_operacao_pretendida`, `prazo_meses` e `garantias` são sempre
+    **declaração do analista** (Tarefa 3) — nunca inferidos da coleta pública.
+    Sem eles a operação e as garantias não existem: `operacoes=[]`,
+    `garantias=[]`, e a dimensão de garantias segue cega.
     """
     receita_respondeu = (
         FonteDaColeta.RECEITA.value in features.fontes_disponiveis
         or features.situacao_cadastral is not None
     )
-    operacoes = _operacoes_pretendidas(valor_operacao_pretendida, data_referencia)
+    operacoes = _operacoes_pretendidas(
+        valor_operacao_pretendida, data_referencia, prazo_meses
+    )
+    garantias_declaradas = list(garantias) if garantias else []
 
     fatos = FatosDoCliente(
         cliente_id=cliente_id,
@@ -515,22 +561,24 @@ def adaptar(
         cadastral=_fatos_cadastrais(features, receita_respondeu),
         ambiental=_fatos_ambientais(features),
         operacoes=operacoes,
-        # Nunca inventadas: garantias, limite, patrimônio e faturamento são
-        # dados da Krill Tech.
-        garantias=[],
+        # `garantias` é declaração do analista (Tarefa 3); limite aprovado,
+        # patrimônio e faturamento continuam dados internos da Krill Tech que
+        # a coleta pública e a declaração de operação não substituem.
+        garantias=garantias_declaradas,
         limite_aprovado=0.0,
         patrimonio_declarado=0.0,
         faturamento_estimado_anual=0.0,
         evidencias=[],
     )
 
+    tem_proposta = bool(operacoes) or bool(garantias_declaradas)
     cobertura = montar_cobertura(
         features,
-        fatores_cegos=_fatores_cegos(features, tem_proposta=bool(operacoes)),
-        tem_proposta=bool(operacoes),
+        fatores_cegos=_fatores_cegos(features, tem_proposta=tem_proposta),
+        tem_proposta=tem_proposta,
         campos_sem_fato=list(CAMPOS_SEM_FATO),
     )
-    return ResultadoDaAdaptacao(fatos=fatos, cobertura=cobertura)
+    return ResultadoDaAdaptacao(fatos=fatos, cobertura=cobertura, features=features)
 
 
 def _fatores_cegos(

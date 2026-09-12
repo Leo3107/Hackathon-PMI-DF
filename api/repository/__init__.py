@@ -15,6 +15,11 @@ delega o cálculo ao motor. Ver `base.RepositorioLastro` para a interface e
 from __future__ import annotations
 
 from .base import ClienteNaoEncontrado, RepositorioLastro
+from .declaracoes import (
+    DeclaracaoDeOperacao,
+    GarantiaDeclarada,
+    RepositorioDeDeclaracoes,
+)
 from .fonte import FonteDeDados, carregar_fonte, fonte_do_modulo, so_digitos
 from .memoria import (
     DECISOES_ALINHADAS,
@@ -38,6 +43,9 @@ __all__ = [
     "RepositorioLastro",
     "RepositorioEmMemoria",
     "ClienteNaoEncontrado",
+    "DeclaracaoDeOperacao",
+    "GarantiaDeclarada",
+    "RepositorioDeDeclaracoes",
     "FonteDeDados",
     "carregar_fonte",
     "fonte_do_modulo",

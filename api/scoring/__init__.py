@@ -19,7 +19,12 @@ from __future__ import annotations
 
 from datetime import date
 
-from models.avaliacao import AvaliacaoDeRisco, DimensaoAvaliada
+from models.avaliacao import (
+    AvaliacaoDeRisco,
+    ContribuicaoPd,
+    DimensaoAvaliada,
+    ModeloPdInfo,
+)
 from models.fatos import FatosDoCliente
 
 from .audit import fatores_das_dimensoes, fechou, verificar_fechamento
@@ -38,7 +43,13 @@ from .dimensoes import (
 )
 from .exposicao import ResumoDeExposicao, calcular_exposicao, normalizar_garantias
 from .fatores import calcular_todos_os_fatores
-from .probabilidades import calcular_pd, calcular_risco_rj, pd12_do_score
+from .modelo_pd import ResultadoModeloPd
+from .probabilidades import (
+    calcular_pd,
+    calcular_pd_a_partir_de_pd12,
+    calcular_risco_rj,
+    pd12_do_score,
+)
 from .recomendacao import escolher_codigo, montar_recomendacao
 from .red_flags import derivar_red_flags
 from .score import calcular_score, classificar_rating, rating_mais_severo
@@ -61,7 +72,9 @@ __all__ = [
     "avaliar_vetos",
     "aplicar_vetos",
     "calcular_pd",
+    "calcular_pd_a_partir_de_pd12",
     "pd12_do_score",
+    "ResultadoModeloPd",
     "calcular_risco_rj",
     "calcular_stay_period",
     "derivar_red_flags",
@@ -96,12 +109,39 @@ def _dimensao_avaliada(
     return montar_dimensao_avaliada(bruta, classificar_tendencia(variacao, cfg), cfg)
 
 
+def _info_do_modelo_pd(resultado: ResultadoModeloPd | None) -> ModeloPdInfo | None:
+    if resultado is None:
+        return None
+    return ModeloPdInfo(
+        aviso=resultado.aviso,
+        contribuicoes=[
+            ContribuicaoPd(
+                termo=contribuicao.termo,
+                coeficiente=contribuicao.coeficiente,
+                valor=contribuicao.valor,
+                contribuicaoLogOdds=contribuicao.contribuicao_log_odds,
+            )
+            for contribuicao in resultado.contribuicoes
+        ],
+    )
+
+
 def calcular_risco(
     fatos: FatosDoCliente,
     config: ScoringConfig | None = None,
     data_referencia: date | str | None = None,
+    *,
+    modelo_pd: ResultadoModeloPd | None = None,
 ) -> AvaliacaoDeRisco:
-    """Avaliação completa de um instante de fatos — o contrato da §14."""
+    """Avaliação completa de um instante de fatos — o contrato da §14.
+
+    `modelo_pd`, quando informado (Tarefa 1 — base real de CNPJs), substitui a
+    PD que sairia da sigmoide sobre o score (`calcular_pd`) pela do modelo
+    preditivo logístico de `scoring.modelo_pd`, com PD6/PD24 derivados dela
+    pelo mesmo hazard de sempre. Score, rating, red flags e vetos **não mudam**
+    — só a PD e o novo campo `modeloPd`, que carrega o aviso obrigatório do
+    dataset e a explicação termo a termo.
+    """
     cfg = resolver_config(config)
     data_ref = _resolver_data(fatos, data_referencia)
 
@@ -126,7 +166,12 @@ def calcular_risco(
         rating_final=rating_final,
         vetos_ativos=vetos,
         dimensoes=[_dimensao_avaliada(bruta, cfg) for bruta in resultado.dimensoes],
-        pd=calcular_pd(resultado.score, tendencia, cfg),
+        pd=(
+            calcular_pd_a_partir_de_pd12(modelo_pd.pd12, tendencia, cfg)
+            if modelo_pd is not None
+            else calcular_pd(resultado.score, tendencia, cfg)
+        ),
+        modelo_pd=_info_do_modelo_pd(modelo_pd),
         risco_rj=calcular_risco_rj(fatos, resumo, cfg),
         stay_period=calcular_stay_period(fatos, cfg, data_ref),
         exposicao=resumo.calculada,

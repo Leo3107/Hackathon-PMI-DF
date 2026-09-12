@@ -190,7 +190,10 @@ def _due_diligence_real(documento: str):
         )
 
     avaliacao = calcular_risco(
-        resultado.fatos, config=resultado.config, data_referencia=data_ref
+        resultado.fatos,
+        config=resultado.config,
+        data_referencia=data_ref,
+        modelo_pd=resultado.modelo_pd,
     )
     return resposta(
         _com_procedencia(

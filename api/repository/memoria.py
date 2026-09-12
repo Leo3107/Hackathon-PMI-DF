@@ -15,13 +15,16 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 
+from adaptadores import ResultadoDaAdaptacao, adaptar
 from models.avaliacao import AvaliacaoDeRisco
 from models.cliente import Cliente
 from models.enums import (
     CodigoRecomendacao,
     DecisaoAnalista,
+    OrigemCliente,
     Rating,
     TipoEventoDeRisco,
+    TipoGarantia,
 )
 from models.eventos import (
     Alerta,
@@ -33,10 +36,11 @@ from models.eventos import (
 from models.base import ModeloLastro
 from models.fatos import FatosDoCliente
 from pydantic import Field
-from scoring import calcular_risco, comparar_avaliacoes
+from scoring import ResultadoModeloPd, ScoringConfig, calcular_risco, comparar_avaliacoes
 from scoring.util import para_data
 
 from .base import ClienteNaoEncontrado, RepositorioLastro
+from .declaracoes import DeclaracaoDeOperacao, GarantiaDeclarada, RepositorioDeDeclaracoes
 from .fonte import FonteDeDados, carregar_fonte
 from .sessao import SESSAO_VAZIA, EstadoDeSessao, EventoSimulado
 from .simulacao import aplicar_eventos_simulados
@@ -71,6 +75,21 @@ DECISOES_ALINHADAS: dict[CodigoRecomendacao, frozenset[DecisaoAnalista]] = {
         {DecisaoAnalista.SUSPENDER, DecisaoAnalista.RECUSAR}
     ),
 }
+
+#: Tarefa 3 — amostra fixa de ~20 CNPJs entre os 6 perfis, para a carteira de
+#: demonstração não abrir vazia. Determinístico: mesmos perfis, mesma
+#: quantidade, sempre os documentos de menor valor dentro de cada perfil.
+QUANTIDADE_POR_PERFIL_DEMO: dict[str, int] = {
+    "limpo": 5,
+    "divida_ativa": 4,
+    "passivo_ambiental_auto": 3,
+    "situacao_irregular": 3,
+    "grupo_societario": 3,
+    "passivo_ambiental_embargo": 2,
+}
+VALOR_OPERACAO_DEMO = 500_000.0
+PRAZO_MESES_DEMO = 12
+FRACAO_GARANTIA_DEMO = 0.7
 
 #: Janela do "o que mudou" da carteira e da lista (`03` §2.3, K7).
 JANELA_COMPARACAO_DIAS = 90
@@ -110,20 +129,75 @@ class RepositorioEmMemoria(RepositorioLastro):
         self.fonte = fonte if fonte is not None else carregar_fonte()
         self._decisoes: list[RegistroAuditoria] = []
         self._cache_snapshot: dict[tuple[str, str], AvaliacaoDeRisco] = {}
+        #: Tarefa 3 — declarações de operação do analista, por documento.
+        #: Estado do processo único (D3), como `_decisoes`.
+        self.declaracoes = RepositorioDeDeclaracoes()
 
     # -- Interface da spec 01 ------------------------------------------------
 
     def listar_clientes(self) -> list[Cliente]:
-        return list(self.fonte.clientes)
+        """A carteira.
+
+        Sem base real de CNPJs (`fonte.features_por_cliente` vazio — o stub de
+        teste de `tests/fixtures.py`), é a lista estática de sempre. Com ela
+        (Tarefa 2), a carteira é o conjunto de documentos com declaração de
+        operação (Tarefa 3): sem declaração, um CNPJ é só um registro
+        consultável por due diligence, nunca uma linha da carteira.
+        """
+        if not self.fonte.features_por_cliente:
+            return list(self.fonte.clientes)
+        declarados = set(self.declaracoes.documentos_declarados())
+        if not declarados:
+            return []
+        return [
+            cliente.model_copy(update={"origem": OrigemCliente.CARTEIRA})
+            for cliente in self.fonte.todos_os_perfis()
+            if cliente.id in declarados
+        ]
 
     def obter_cliente(self, cliente_id: str) -> Cliente | None:
-        return self.fonte.por_id(cliente_id)
+        cliente = self.fonte.por_id(cliente_id)
+        if cliente is not None and self.declaracoes.obter(cliente_id) is not None:
+            return cliente.model_copy(update={"origem": OrigemCliente.CARTEIRA})
+        return cliente
 
     def obter_fatos_atuais(self, cliente_id: str) -> FatosDoCliente:
+        features = self.fonte.features_por_cliente.get(cliente_id)
+        if features is not None:
+            return self._adaptar(cliente_id, features).fatos
         fatos = self.fonte.fatos_por_cliente.get(cliente_id)
         if fatos is None:
             raise ClienteNaoEncontrado(cliente_id)
         return fatos
+
+    def _adaptar(self, cliente_id: str, features) -> ResultadoDaAdaptacao:
+        """`Features` + declaração corrente → fatos, cobertura e modelo de PD.
+
+        Recomputado a cada chamada (função pura e barata — sem I/O) em vez de
+        cacheado, porque a declaração pode mudar entre uma chamada e outra
+        (`POST /api/carteira/semear` e a rota inversa).
+        """
+        declaracao = self.declaracoes.obter(cliente_id)
+        data_ref = self.fonte.data_referencia or date.today().isoformat()
+        if declaracao is None:
+            return adaptar(features, cliente_id=cliente_id, data_referencia=data_ref)
+        return adaptar(
+            features,
+            cliente_id=cliente_id,
+            data_referencia=data_ref,
+            valor_operacao_pretendida=declaracao.valor_operacao,
+            prazo_meses=declaracao.prazo_meses,
+            garantias=declaracao.garantias_do_motor(data_ref),
+        )
+
+    def _config_e_modelo_pd(
+        self, cliente_id: str
+    ) -> tuple[ScoringConfig | None, ResultadoModeloPd | None]:
+        features = self.fonte.features_por_cliente.get(cliente_id)
+        if features is None:
+            return None, None
+        resultado = self._adaptar(cliente_id, features)
+        return resultado.config, resultado.modelo_pd
 
     def obter_historico(self, cliente_id: str) -> list[SnapshotHistorico]:
         self._exigir_cliente(cliente_id)
@@ -188,9 +262,18 @@ class RepositorioEmMemoria(RepositorioLastro):
     def avaliar_fatos(
         self, fatos: FatosDoCliente, sessao: EstadoDeSessao = SESSAO_VAZIA
     ) -> AvaliacaoDeRisco:
-        """Aplica a sessão e roda o motor. Único caminho para produzir um score."""
+        """Aplica a sessão e roda o motor. Único caminho para produzir um score.
+
+        Quando o cliente tem `Features` reais (Tarefa 2), a avaliação usa a
+        `ScoringConfig` com pesos renormalizados pela cobertura (dimensões sem
+        fonte pública saem da média, Tarefa 3) e a PD sai do modelo preditivo
+        de `scoring.modelo_pd` (Tarefa 1) em vez da sigmoide sobre o score —
+        `scoring.calcular_risco` faz a troca sozinho a partir de `modelo_pd`.
+        Nenhuma das duas coisas muda score, rating, red flags ou vetos.
+        """
         mutados = aplicar_eventos_simulados(fatos, sessao.eventos_simulados)
-        avaliacao = calcular_risco(mutados)
+        config, modelo_pd = self._config_e_modelo_pd(fatos.cliente_id)
+        avaliacao = calcular_risco(mutados, config=config, modelo_pd=modelo_pd)
         if sessao.status_red_flags:
             for red_flag in avaliacao.red_flags:
                 status = sessao.status_red_flags.get(red_flag.id)
@@ -260,6 +343,44 @@ class RepositorioEmMemoria(RepositorioLastro):
 
     def alertas_do_cliente(self, cliente_id: str) -> list[Alerta]:
         return [a for a in self.fonte.alertas if a.cliente_id == cliente_id]
+
+    # -- Tarefa 3: declaração de operação e semeadura de demonstração --------
+
+    def semear_carteira_de_demonstracao(self) -> list[str]:
+        """Declara operações fictícias para uma amostra fixa de ~20 CNPJs.
+
+        Sem isso a carteira abre vazia (Tarefa 3: ela é o conjunto de
+        documentos com declaração). Marca cada declaração com
+        `demonstracao=True` para que `limpar_declaracoes_de_demonstracao`
+        remova só isto, nunca uma declaração real feita na mesma sessão.
+        """
+        documentos_por_perfil: dict[str, list[str]] = {}
+        for documento, perfil in self.fonte.perfil_por_cliente.items():
+            documentos_por_perfil.setdefault(perfil, []).append(documento)
+
+        semeados: list[str] = []
+        for perfil, quantidade in QUANTIDADE_POR_PERFIL_DEMO.items():
+            candidatos = sorted(documentos_por_perfil.get(perfil, []))[:quantidade]
+            for documento in candidatos:
+                garantia = GarantiaDeclarada(
+                    tipo=TipoGarantia.CPR_FINANCEIRA,
+                    valor=VALOR_OPERACAO_DEMO * FRACAO_GARANTIA_DEMO,
+                    descricao="Garantia de DEMONSTRAÇÃO — declaração fictícia (Tarefa 3)",
+                )
+                self.declaracoes.declarar(
+                    DeclaracaoDeOperacao(
+                        documento=documento,
+                        valor_operacao=VALOR_OPERACAO_DEMO,
+                        prazo_meses=PRAZO_MESES_DEMO,
+                        garantias=(garantia,),
+                        demonstracao=True,
+                    )
+                )
+                semeados.append(documento)
+        return semeados
+
+    def limpar_declaracoes_de_demonstracao(self) -> int:
+        return self.declaracoes.limpar(apenas_demonstracao=True)
 
     # -- Auxiliares privados -------------------------------------------------
 

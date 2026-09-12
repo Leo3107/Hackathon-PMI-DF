@@ -1,23 +1,30 @@
-"""Dataset simulado do Lastro — `specs/06-dados-simulados.md`.
+"""Dataset real do Lastro — Tarefa 2 (substitui os 18 clientes inventados).
 
-**18 clientes de carteira + 4 prospects**, com seis snapshots históricos cada,
-eventos de risco, alertas, evidências e trilha de auditoria. Exposição total da
-carteira: **R$ 244.300.000,00**.
+3.000 CNPJs de soja (12 UFs, 6 perfis de risco), lidos de
+`data/mock/features_agro_mock.csv` por `data.carregador_csv` e traduzidos por
+`adaptadores.features_para_fatos.adaptar` — o mesmo adaptador que a due
+diligence de CNPJ avulso já usa para dado público real.
 
-Regras do pacote, verificadas por teste (`api/tests/test_dataset.py`):
+**Nada aqui é carteira.** A carteira (o que `POST /api/carteira` lista) é o
+conjunto de documentos com declaração de operação do analista
+(`repository.declaracoes.RepositorioDeDeclaracoes`), montada em runtime por
+`RepositorioEmMemoria` — não um recorte estático deste módulo. Os 3.000
+registros aqui são só o universo consultável (devem aparecer na due diligence
+por documento e na ficha do cliente; a lista de carteira, não).
 
-* nada aqui importa de `scoring` — o dataset descreve **fatos**, não avaliações;
-* nada aqui escreve campo derivado (score, rating, PD, red flag, recomendação,
-  `natureza` ou `valorAtualizado` de garantia, `scoreApos`, `deltaScore`);
-* toda `Evidencia` carrega `simulada = true` (invariante I10).
+Sem histórico real para 3.000 CNPJs, `SNAPSHOTS_POR_CLIENTE`,
+`EVENTOS_POR_CLIENTE`, `ALERTAS` e `REGISTROS_AUDITORIA` saem vazios de
+propósito: inventar uma série temporal ou uma trilha de auditoria para uma
+base pública seria exatamente o erro que os workstreams 2 e 3 existem para
+evitar. `repository.fonte.carregar_fonte` e `RepositorioEmMemoria` já degradam
+com graça para essas ausências (nenhuma tela quebra; históricos e alertas
+aparecem vazios).
 
-API pública:
+API pública (nomes lidos por `repository.fonte.fonte_do_modulo`):
 
-    >>> from data import CLIENTES, FATOS_POR_CLIENTE
-    >>> len(CLIENTES)
-    18
-    >>> FATOS_POR_CLIENTE["cerrado-norte"].data_referencia
-    '2026-09-12'
+    >>> from data import PROSPECTS, FATOS_POR_CLIENTE, FEATURES_POR_CLIENTE
+    >>> len(PROSPECTS)
+    3000
 """
 
 from __future__ import annotations
@@ -26,48 +33,38 @@ from models.cliente import Cliente
 from models.eventos import Alerta, EventoDeRisco, RegistroAuditoria, SnapshotHistorico
 from models.fatos import FatosDoCliente
 
-from ._base import DATA_REFERENCIA, DATAS_SNAPSHOT, normalizar_documento
-from .alertas import ALERTAS
-from .auditoria import REGISTROS as REGISTROS_AUDITORIA
-from .catalogo import (
-    CLIENTES,
-    FATOS_DE_TODOS_OS_REGISTROS,
+from .carregador_csv import (
+    CAMINHO_CSV,
+    DATA_REFERENCIA,
+    FATOS_POR_CLIENTE,
+    FEATURES_POR_CLIENTE,
+    PERFIL_POR_CLIENTE,
     PROSPECTS,
-    TODOS_OS_REGISTROS,
-    por_documento,
-    por_id,
+    normalizar_documento,
 )
-from .clientes import FATOS_POR_CLIENTE, SNAPSHOTS_POR_CLIENTE
-from .eventos import EVENTOS, EVENTOS_POR_CLIENTE
-from .fontes import ROTULOS_FONTE
-from .prospects import FATOS_POR_PROSPECT
 
 __all__ = [
     "CLIENTES",
     "PROSPECTS",
     "FATOS_POR_CLIENTE",
+    "FEATURES_POR_CLIENTE",
+    "PERFIL_POR_CLIENTE",
     "SNAPSHOTS_POR_CLIENTE",
     "EVENTOS_POR_CLIENTE",
     "ALERTAS",
     "REGISTROS_AUDITORIA",
-    "por_documento",
-    # auxiliares
-    "TODOS_OS_REGISTROS",
-    "FATOS_POR_PROSPECT",
-    "FATOS_DE_TODOS_OS_REGISTROS",
-    "EVENTOS",
-    "ROTULOS_FONTE",
     "DATA_REFERENCIA",
-    "DATAS_SNAPSHOT",
+    "CAMINHO_CSV",
     "normalizar_documento",
-    "por_id",
 ]
 
-#: Tipagem explícita da API pública, para quem lê o módulo antes do repositório.
-CLIENTES: list[Cliente]
-PROSPECTS: list[Cliente]
-FATOS_POR_CLIENTE: dict[str, FatosDoCliente]
-SNAPSHOTS_POR_CLIENTE: dict[str, list[SnapshotHistorico]]
-EVENTOS_POR_CLIENTE: dict[str, list[EventoDeRisco]]
-ALERTAS: list[Alerta]
-REGISTROS_AUDITORIA: list[RegistroAuditoria]
+#: Nenhum CNPJ nasce em carteira: a carteira é a declaração do analista
+#: (Tarefa 3, `repository.declaracoes`). `RepositorioEmMemoria.listar_clientes`
+#: filtra `PROSPECTS` pelos documentos declarados em runtime.
+CLIENTES: list[Cliente] = []
+
+#: Sem base real para inventar. Ver docstring do módulo.
+SNAPSHOTS_POR_CLIENTE: dict[str, list[SnapshotHistorico]] = {}
+EVENTOS_POR_CLIENTE: dict[str, list[EventoDeRisco]] = {}
+ALERTAS: list[Alerta] = []
+REGISTROS_AUDITORIA: list[RegistroAuditoria] = []

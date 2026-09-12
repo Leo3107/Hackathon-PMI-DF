@@ -14,11 +14,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from models.cliente import Cliente
 from models.eventos import Alerta, EventoDeRisco, RegistroAuditoria, SnapshotHistorico
 from models.fatos import FatosDoCliente
+
+if TYPE_CHECKING:  # só para tipagem — evita exigir `coleta` no runtime deste módulo
+    from coleta.models import Features
 
 __all__ = ["FonteDeDados", "carregar_fonte", "so_digitos"]
 
@@ -32,6 +35,10 @@ _NOME_SNAPSHOTS = "SNAPSHOTS_POR_CLIENTE"
 _NOME_EVENTOS = "EVENTOS_POR_CLIENTE"
 _NOME_ALERTAS = "ALERTAS"
 _NOME_AUDITORIA = "REGISTROS_AUDITORIA"
+#: Acrescentados na Tarefa 2 — dataset real de CNPJs (`data/carregador_csv.py`).
+_NOME_FEATURES = "FEATURES_POR_CLIENTE"
+_NOME_PERFIS = "PERFIL_POR_CLIENTE"
+_NOME_DATA_REFERENCIA = "DATA_REFERENCIA"
 
 
 def so_digitos(documento: str) -> str:
@@ -52,6 +59,17 @@ class FonteDeDados:
     eventos_por_cliente: dict[str, list[EventoDeRisco]] = field(default_factory=dict)
     alertas: list[Alerta] = field(default_factory=list)
     registros_auditoria: list[RegistroAuditoria] = field(default_factory=list)
+    #: Tarefa 2 — `Features` brutas por documento, base real de CNPJs. Vazio
+    #: para a fonte de teste (perfis à mão de `tests/fixtures.py`): nesse caso
+    #: o repositório usa só `fatos_por_cliente`, sem modelo de PD nem
+    #: renormalização de cobertura.
+    features_por_cliente: dict[str, "Features"] = field(default_factory=dict)
+    #: Perfil de risco do CSV mock (`limpo`, `divida_ativa`, ...). Só para a
+    #: semeadura de demonstração da carteira (Tarefa 3) — não é fato de risco.
+    perfil_por_cliente: dict[str, str] = field(default_factory=dict)
+    #: Data de referência do dataset carregado. `""` quando a fonte é o stub de
+    #: teste; `routes.comum.data_de_referencia` cai para `date.today()` nesse caso.
+    data_referencia: str = ""
 
     @property
     def vazia(self) -> bool:
@@ -102,6 +120,9 @@ def fonte_do_modulo(modulo: Any) -> FonteDeDados:
         eventos_por_cliente=_dicionario(modulo, _NOME_EVENTOS),
         alertas=_lista(modulo, _NOME_ALERTAS),
         registros_auditoria=_lista(modulo, _NOME_AUDITORIA),
+        features_por_cliente=_dicionario(modulo, _NOME_FEATURES),
+        perfil_por_cliente=_dicionario(modulo, _NOME_PERFIS),
+        data_referencia=str(getattr(modulo, _NOME_DATA_REFERENCIA, "") or ""),
     )
 
 

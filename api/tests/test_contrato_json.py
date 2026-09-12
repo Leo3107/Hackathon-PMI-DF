@@ -33,6 +33,9 @@ _CHAVES_DA_AVALIACAO = {
     "recomendacao",
     "evidencias",
     "auditoria",
+    #: Tarefa 1 — presente (e `null`) mesmo quando `calcular_risco` não recebe
+    #: `modelo_pd`, porque é campo acrescentado ao contrato, nunca condicional.
+    "modeloPd",
 }
 
 

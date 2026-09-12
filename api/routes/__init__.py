@@ -30,6 +30,7 @@ from .auditoria import auditoria_bp
 from .carteira import carteira_bp
 from .clientes import clientes_bp
 from .due_diligence import due_diligence_bp
+from .semeadura import semeadura_bp
 
 __all__ = ["BLUEPRINTS", "registrar_blueprints"]
 
@@ -39,6 +40,7 @@ BLUEPRINTS = (
     alertas_bp,
     auditoria_bp,
     due_diligence_bp,
+    semeadura_bp,
 )
 
 
