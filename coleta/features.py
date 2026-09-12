@@ -9,6 +9,7 @@ warehouse.
 from __future__ import annotations
 
 import datetime as dt
+import time
 from typing import Any, Callable
 
 import duckdb
@@ -44,9 +45,35 @@ def _uma(con: duckdb.DuckDBPyConnection, sql: str, params: list) -> tuple | None
         return None
 
 
+# Descobrir a competencia mais recente custa um scan da tabela inteira, e isso
+# acontecia 7 vezes por documento: com 96 milhoes de linhas na PGFN virou o
+# gargalo (3,2 s por CNPJ contra 0,4 s). A competencia so muda quando roda uma
+# carga nova, entao um cache curto resolve sem risco de servir dado velho por
+# muito tempo.
+_TTL_COMPETENCIA_S = 300.0
+_cache_competencia: dict[str, tuple[float, Any]] = {}
+
+
+def limpar_cache_competencias() -> None:
+    """Invalida o cache. Chamar depois de uma carga no mesmo processo."""
+    _cache_competencia.clear()
+
+
+def _cacheado(chave: str, calcular: Callable[[], Any]) -> Any:
+    item = _cache_competencia.get(chave)
+    if item is not None and time.monotonic() - item[0] < _TTL_COMPETENCIA_S:
+        return item[1]
+    valor = calcular()
+    _cache_competencia[chave] = (time.monotonic(), valor)
+    return valor
+
+
 def _ultima_competencia(con: duckdb.DuckDBPyConnection, tabela: str) -> str | None:
-    row = _uma(con, f"SELECT max(competencia) FROM {tabela}", [])
-    return row[0] if row and row[0] else None
+    def consultar() -> str | None:
+        row = _uma(con, f"SELECT max(competencia) FROM {tabela}", [])
+        return row[0] if row and row[0] else None
+
+    return _cacheado(f"max:{tabela}", consultar)
 
 
 def _competencias_pgfn(con: duckdb.DuckDBPyConnection, limite: int = 2) -> list[str]:
@@ -55,15 +82,18 @@ def _competencias_pgfn(con: duckdb.DuckDBPyConnection, limite: int = 2) -> list[
     A ordenacao alfabetica de '2026T2' funciona dentro do mesmo seculo, que e
     o horizonte desta base.
     """
-    try:
-        rows = con.execute(
-            "SELECT DISTINCT competencia FROM pgfn_divida "
-            "ORDER BY competencia DESC LIMIT ?",
-            [limite],
-        ).fetchall()
-    except duckdb.Error:
-        return []
-    return [r[0] for r in rows]
+    def consultar() -> list[str]:
+        try:
+            rows = con.execute(
+                "SELECT DISTINCT competencia FROM pgfn_divida "
+                "ORDER BY competencia DESC LIMIT ?",
+                [limite],
+            ).fetchall()
+        except duckdb.Error:
+            return []
+        return [r[0] for r in rows]
+
+    return _cacheado(f"pgfn:{limite}", consultar)
 
 
 def _filtro_documento(documento: str) -> tuple[str, list]:
@@ -74,6 +104,15 @@ def _filtro_documento(documento: str) -> tuple[str, list]:
 
 
 # ------------------------------------------------------------- fonte 1 ------
+
+# A PGFN repete cada inscricao uma vez por devedor: o PRINCIPAL e cada
+# CORRESPONSAVEL/SOLIDARIO, todos carregando o valor cheio. Somar tudo faz uma
+# avalista de uma divida de R$ 500 milhoes parecer devedora de R$ 500 milhoes.
+# Somando so PRINCIPAL o estoque bate com o que a PGFN divulga (~R$ 2,9 tri);
+# somando tudo da R$ 6,8 tri. A corresponsabilidade e passivo contingente real
+# e vale como feature, mas em coluna separada.
+_PRINCIPAL = "upper(coalesce(tipo_devedor, '')) = 'PRINCIPAL'"
+
 
 def _features_pgfn(con: duckdb.DuckDBPyConnection, documento: str) -> dict:
     competencias = _competencias_pgfn(con, limite=2)
@@ -86,11 +125,13 @@ def _features_pgfn(con: duckdb.DuckDBPyConnection, documento: str) -> dict:
         con,
         f"""
         SELECT
-            coalesce(sum(valor_consolidado), 0),
-            coalesce(sum(CASE WHEN indicador_ajuizado THEN valor_consolidado END), 0),
-            count(DISTINCT numero_inscricao),
-            bool_or(origem = 'PREV'),
-            bool_or(origem = 'FGTS')
+            coalesce(sum(CASE WHEN {_PRINCIPAL} THEN valor_consolidado END), 0),
+            coalesce(sum(CASE WHEN {_PRINCIPAL} AND indicador_ajuizado
+                              THEN valor_consolidado END), 0),
+            count(DISTINCT CASE WHEN {_PRINCIPAL} THEN numero_inscricao END),
+            coalesce(sum(CASE WHEN NOT {_PRINCIPAL} THEN valor_consolidado END), 0),
+            bool_or({_PRINCIPAL} AND origem = 'PREV'),
+            bool_or({_PRINCIPAL} AND origem = 'FGTS')
         FROM pgfn_divida
         WHERE competencia = ? AND {cond}
         """,
@@ -99,11 +140,12 @@ def _features_pgfn(con: duckdb.DuckDBPyConnection, documento: str) -> dict:
     if row is None:
         return {}
 
-    total, ajuizada, n_inscricoes, tem_prev, tem_fgts = row
+    total, ajuizada, n_inscricoes, corresponsavel, tem_prev, tem_fgts = row
     saida: dict[str, Any] = {
         "divida_ativa_total": float(total or 0.0),
         "divida_ativa_ajuizada": float(ajuizada or 0.0),
         "n_inscricoes": int(n_inscricoes or 0),
+        "divida_ativa_corresponsavel": float(corresponsavel or 0.0),
         "flag_divida_previdenciaria": bool(tem_prev),
         "flag_divida_fgts": bool(tem_fgts),
     }
@@ -112,7 +154,7 @@ def _features_pgfn(con: duckdb.DuckDBPyConnection, documento: str) -> dict:
         anterior = _uma(
             con,
             f"""
-            SELECT coalesce(sum(valor_consolidado), 0)
+            SELECT coalesce(sum(CASE WHEN {_PRINCIPAL} THEN valor_consolidado END), 0)
             FROM pgfn_divida WHERE competencia = ? AND {cond}
             """,
             [competencias[1], *params],
@@ -670,4 +712,4 @@ def build_features(
             con.close()
 
 
-__all__ = ["build_features", "janela_safra"]
+__all__ = ["build_features", "janela_safra", "limpar_cache_competencias"]

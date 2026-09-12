@@ -1,0 +1,16 @@
+# Camada de modelagem (src/modelos). Separada de requirements.txt de proposito:
+# a API de producao nao precisa de mlflow nem dos boosters para SERVIR um
+# modelo ja treinado -- precisa so de scikit-learn, xgboost e lightgbm.
+# Instale `requirements-ml.txt` na maquina de treino e `requirements.txt` +
+# as tres linhas marcadas com [inferencia] no servidor.
+
+scikit-learn>=1.5.0   # [inferencia] pipeline, metricas, calibracao
+xgboost>=2.1.0        # [inferencia] carregar o booster salvo
+lightgbm>=4.5.0       # [inferencia] carregar o booster salvo
+joblib>=1.4.0         # [inferencia] serializacao do bundle
+numpy>=1.26.0         # [inferencia]
+pandas>=2.2.0         # [inferencia]
+
+mlflow>=2.16.0        # tracking: so no treino
+matplotlib>=3.8.0     # curvas ROC/calibracao logadas como artefato
+pyarrow>=16.0.0       # parquet do dataset versionado no MLflow

@@ -6,3 +6,20 @@ data/raw/
 data/*.duckdb
 data/*.duckdb.wal
 !data/raw/protestos_manual.csv
+# o mock e versionado de proposito: o time precisa dele para escrever o treino
+!data/mock/
+!data/mock/*
+
+# --- camada de modelagem (src/modelos) ---
+# Tracking do MLflow: banco local e artefatos de run. Reproduzivel pelo treino,
+# e o banco cresce rapido.
+mlflow.db
+mlflow.db-journal
+mlartifacts/
+mlruns/
+# Graficos e comparativos de run.
+src/modelos/relatorios/
+# Os .joblib de `artefatos/` FICAM versionados de proposito: a API precisa de um
+# modelo para subir, e os quatro somam ~2,5 MB (o campeao, linear, tem 8 KB).
+# Quando o treino real produzir modelo grande, troque por artefato em
+# storage e deixe so o campeao.json.

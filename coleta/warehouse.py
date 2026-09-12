@@ -302,9 +302,15 @@ def tem_dados(con: duckdb.DuckDBPyConnection, nome: str) -> bool:
 
 
 def apagar_particao(
-    con: duckdb.DuckDBPyConnection, tabela: str, **chaves: Any
+    con: duckdb.DuckDBPyConnection, tabela: str, /, **chaves: Any
 ) -> int:
-    """Remove uma particao antes de recarregar. E o que garante idempotencia."""
+    """Remove uma particao antes de recarregar. E o que garante idempotencia.
+
+    `con` e `tabela` sao posicionais-apenas de proposito: `rf_dominio` tem uma
+    COLUNA chamada `tabela`, entao `apagar_particao(con, "rf_dominio",
+    tabela="Cnaes")` colidiria com o parametro. A barra manda o nome para
+    `chaves`, que e onde ele deve ir.
+    """
     if not chaves:
         res = con.execute(f"DELETE FROM {tabela}").fetchone()
     else:
@@ -331,7 +337,8 @@ def registrar_ingestao(
     )
 
 
-def contar(con: duckdb.DuckDBPyConnection, tabela: str, **chaves: Any) -> int:
+def contar(con: duckdb.DuckDBPyConnection, tabela: str, /, **chaves: Any) -> int:
+    """Mesma razao de `apagar_particao` para os parametros posicionais."""
     if chaves:
         where = " AND ".join(f"{k} = ?" for k in chaves)
         sql = f"SELECT count(*) FROM {tabela} WHERE {where}"

@@ -56,8 +56,16 @@ Feita como Blueprint, para registrar no backend existente:
 
 ```python
 from coleta.api import features_bp
+from coleta.api_score import score_bp        # opcional: exige requirements-ml.txt
+
 app.register_blueprint(features_bp, url_prefix="/api/v1")
+app.register_blueprint(score_bp, url_prefix="/api/v1")
 ```
+
+Os dois blueprints são separados de propósito: quem só quer os dados registra
+`features_bp` e não instala sklearn. Sem a camada de modelagem — ou sem um
+campeão publicado — `/score` devolve **503** com o comando que resolve, e o
+resto da API continua de pé.
 
 De pé sozinha, para desenvolvimento:
 
@@ -71,10 +79,97 @@ python -m flask --app "coleta.api:criar_app" run --port 5000
 | `GET /fontes` | Última carga e nº de linhas por tabela — responde "esse dado está velho?" |
 | `GET /features/<cnpj>` | As 39 features de um CNPJ. `?cultura=soja`, `?rede=0\|1` |
 | `POST /features/lote` | Vários CNPJs numa chamada, para escorar uma carteira |
+| `GET /score/<cnpj>` | **Probabilidade de inadimplência + faixa.** `?explicar=1`, `?features=1`, `?cultura=soja`, `?modelo=<nome>` |
+| `POST /score/lote` | Escora uma carteira; devolve ordenado pelo pior risco |
+| `GET /modelo` | Modelo em produção: métricas, faixas, versões de lib |
 
 Aceita CNPJ com ou sem máscara e a base de 8 dígitos. Dígito verificador
 inválido devolve **400** — devolver 39 campos nulos para um número digitado
 errado esconderia o erro em vez de mostrá-lo.
+
+### Scoring
+
+```bash
+curl localhost:5000/api/v1/score/02776188000190?explicar=1
+```
+
+```json
+{
+  "documento": "02776188000190",
+  "probabilidade_inadimplencia": 0.134,
+  "score_risco": 134,
+  "faixa_risco": "MEDIO",
+  "modelo": "regressao_logistica",
+  "sinais_observados": ["divida ativa na PGFN"],
+  "fontes_ausentes": ["bcb", "ibge", "clima", "protestos"]
+}
+```
+
+`score_risco` é a probabilidade em 0..1000 e **maior = mais risco** —
+deliberadamente invertido em relação ao score de bureau, porque quem lê o
+número é uma política de crédito e "953 = crítico" erra menos que "47 =
+crítico". As faixas (BAIXO/MÉDIO/ALTO/CRÍTICO) saem dos quantis 0,80/0,95/0,99
+da distribuição de treino e ficam **gravadas no artefato**, não no código da
+API: trocar de modelo muda a distribuição do score e um corte chumbado em `0.3`
+deixaria de significar a mesma coisa.
+
+`fontes_ausentes` viaja junto com o número de propósito — um score dado sem
+BCB, IBGE e clima vale menos que um score completo, e quem decide precisa
+enxergar isso na mesma resposta.
+
+O modelo vem do ponteiro `src/modelos/artefatos/campeao.json`; trocar o que
+está em produção é reescrever um JSON de duas linhas, sem deploy de código.
+
+> **O alvo é sintético.** Rótulo de inadimplência não é dado público no Brasil.
+> `alvo_sintetico` é fabricado por uma logística de coeficientes conhecidos
+> (`data/mock/alvo_coeficientes.json`), e as métricas atestam que o pipeline
+> está de pé — não performance em inadimplência real. **As features são
+> reais.** O `/modelo` devolve esse aviso junto com as métricas.
+
+### Comparativo dos modelos
+
+Quatro famílias, **mesma partição** (mesma semente, mesmo split agrupado por
+município), então a diferença entre elas é diferença de modelo, não sorte de
+partição:
+
+| modelo | AUC CV | desvio | AUC teste | KS teste |
+|---|---|---|---|---|
+| **regressão logística** (campeão) | **0,8061** | 0,0442 | 0,7999 | 0,5119 |
+| random forest | 0,7863 | 0,0363 | 0,7968 | 0,5492 |
+| lightgbm | 0,7598 | 0,0293 | 0,7830 | 0,5036 |
+| xgboost | 0,7513 | 0,0206 | 0,7671 | 0,4678 |
+
+O campeão é escolhido pelo **AUC médio do CV**, não pelo holdout: com 9
+municípios e ~52 positivos no holdout, escolher pelo teste é escolher por sorte
+de partição.
+
+O teto de Bayes do alvo sintético é **0,8216** — a logística chega a 98% do
+máximo alcançável, que é o resultado esperado quando o gerador é linear e o
+pré-processamento está correto. É exatamente esse o valor do alvo sintético:
+ele **valida o pipeline** contra um processo gerador conhecido. Que os boosters
+fiquem abaixo da logística aqui não diz nada sobre dado real — diz que eles
+estão gastando capacidade em interações que o gerador não tem.
+
+### A armadilha do capital social
+
+O achado que mais mudou o resultado, e que só aparece cruzando mock com dado
+real: **91,1% das 137.705 matrizes agro declaram capital social ≤ R$ 1** (a
+mediana da população é R$ 0). O gerador do mock usava uma lognormal pura, que
+nunca produz zero, e entregava mediana de R$ 189.561.
+
+A consequência não era cosmética. Com a razão `dívida / capital` crua:
+
+| | treino (mock antigo) | real |
+|---|---|---|
+| `divida_sobre_capital` p99 | 16 | 13.301.866 |
+| máximo | 1.187 | 55.776.835 |
+
+O modelo linear saturava o logit e **colava o score em 1,000 para qualquer
+microempresa com dívida** — metade da carteira agro. Corrigido nos dois lados:
+a razão passou a entrar em `log1p` (`src/modelos/preparo.py`) e o mock passou a
+sortear capital social pela distribuição real (`scripts/gerar_mock.py`).
+`tests/test_api.py::test_score_nao_satura_com_capital_social_zero` guarda a
+regressão.
 
 ### Modo de conexão
 

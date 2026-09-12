@@ -1,0 +1,22 @@
+{
+  "aviso": "alvo_sintetico e FABRICADO. Serve para validar o pipeline, nao para medir performance. Nao use como inadimplencia real.",
+  "forma": "sigmoide(intercepto + soma(coef * termo))",
+  "coeficientes": {
+    "intercepto": -3.8,
+    "log1p_divida_ativa_total": 0.2,
+    "flag_situacao_irregular": 1.1,
+    "n_empresas_do_socio_inaptas": 0.28,
+    "n_autos_infracao": 0.14,
+    "flag_embargo_ativo": 0.75,
+    "log1p_idade_empresa_meses": -0.45,
+    "log1p_capital_social": -0.18,
+    "desvio_produtividade_vs_media_5a": -0.9,
+    "anomalia_na_fase_critica": -0.55,
+    "n_protestos_ativos": 0.4
+  },
+  "referencias_de_centragem": {
+    "idade_empresa_meses": 240.0,
+    "capital_social": 0.0
+  },
+  "nota": "os termos log1p de idade_empresa_meses e capital_social sao centrados nas referencias acima"
+}

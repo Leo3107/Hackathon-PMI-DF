@@ -172,6 +172,10 @@ def saude():
             "somente_leitura": estado.get("somente_leitura"),
             "consulta_ao_vivo": _permitir_rede(),
             "fontes_carregadas": fontes,
+            # None quando o scoring nao subiu. Vale distinguir de "ok" sem
+            # modelo: o /saude e o que o balanceador le, e uma instancia que
+            # serve feature mas nao serve score nao esta inteira.
+            "modelo": current_app.config.get("COLETA_MODELO_CARREGADO"),
         }
     )
 
@@ -359,6 +363,16 @@ def criar_app(**overrides: Any) -> Flask:
     )
     app.config.update(overrides)
     app.register_blueprint(features_bp, url_prefix="/api/v1")
+
+    # Scoring e opcional: sem `requirements-ml.txt` instalado ou sem campeao
+    # publicado, a API de features continua de pe e `/score` devolve 503 com o
+    # comando que resolve. `aquecer` carrega o joblib agora para que um artefato
+    # ausente apareca no log de subida, e nao na primeira requisicao do cliente.
+    if app.config.get("COLETA_SCORING", True):
+        from .api_score import aquecer, score_bp
+
+        app.register_blueprint(score_bp, url_prefix="/api/v1")
+        app.config["COLETA_MODELO_CARREGADO"] = aquecer(app)
 
     # So no app standalone: registrar isso no app de voces sobrescreveria o
     # tratamento de 404 do resto do backend.

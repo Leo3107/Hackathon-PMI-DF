@@ -250,11 +250,18 @@ def construir_grafo_societario(
     return inserir_select(con, "socio_empresa", select)
 
 
+def _parte(nome_zip: str) -> int | None:
+    """'Estabelecimentos3.zip' -> 3; 'Simples.zip' -> None."""
+    achado = re.search(r"(\d+)\.zip$", nome_zip, flags=re.IGNORECASE)
+    return int(achado.group(1)) if achado else None
+
+
 def executar(
     con: duckdb.DuckDBPyConnection,
     *,
     competencia: str | None = None,
     apenas: tuple[str, ...] | None = None,
+    partes: tuple[int, ...] | None = None,
     raw_dir: Path | None = None,
 ) -> int:
     competencia = competencia or competencia_mais_recente()
@@ -271,6 +278,20 @@ def executar(
     if apenas:
         familias = {a.capitalize() for a in apenas}
         disponiveis = [z for z in disponiveis if _familia(z) in familias]
+
+    if partes is not None:
+        # Carga parcial: util para montar uma amostra sem baixar os 8,4 GB.
+        # As tabelas de dominio e o Simples nao sao particionados e entram
+        # sempre -- sao pequenos e o resto do pipeline depende deles.
+        disponiveis = [
+            z for z in disponiveis
+            if _parte(z) is None or _parte(z) in partes
+        ]
+        log_evento(
+            log, "receita.carga_parcial", partes=list(partes),
+            arquivos=len(disponiveis),
+            aviso="cobertura reduzida do cadastro; nao use para producao",
+        )
 
     # Uma recarga limpa por familia de tabela antes do primeiro arquivo dela.
     familias_vistas: set[str] = set()

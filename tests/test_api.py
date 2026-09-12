@@ -16,8 +16,9 @@ def app(tmp_path):
     con = warehouse.conectar(caminho)
     con.execute(
         "INSERT INTO pgfn_divida (competencia, origem, documento, pf_mascarado,"
-        " numero_inscricao, indicador_ajuizado, valor_consolidado) VALUES"
-        f" ('2026T1','FGTS','{CNPJ}',false,'A',true,2500.0)"
+        " numero_inscricao, indicador_ajuizado, valor_consolidado, tipo_devedor)"
+        " VALUES"
+        f" ('2026T1','FGTS','{CNPJ}',false,'A',true,2500.0,'PRINCIPAL')"
     )
     con.execute(
         "INSERT INTO rf_empresas (competencia, cnpj_basico, razao_social,"
@@ -179,3 +180,139 @@ def test_rota_inexistente_devolve_json(cliente):
     r = cliente.get("/api/v1/nao-existe")
     assert r.status_code == 404
     assert r.get_json()["erro"] == "rota nao encontrada"
+
+
+# ----------------------------------------------------------------- scoring --
+#
+# Os testes abaixo dependem de um campeao publicado em
+# `src/modelos/artefatos/`. Quando nao ha (checkout limpo, CI sem o passo de
+# treino), o contrato que vale e o 503 com texto acionavel -- e isso tambem e
+# testado, em `test_score_sem_modelo_responde_503`.
+
+pytest.importorskip("sklearn", reason="scoring exige requirements-ml.txt")
+
+
+def _tem_campeao() -> bool:
+    from src.modelos import artefatos
+
+    return artefatos.nome_do_campeao() is not None
+
+
+precisa_campeao = pytest.mark.skipif(
+    not _tem_campeao(),
+    reason="sem campeao publicado; rode treinar_todos --promover-melhor",
+)
+
+
+@precisa_campeao
+def test_score_devolve_probabilidade_e_faixa(cliente):
+    corpo = cliente.get(f"/api/v1/score/{CNPJ}").get_json()
+
+    assert corpo["documento"] == CNPJ
+    assert 0.0 <= corpo["probabilidade_inadimplencia"] <= 1.0
+    # O score e a probabilidade em 0..1000, monotono e coerente com ela.
+    assert corpo["score_risco"] == round(corpo["probabilidade_inadimplencia"] * 1000)
+    assert corpo["faixa_risco"] in ("BAIXO", "MEDIO", "ALTO", "CRITICO")
+    # O CNPJ da fixture tem divida ativa na PGFN: o sinal tem de aparecer.
+    assert "divida ativa na PGFN" in corpo["sinais_observados"]
+    # E as fontes que a fixture nao semeia tem de ser declaradas ausentes, para
+    # o analista saber que o score foi dado sem elas.
+    assert set(corpo["fontes_ausentes"]) >= {"bcb", "ibge", "clima"}
+
+
+@precisa_campeao
+def test_score_nao_satura_com_capital_social_zero(cliente, app):
+    """Regressao do bug que colava o score em 1,000.
+
+    91% das matrizes agro declaram capital social <= R$ 1. Com a razao
+    divida/capital crua, o logit saturava e QUALQUER microempresa com divida
+    virava CRITICO -- metade da carteira. Aqui o CNPJ tem R$ 2.500 de divida e
+    capital zerado; o score tem de continuar dentro do intervalo aberto.
+    """
+    con = warehouse.conectar(app.config["COLETA_WAREHOUSE"])
+    con.execute("UPDATE rf_empresas SET capital_social = 0.0")
+    con.close()
+    fechar_conexao(app)
+
+    corpo = cliente.get(f"/api/v1/score/{CNPJ}").get_json()
+    assert corpo["probabilidade_inadimplencia"] < 1.0
+    assert corpo["score_risco"] < 1000
+
+
+@precisa_campeao
+def test_score_explicar_traz_contribuicoes(cliente):
+    """O campeao e linear, entao a decomposicao coeficiente x valor e exata."""
+    sem = cliente.get(f"/api/v1/score/{CNPJ}").get_json()
+    com = cliente.get(f"/api/v1/score/{CNPJ}?explicar=1&features=1").get_json()
+
+    assert "contribuicoes" not in sem
+    assert com["contribuicoes"] and isinstance(com["contribuicoes"], dict)
+    # `features=1` devolve o dicionario que alimentou o modelo, para auditoria.
+    assert com["features"]["documento"] == CNPJ
+    # Explicar nao pode mudar o numero.
+    assert com["score_risco"] == sem["score_risco"]
+
+
+@precisa_campeao
+def test_score_lote_ordena_por_risco_e_isola_invalido(cliente):
+    resposta = cliente.post(
+        "/api/v1/score/lote",
+        json={"documentos": [CNPJ, "11222333000180", "84461748000181"]},
+    )
+    corpo = resposta.get_json()
+
+    assert resposta.status_code == 200
+    assert corpo["total"] == 2  # o do DV errado nao entra
+    assert len(corpo["erros"]) == 1
+    assert "digito verificador" in corpo["erros"][0]["detalhe"]
+    # Carteira: o pior risco vem primeiro, que e o que o analista abre.
+    scores = [s["score_risco"] for s in corpo["scores"]]
+    assert scores == sorted(scores, reverse=True)
+
+
+@precisa_campeao
+def test_score_rejeita_documento_invalido_antes_de_carregar_modelo(cliente):
+    resposta = cliente.get("/api/v1/score/123")
+    assert resposta.status_code == 400
+    assert "documento invalido" in resposta.get_json()["erro"]
+
+
+@precisa_campeao
+def test_modelo_expoe_metricas_e_avisa_sobre_alvo_sintetico(cliente):
+    corpo = cliente.get("/api/v1/modelo").get_json()
+
+    assert corpo["nome"] and corpo["metricas"]
+    assert corpo["n_colunas_de_entrada"] > 0
+    # O alvo sintetico tem de viajar junto com o numero, nao so no README.
+    if corpo["alvo"] == "alvo_sintetico":
+        assert "sintetico" in corpo["aviso_alvo"]
+
+
+def test_score_sem_modelo_responde_503(app, tmp_path):
+    """Sem artefato publicado a API de features continua de pe.
+
+    O 503 tem de dizer o comando que resolve: um 500 generico aqui manda o
+    time procurar bug no lugar errado.
+    """
+    from coleta import api_score
+
+    vazio = tmp_path / "sem_artefatos"
+    vazio.mkdir()
+    with app.app_context():
+        original = api_score._scorer
+        api_score._scorer = lambda nome=None: (_ for _ in ()).throw(
+            RuntimeError("modelo indisponivel. Treine e promova um campeao com ...")
+        )
+        try:
+            resposta = app.test_client().get(f"/api/v1/score/{CNPJ}")
+        finally:
+            api_score._scorer = original
+
+    assert resposta.status_code == 503
+    assert "campeao" in resposta.get_json()["erro"]
+
+
+def test_saude_declara_o_modelo_carregado(cliente):
+    """Instancia que serve feature mas nao serve score nao esta inteira."""
+    corpo = cliente.get("/api/v1/saude").get_json()
+    assert "modelo" in corpo

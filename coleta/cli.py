@@ -46,6 +46,10 @@ def bulk(
     apenas: Optional[str] = typer.Option(
         None, "--apenas", help="Receita: subconjunto de arquivos (ex.: empresas,socios)"
     ),
+    partes: Optional[str] = typer.Option(
+        None, "--partes",
+        help="Receita: particoes a carregar (ex.: 1,2,3,4). Padrao: todas",
+    ),
     culturas: Optional[str] = typer.Option(
         None, "--culturas", help="IBGE: culturas separadas por virgula (padrao: soja,milho)"
     ),
@@ -79,6 +83,7 @@ def bulk(
                     quarters=quarters,
                     competencia=competencia,
                     apenas=_lista(apenas),
+                    partes=_lista(partes),
                     culturas=_lista(culturas),
                     municipios=_lista(municipios),
                     limite_clima=limite_clima,
@@ -104,7 +109,13 @@ def _executar_fonte(con, fonte: str, **kw) -> None:
     if fonte == "pgfn":
         pgfn.executar(con, quarters=kw["quarters"])
     elif fonte == "receita":
-        receita.executar(con, competencia=kw["competencia"], apenas=kw["apenas"])
+        partes = kw.get("partes")
+        receita.executar(
+            con,
+            competencia=kw["competencia"],
+            apenas=kw["apenas"],
+            partes=tuple(int(p) for p in partes) if partes else None,
+        )
     elif fonte == "ibama":
         ibama.executar(con)
     elif fonte == "bcb":

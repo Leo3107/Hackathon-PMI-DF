@@ -28,6 +28,9 @@ class Features(BaseModel):
     divida_ativa_total: float | None = None
     divida_ativa_ajuizada: float | None = None
     n_inscricoes: int | None = None
+    # Passivo contingente: inscricoes em que o documento e corresponsavel ou
+    # solidario, nao o devedor principal. Separado de proposito.
+    divida_ativa_corresponsavel: float | None = None
     delta_divida_2_trimestres: float | None = None
     flag_divida_previdenciaria: bool | None = None
     flag_divida_fgts: bool | None = None

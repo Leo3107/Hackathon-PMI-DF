@@ -20,10 +20,26 @@ from coleta.ondemand import protestos
 
 @pytest.fixture()
 def con() -> duckdb.DuckDBPyConnection:
+    """Warehouse limpo por teste -- INCLUSIVE o cache de competencias.
+
+    `features._cache_competencia` e de modulo e sobrevive entre testes, mas
+    cada teste recebe um DuckDB em memoria novo. Sem a limpeza, o segundo teste
+    herda a competencia semeada pelo primeiro, nenhuma linha casa e features
+    como `delta_divida_2_trimestres` voltam None -- falhando so na suite
+    inteira e passando quando rodadas isoladas, que e o jeito mais caro de
+    descobrir o problema.
+
+    Em producao o cache e correto como esta: um processo serve um warehouse so,
+    e o TTL de 300s cobre a troca de competencia entre cargas.
+    """
+    import coleta.features as _features
+
+    _features.limpar_cache_competencias()
     c = duckdb.connect(":memory:")
     warehouse.criar_schema(c)
     yield c
     c.close()
+    _features.limpar_cache_competencias()
 
 
 # ------------------------------------------------------------ normalizacao --
@@ -133,10 +149,14 @@ def test_carga_pgfn_e_idempotente(con, tmp_path):
 def _semear(con) -> None:
     con.execute(
         "INSERT INTO pgfn_divida (competencia, origem, documento, pf_mascarado,"
-        " numero_inscricao, indicador_ajuizado, valor_consolidado) VALUES"
-        " ('2026T1','FGTS','11111111000191',false,'A',true,1000.0),"
-        " ('2025T4','FGTS','11111111000191',false,'A',true,400.0),"
-        " ('2026T1','PREV','22222222000110',false,'B',false,50.0)"
+        " numero_inscricao, indicador_ajuizado, valor_consolidado, tipo_devedor)"
+        " VALUES"
+        " ('2026T1','FGTS','11111111000191',false,'A',true,1000.0,'PRINCIPAL'),"
+        " ('2025T4','FGTS','11111111000191',false,'A',true,400.0,'PRINCIPAL'),"
+        " ('2026T1','PREV','22222222000110',false,'B',false,50.0,'Principal'),"
+        # Avalista de uma divida alheia de 9 milhoes: nao e divida propria.
+        " ('2026T1','SIDA','11111111000191',false,'C',false,9000000.0,"
+        "  'CORRESPONSAVEL')"
     )
     con.execute(
         "INSERT INTO rf_empresas (competencia, cnpj_basico, razao_social,"
@@ -168,6 +188,7 @@ def test_build_features_so_com_pgfn_e_receita(con):
 
     assert f["documento"] == "11111111000191"
     assert f["divida_ativa_total"] == pytest.approx(1000.0)
+    assert f["divida_ativa_corresponsavel"] == pytest.approx(9_000_000.0)
     assert f["divida_ativa_ajuizada"] == pytest.approx(1000.0)
     assert f["delta_divida_2_trimestres"] == pytest.approx(600.0)
     assert f["flag_divida_fgts"] is True
@@ -252,3 +273,75 @@ def test_protestos_api_sem_token_nao_estoura():
     resultado = provider.consultar("11111111000191")
     assert resultado.disponivel is False
     assert protestos.features(resultado)["n_protestos_ativos"] is None
+
+
+# ------------------------------------------------- regressao: nomes de coluna --
+
+def test_apagar_particao_com_chave_chamada_tabela(con):
+    """`rf_dominio` tem uma COLUNA chamada `tabela`.
+
+    Sem parametro posicional-apenas, `apagar_particao(con, "rf_dominio",
+    tabela="Cnaes")` colide com o proprio parametro `tabela` e estoura. Foi o
+    que derrubou a carga da Receita inteira na primeira execucao real.
+    """
+    con.execute(
+        "INSERT INTO rf_dominio VALUES ('2026-08','Cnaes','1','a'),"
+        " ('2026-08','Motivos','2','b')"
+    )
+    removidas = warehouse.apagar_particao(
+        con, "rf_dominio", competencia="2026-08", tabela="Cnaes"
+    )
+    assert removidas == 1
+    assert warehouse.contar(con, "rf_dominio", tabela="Motivos") == 1
+    assert warehouse.contar(con, "rf_dominio") == 1
+
+
+def test_corresponsabilidade_nao_entra_na_divida_propria(con):
+    """A PGFN repete a inscricao por devedor, com o valor cheio em cada linha.
+
+    Somar tudo faria uma avalista de R$ 9 milhoes parecer devedora de
+    R$ 9 milhoes -- e inflaria o estoque nacional de R$ 2,9 tri para R$ 6,8 tri.
+    """
+    _semear(con)
+    f = build_features("11111111000191", con=con, permitir_rede=False)
+
+    assert f["divida_ativa_total"] == pytest.approx(1000.0)
+    assert f["divida_ativa_corresponsavel"] == pytest.approx(9_000_000.0)
+    # n_inscricoes e o delta tambem olham so o que e divida propria.
+    assert f["n_inscricoes"] == 1
+    assert f["delta_divida_2_trimestres"] == pytest.approx(600.0)
+    # A inscricao de corresponsabilidade e SIDA, mas as flags sao do principal.
+    assert f["flag_divida_fgts"] is True
+
+
+def test_competencia_e_cacheada_entre_chamadas(con):
+    """Descobrir a competencia custa um scan da tabela inteira.
+
+    Sem cache isso rodava 7x por documento; com 96 milhoes de linhas na PGFN
+    virou o gargalo da montagem em lote.
+    """
+    from coleta import features as mod
+
+    _semear(con)
+    mod.limpar_cache_competencias()
+
+    chamadas = {"n": 0}
+    original = mod._uma
+
+    def espiao(c, sql, params):
+        if "max(competencia)" in sql:
+            chamadas["n"] += 1
+        return original(c, sql, params)
+
+    mod._uma = espiao
+    try:
+        for _ in range(5):
+            build_features("11111111000191", con=con, permitir_rede=False)
+    finally:
+        mod._uma = original
+
+    # Uma vez por tabela consultada, nao uma vez por chamada.
+    assert chamadas["n"] <= 2, f"scan repetido {chamadas['n']} vezes"
+
+    mod.limpar_cache_competencias()
+    assert not mod._cache_competencia
