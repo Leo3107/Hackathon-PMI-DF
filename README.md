@@ -67,7 +67,34 @@ A fronteira entre a coleta e o motor é o contrato `Features → FatosDoCliente`
 [`api/adaptadores/`](api/adaptadores/): é o que permite a mesma análise rodar sobre um cliente
 simulado da carteira ou sobre um CNPJ real consultado na hora.
 
-## Rodando
+## Rodando com Docker (recomendado)
+
+Único pré-requisito: Docker.
+
+```bash
+docker compose up --build
+```
+
+Interface em **http://localhost:3000** · API em **http://localhost:5001**.
+
+A aplicação funciona **integralmente sem chave da OpenAI**: sem ela, a camada de linguagem cai
+num gerador determinístico e nenhum número desaparece da tela. Para ligar o modelo de verdade,
+exporte a chave antes de subir (ou deixe-a num `.env`, que o compose lê):
+
+```bash
+export OPENAI_API_KEY=sk-...
+docker compose up --build
+```
+
+Para desligar o modelo mesmo tendo chave — útil para ensaiar o pitch sem depender de rede:
+
+```bash
+LASTRO_LLM_ENABLED=false docker compose up
+```
+
+Derrubar tudo: `docker compose down`. Apagar também o warehouse da coleta: `docker compose down -v`.
+
+## Rodando sem Docker
 
 Pré-requisitos: Node 22+ e Python 3.13+.
 

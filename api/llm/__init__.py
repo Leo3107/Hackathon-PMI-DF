@@ -12,8 +12,29 @@ garantida por três mecanismos, todos neste pacote:
 3. `deterministic_engine.DeterministicNarrativeEngine` — rede de segurança sem
    rede e sem custo, com a mesma estrutura de saída.
 
-Para registrar as rotas no Flask, ver `llm.blueprint` (nome a importar:
-``from llm.blueprint import llm_bp``).
+Frase-síntese do pitch: *o modelo de risco decide e calcula; o modelo de
+linguagem explica e cita. Nenhum número na tela veio de um LLM.*
+
+**Registro no Flask** (`api/app.py`):
+
+    from llm.blueprint import llm_bp
+    app.register_blueprint(llm_bp)
+
+ou `from llm.blueprint import registrar_llm; registrar_llm(app)`, assinatura
+`(app: Flask) -> None`.
+
+Mapa de nomes entre a spec e o código (a spec 04 antecede o código):
+
+| Spec | Real |
+|---|---|
+| `api/motor/` | `api/scoring/` |
+| `engine_openai.py` · `engine_deterministico.py` · `engine_fixture.py` | `openai_engine.py` · `deterministic_engine.py` · `fixture_engine.py` |
+| `fidelidade.py` | `verificador.py` |
+| `custo.py` | `ledger.py` |
+| `routes.py` | `blueprint.py` |
+| `models.py` | `pedidos.py` |
+| `selecao.py` | fundido em `engine.py` |
+| `prompts/*.py` | `prompts.py` (arquivo único, gerado da spec) |
 """
 
 from __future__ import annotations
@@ -27,6 +48,7 @@ from .engine import (
     PedacoNarrativa,
     TarefaNarrativa,
     UsoTokens,
+    diagnosticar_selecao,
     selecionar_engine,
 )
 
@@ -39,5 +61,6 @@ __all__ = [
     "PedacoNarrativa",
     "TarefaNarrativa",
     "UsoTokens",
+    "diagnosticar_selecao",
     "selecionar_engine",
 ]

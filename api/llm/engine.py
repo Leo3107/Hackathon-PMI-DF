@@ -34,6 +34,7 @@ __all__ = [
     "LIMITE_PERGUNTA",
     "LIMITE_HISTORICO",
     "selecionar_engine",
+    "diagnosticar_selecao",
     "modelo_de",
 ]
 
@@ -153,33 +154,55 @@ def modelo_de(engine: object) -> str | None:
     return getattr(engine, "modelo", None)
 
 
+def diagnosticar_selecao(
+    ledger: "Ledger | None" = None,
+    custo_previsto_usd: float = 0.0,
+) -> tuple[EngineId, str | None]:
+    """A decisão da §1.4 **sem instanciar nada** — ordem normativa.
+
+    Variável de força → kill switch → presença de chave → disjuntor →
+    orçamento. `GET /api/llm/custo` usa esta forma para relatar o estado sem
+    abrir cliente HTTP nenhum.
+    """
+    forcado = os.environ.get("LASTRO_LLM_ENGINE", "").strip().lower()
+    if forcado == "fixture":
+        return "fixture", None
+    if forcado == "deterministico":
+        return "deterministico", "FORCADO_POR_ENV"
+    if forcado == "openai":
+        return "openai", None
+    if os.environ.get("LASTRO_LLM_ENABLED", "true").strip().lower() != "true":
+        return "deterministico", "LLM_DESLIGADO"
+    if not os.environ.get("OPENAI_API_KEY", "").strip():
+        return "deterministico", "SEM_CHAVE"
+    if ledger is not None and ledger.disjuntor_aberto():
+        return "deterministico", "DISJUNTOR"
+    if ledger is not None and not ledger.cabe_no_orcamento(custo_previsto_usd):
+        return "deterministico", "ORCAMENTO"
+    return "openai", None
+
+
 def selecionar_engine(
     ledger: "Ledger | None" = None,
     custo_previsto_usd: float = 0.0,
 ) -> tuple[NarrativeEngine, str | None]:
     """Escolhe o engine. Devolve `(engine, motivo_degradacao)`.
 
-    A **ordem é normativa** (§1.4): variável de força → kill switch → presença
-    de chave → disjuntor → orçamento. `motivo` é `None` apenas quando o engine
-    escolhido é o OpenAI (ou o de fixture, que é modo de teste explícito).
+    `motivo` é `None` apenas quando o engine escolhido é o OpenAI (ou o de
+    fixture, que é modo de teste explícito). Se abrir o cliente da OpenAI
+    falhar — chave inválida, SDK ausente —, cai no determinístico com
+    `SEM_CHAVE` em vez de derrubar a requisição.
     """
     from .deterministic_engine import DeterministicNarrativeEngine
     from .fixture_engine import FixtureNarrativeEngine
     from .openai_engine import OpenAINarrativeEngine
 
-    forcado = os.environ.get("LASTRO_LLM_ENGINE", "").strip().lower()
-    if forcado == "fixture":
-        return FixtureNarrativeEngine(), None
-    if forcado == "deterministico":
-        return DeterministicNarrativeEngine(), "FORCADO_POR_ENV"
-    if forcado == "openai":
-        return OpenAINarrativeEngine(), None
-    if os.environ.get("LASTRO_LLM_ENABLED", "true").strip().lower() != "true":
-        return DeterministicNarrativeEngine(), "LLM_DESLIGADO"
-    if not os.environ.get("OPENAI_API_KEY", "").strip():
-        return DeterministicNarrativeEngine(), "SEM_CHAVE"
-    if ledger is not None and ledger.disjuntor_aberto():
-        return DeterministicNarrativeEngine(), "DISJUNTOR"
-    if ledger is not None and not ledger.cabe_no_orcamento(custo_previsto_usd):
-        return DeterministicNarrativeEngine(), "ORCAMENTO"
-    return OpenAINarrativeEngine(), None
+    escolhido, motivo = diagnosticar_selecao(ledger, custo_previsto_usd)
+    if escolhido == "fixture":
+        return FixtureNarrativeEngine(), motivo
+    if escolhido == "deterministico":
+        return DeterministicNarrativeEngine(motivo), motivo
+    try:
+        return OpenAINarrativeEngine(), motivo
+    except EngineIndisponivel:
+        return DeterministicNarrativeEngine("SEM_CHAVE"), "SEM_CHAVE"

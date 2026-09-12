@@ -1,0 +1,60 @@
+# Lastro — inteligência de risco de crédito no agronegócio.
+#
+#   docker compose up --build
+#   → interface em http://localhost:3000
+#
+# A aplicação funciona INTEGRALMENTE sem chave da OpenAI: sem ela, a camada de
+# linguagem cai num gerador determinístico e nenhum número desaparece da tela.
+# Com chave, o parecer e o copiloto passam a ser redigidos pelo modelo.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: lastro-api
+    ports:
+      - "5001:5001"
+    environment:
+      # Repassadas do .env da máquina, se existirem. Sem OPENAI_API_KEY o
+      # serviço sobe do mesmo jeito e usa o gerador determinístico.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LASTRO_LLM_ENABLED: ${LASTRO_LLM_ENABLED:-true}
+      LASTRO_LLM_MODEL: ${LASTRO_LLM_MODEL:-gpt-5.4-mini}
+      LASTRO_LLM_BUDGET_USD: ${LASTRO_LLM_BUDGET_USD:-8}
+      # Warehouse da camada de coleta. Vazio é estado válido: as rotas de
+      # coleta respondem dizendo quais fontes ainda não foram carregadas.
+      COLETA_WAREHOUSE: /app/data/warehouse.duckdb
+      COLETA_SOMENTE_LEITURA: "1"
+    volumes:
+      # Persiste o warehouse da coleta e o diário de custo do LLM entre execuções.
+      - lastro-dados:/app/data
+      - lastro-custo:/app/api/.lastro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5001/api/saude', timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    container_name: lastro-web
+    ports:
+      - "3000:3000"
+    environment:
+      # Nome do serviço na rede do compose, não localhost.
+      LASTRO_API_URL: http://api:5001
+    depends_on:
+      api:
+        # A interface degrada com elegância se o motor cair, mas subir na ordem
+        # certa evita que a primeira tela que o avaliador vê seja a de erro.
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  lastro-dados:
+  lastro-custo:

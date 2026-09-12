@@ -44,3 +44,6 @@ data/raw/
 data/*.duckdb
 data/*.duckdb.wal
 !data/raw/protestos_manual.csv
+
+# Diário de custo do LLM (specs/04-camada-llm.md §5.4). Gasto real, nunca versionado.
+api/.lastro/
