@@ -16,6 +16,7 @@ import {
   Button,
   CLASSES_RISCO,
   Card,
+  cn,
   EmptyState,
   FactorBar,
   FilterChips,
@@ -275,24 +276,28 @@ export function BlocoDimensoes({
           const expandida = aberta === dimensao.id;
           return (
             <li key={dimensao.id} className="py-2">
-              <div className="flex items-center gap-2">
+              {/*
+                Em tela estreita a barra desce para uma linha própria (`basis-full`); a partir
+                de `sm` volta a dividir a linha com o nome, como no desktop.
+              */}
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setAberta(expandida ? null : dimensao.id)}
                   aria-expanded={expandida}
-                  className="transicao-controle flex shrink-0 items-center gap-1 rounded px-1 py-0.5 text-fg-secondary hover:bg-surface-hover"
+                  className="transicao-controle flex min-w-0 shrink-0 items-center gap-1 rounded px-1 py-0.5 text-left text-fg-secondary hover:bg-surface-hover"
                 >
                   <ChevronDown
                     size={14}
                     strokeWidth={2}
-                    className={expandida ? 'rotate-180' : ''}
+                    className={cn('shrink-0', expandida && 'rotate-180')}
                     aria-hidden="true"
                   />
                   <span className="type-body-strong">{NOME_DIMENSAO[dimensao.id]}</span>
                   <span className="type-caption tnum">{formatarPercentual(dimensao.peso, 0)}</span>
                 </button>
 
-                <div className="min-w-0 flex-1">
+                <div className="order-last min-w-0 basis-full sm:order-none sm:flex-1 sm:basis-auto">
                   <ProgressBar
                     valor={dimensao.score}
                     maximo={1000}
@@ -317,7 +322,7 @@ export function BlocoDimensoes({
               </div>
 
               {expandida ? (
-                <div className="mt-2 ml-6 flex flex-col gap-2 border-l border-line-subtle pl-3">
+                <div className="mt-2 ml-2 flex min-w-0 flex-col gap-2 border-l border-line-subtle pl-3 sm:ml-6">
                   <p className="type-caption tnum">
                     Contribuição para o score: {formatarNumero(dimensao.contribuicao, 1)} ={' '}
                     {formatarScore(dimensao.score)} × {formatarPercentual(dimensao.peso, 0)}

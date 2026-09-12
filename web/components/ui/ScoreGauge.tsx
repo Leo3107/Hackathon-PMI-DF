@@ -214,12 +214,15 @@ export function ScoreGauge({
       role="img"
       aria-label={descricao}
       className={cn('score-gauge relative shrink-0', className)}
-      style={{ width: `${largura}px` }}
+      // A largura nominal é um teto: num container mais estreito (celular) o gauge encolhe
+      // junto, e o SVG segue a proporção do viewBox. As camadas de texto ficam em %, então
+      // acompanham sem recálculo.
+      style={{ width: `${largura}px`, maxWidth: '100%' }}
     >
       <svg
         viewBox="0 0 200 172"
-        width={largura}
-        height={(largura * 172) / 200}
+        className="block h-auto w-full"
+        style={{ aspectRatio: '200 / 172' }}
         aria-hidden="true"
         focusable="false"
       >
@@ -371,7 +374,7 @@ export function ScoreGauge({
         {tamanho === 'sm' ? null : emVeto ? (
           <span
             className={cn(
-              'absolute left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap',
+              'absolute left-1/2 flex max-w-full -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap',
               'text-[11px]/[16px] font-semibold text-fg-primary',
             )}
             style={{ top: `${Y.rodape}%` }}
@@ -382,7 +385,9 @@ export function ScoreGauge({
               className={cn('shrink-0', classesFinal.texto)}
               aria-hidden="true"
             />
-            {rotuloVeto}
+            <span className="min-w-0 truncate" title={rotuloVeto ?? undefined}>
+              {rotuloVeto}
+            </span>
           </span>
         ) : tendencia ? (
           <span

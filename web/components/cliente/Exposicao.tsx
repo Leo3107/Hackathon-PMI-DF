@@ -203,18 +203,25 @@ export function BlocoExposicao({ exposicao, fatos }: BlocoExposicaoProps) {
       {/* Tabela de garantias ----------------------------------------------- */}
       <div className="mt-4">
         <h3 className="type-eyebrow mb-2 text-fg-secondary">Garantias ({garantias.length})</h3>
-        <DataTable<Garantia>
-          aria-label="Garantias oferecidas pelo cliente"
-          densidade="densa"
-          linhas={garantias}
-          obterId={(linha) => linha.id}
-          colunas={colunasDeGarantia(temEmbargada)}
-          vazio={
-            <p className="type-caption p-3">
-              Nenhuma garantia registrada. A exposição está integralmente descoberta.
-            </p>
-          }
-        />
+        {/*
+          A tabela tem largura mínima por coluna; em tela estreita ela rola de lado. As margens
+          negativas compensam o padding do `Card` (p-4) para a rolagem chegar até a borda.
+        */}
+        {/* A rolagem lateral e a sangria em telas estreitas são da própria DataTable. */}
+        <div className="min-w-0">
+          <DataTable<Garantia>
+            aria-label="Garantias oferecidas pelo cliente"
+            densidade="densa"
+            linhas={garantias}
+            obterId={(linha) => linha.id}
+            colunas={colunasDeGarantia(temEmbargada)}
+            vazio={
+              <p className="type-caption p-3">
+                Nenhuma garantia registrada. A exposição está integralmente descoberta.
+              </p>
+            }
+          />
+        </div>
       </div>
 
       {/* Operações --------------------------------------------------------- */}
@@ -415,7 +422,7 @@ function DrawerDeOperacoes({
         {operacoes.map((operacao) => (
           <li key={operacao.id} className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="type-body-strong text-fg-primary">{operacao.descricao}</span>
+              <span className="type-body-strong min-w-0 text-fg-primary">{operacao.descricao}</span>
               <span className="tnum type-body-strong text-fg-primary">
                 {formatarMoeda(operacao.saldoDevedor, { casas: 0 })}
               </span>
@@ -440,32 +447,38 @@ function DrawerDeOperacoes({
               </p>
             ) : null}
 
-            <DataTable<Parcela>
-              aria-label={`Parcelas da operação ${operacao.descricao}`}
-              densidade="densa"
-              linhas={operacao.parcelas}
-              obterId={(p) => p.id}
-              colunas={[
-                { id: 'venc', cabecalho: 'Vencimento', celula: (p) => formatarData(p.vencimento) },
-                {
-                  id: 'valor',
-                  cabecalho: 'Valor',
-                  numerica: true,
-                  celula: (p) => formatarMoeda(p.valor, { casas: 0 }),
-                },
-                {
-                  id: 'status',
-                  cabecalho: 'Status',
-                  celula: (p) => ROTULO_PARCELA[p.status],
-                },
-                {
-                  id: 'atraso',
-                  cabecalho: 'Atraso',
-                  numerica: true,
-                  celula: (p) => (p.diasAtraso ? `${formatarNumero(p.diasAtraso, 0)} d` : '—'),
-                },
-              ]}
-            />
+            <div className="min-w-0">
+              <DataTable<Parcela>
+                aria-label={`Parcelas da operação ${operacao.descricao}`}
+                densidade="densa"
+                linhas={operacao.parcelas}
+                obterId={(p) => p.id}
+                colunas={[
+                  {
+                    id: 'venc',
+                    cabecalho: 'Vencimento',
+                    celula: (p) => formatarData(p.vencimento),
+                  },
+                  {
+                    id: 'valor',
+                    cabecalho: 'Valor',
+                    numerica: true,
+                    celula: (p) => formatarMoeda(p.valor, { casas: 0 }),
+                  },
+                  {
+                    id: 'status',
+                    cabecalho: 'Status',
+                    celula: (p) => ROTULO_PARCELA[p.status],
+                  },
+                  {
+                    id: 'atraso',
+                    cabecalho: 'Atraso',
+                    numerica: true,
+                    celula: (p) => (p.diasAtraso ? `${formatarNumero(p.diasAtraso, 0)} d` : '—'),
+                  },
+                ]}
+              />
+            </div>
           </li>
         ))}
       </ul>

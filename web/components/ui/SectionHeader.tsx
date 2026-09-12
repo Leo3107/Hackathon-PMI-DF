@@ -40,7 +40,9 @@ export function SectionHeader({
   return (
     <header
       className={cn(
-        'section-header flex items-start justify-between gap-4',
+        // Título e ações lado a lado a partir de `sm`; abaixo disso as ações (chips, botões)
+        // descem para a linha seguinte em vez de espremer o título.
+        'section-header flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4',
         divisor && 'border-b border-line-subtle pb-3',
         className,
       )}
@@ -66,7 +68,9 @@ export function SectionHeader({
         </div>
         {descricao ? <p className="type-caption mt-1">{descricao}</p> : null}
       </div>
-      {acoes ? <div className="flex shrink-0 items-center gap-2">{acoes}</div> : null}
+      {acoes ? (
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0">{acoes}</div>
+      ) : null}
     </header>
   );
 }

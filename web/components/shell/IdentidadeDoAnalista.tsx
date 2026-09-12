@@ -31,7 +31,8 @@ export function IdentidadeDoAnalista() {
           >
             {PERSONA.iniciais}
           </span>
-          <span className="type-label hidden sm:inline">{PERSONA.nome}</span>
+          {/* Abaixo de `md` só as iniciais: a topbar compacta não tem lugar para o nome. */}
+          <span className="type-label hidden md:inline">{PERSONA.nome}</span>
         </button>
       )}
     >

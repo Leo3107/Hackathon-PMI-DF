@@ -115,9 +115,9 @@ def test_todos_os_clientes_tem_cultura_soja_apenas_descritiva():
 # ---------------------------------------------------------------------------
 
 
-def test_razao_social_e_claramente_sintetica():
+def test_razao_social_e_descritiva_e_estavel():
     for cliente in data.PROSPECTS:
-        assert cliente.razao_social.startswith("[DADO SIMULADO]")
+        assert cliente.razao_social.startswith("Produtor rural ")
         # Estável: os últimos dígitos do documento aparecem na etiqueta.
         assert normalizar_documento(cliente.documento)[-6:] in cliente.razao_social
 

@@ -16,6 +16,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { cn } from '@/components/ui';
+
 import { rotuloDaRota } from './rotas';
 import { useClientes } from './usar-clientes';
 
@@ -56,9 +58,16 @@ export function Trilha() {
     <nav aria-label="Trilha de navegação" className="min-w-0 flex-1">
       <ol className="flex min-w-0 items-center gap-1.5">
         {niveis.map((nivel, i) => (
-          <li key={`${nivel.rotulo}-${i}`} className="flex min-w-0 items-center gap-1.5">
+          <li
+            key={`${nivel.rotulo}-${i}`}
+            // Abaixo de `md` só o nível atual aparece: os anteriores estão na sidebar.
+            className={cn(
+              'min-w-0 items-center gap-1.5',
+              i < niveis.length - 1 ? 'hidden md:flex' : 'flex',
+            )}
+          >
             {i > 0 && (
-              <span aria-hidden className="type-caption text-fg-tertiary">
+              <span aria-hidden className="type-caption hidden text-fg-tertiary md:inline">
                 ›
               </span>
             )}

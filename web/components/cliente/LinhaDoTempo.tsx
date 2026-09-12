@@ -148,162 +148,169 @@ export function BlocoLinhaDoTempo({
           />
         </div>
       ) : (
-        <svg
-          ref={grafico}
-          role="img"
-          aria-label={descricaoDaSerie}
-          tabIndex={0}
-          viewBox={`0 0 ${LARGURA} ${ALTURA_SERIE + 46}`}
-          className="mt-3 w-full rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
-          onKeyDown={(evento) => {
-            if (evento.key === 'ArrowRight') {
-              evento.preventDefault();
-              setFocado((i) => Math.min(pontos.length - 1, i + 1));
-            } else if (evento.key === 'ArrowLeft') {
-              evento.preventDefault();
-              setFocado((i) => Math.max(0, i - 1));
-            } else if (evento.key === 'Enter' || evento.key === ' ') {
-              evento.preventDefault();
-              setComparando(pontos[focado] ?? null);
-            }
-          }}
-        >
-          {/* Faixas de rating ao fundo, rotuladas à direita */}
-          {FAIXAS_RATING.map((faixa) => {
-            const topo = y(faixa.ate);
-            const base = y(faixa.de);
-            return (
-              <g key={faixa.rating}>
-                <rect
-                  x={MARGEM_ESQ}
-                  y={topo}
-                  width={LARGURA - MARGEM_ESQ - MARGEM_DIR}
-                  height={Math.max(1, base - topo)}
-                  fill={CLASSES_RISCO[faixa.familia].varCor}
-                  opacity={0.07}
-                />
-                <text
-                  x={LARGURA - MARGEM_DIR + 5}
-                  y={(topo + base) / 2}
-                  fontSize={10}
-                  fontWeight={600}
-                  dominantBaseline="middle"
-                  fill={CLASSES_RISCO[faixa.familia].varCor}
+        /*
+          O SVG escala pelo viewBox de 800px. Abaixo de `sm` isso encolheria os rótulos a menos de
+          5px; por isso o gráfico mantém uma largura mínima e rola de lado dentro do drawer, cujas
+          margens (p-4) são compensadas pelo `-mx-4 px-4`.
+        */
+        <div className="-mx-4 mt-3 min-w-0 overflow-x-auto px-4 scrollbar-thin sm:mx-0 sm:px-0">
+          <svg
+            ref={grafico}
+            role="img"
+            aria-label={descricaoDaSerie}
+            tabIndex={0}
+            viewBox={`0 0 ${LARGURA} ${ALTURA_SERIE + 46}`}
+            className="w-full min-w-[640px] rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400 sm:min-w-0"
+            onKeyDown={(evento) => {
+              if (evento.key === 'ArrowRight') {
+                evento.preventDefault();
+                setFocado((i) => Math.min(pontos.length - 1, i + 1));
+              } else if (evento.key === 'ArrowLeft') {
+                evento.preventDefault();
+                setFocado((i) => Math.max(0, i - 1));
+              } else if (evento.key === 'Enter' || evento.key === ' ') {
+                evento.preventDefault();
+                setComparando(pontos[focado] ?? null);
+              }
+            }}
+          >
+            {/* Faixas de rating ao fundo, rotuladas à direita */}
+            {FAIXAS_RATING.map((faixa) => {
+              const topo = y(faixa.ate);
+              const base = y(faixa.de);
+              return (
+                <g key={faixa.rating}>
+                  <rect
+                    x={MARGEM_ESQ}
+                    y={topo}
+                    width={LARGURA - MARGEM_ESQ - MARGEM_DIR}
+                    height={Math.max(1, base - topo)}
+                    fill={CLASSES_RISCO[faixa.familia].varCor}
+                    opacity={0.07}
+                  />
+                  <text
+                    x={LARGURA - MARGEM_DIR + 5}
+                    y={(topo + base) / 2}
+                    fontSize={10}
+                    fontWeight={600}
+                    dominantBaseline="middle"
+                    fill={CLASSES_RISCO[faixa.familia].varCor}
+                  >
+                    {faixa.rating}
+                  </text>
+                </g>
+              );
+            })}
+  
+            {/* Eixo Y mínimo: 0, 500, 1000 */}
+            {[0, 500, 1000].map((marca) => (
+              <text
+                key={marca}
+                x={MARGEM_ESQ - 6}
+                y={y(marca)}
+                fontSize={9}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fill="var(--color-fg-tertiary)"
+                style={{ fontVariantNumeric: 'tabular-nums' }}
+              >
+                {marca}
+              </text>
+            ))}
+  
+            {/* Série em degraus */}
+            <path
+              d={pontos
+                .map((ponto, indice) => {
+                  const px = x(ponto.data);
+                  const py = y(ponto.score);
+                  if (indice === 0) return `M ${px} ${py}`;
+                  const anterior = pontos[indice - 1];
+                  return `L ${px} ${y(anterior.score)} L ${px} ${py}`;
+                })
+                .join(' ')}
+              fill="none"
+              stroke="var(--color-accent-400, var(--color-fg-primary))"
+              strokeWidth={2}
+            />
+  
+            {pontos.map((ponto, indice) => (
+              <g key={ponto.data}>
+                <circle
+                  cx={x(ponto.data)}
+                  cy={y(ponto.score)}
+                  r={indice === focado ? 5.5 : 3.5}
+                  fill="var(--color-surface-page)"
+                  stroke={CLASSES_RISCO[RATING[ratingDoScore(ponto.score)].familia].varCor}
+                  strokeWidth={2}
+                  onClick={() => {
+                    setFocado(indice);
+                    setComparando(ponto);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
-                  {faixa.rating}
-                </text>
+                  <title>{`${formatarData(ponto.data)} · score ${formatarScore(ponto.score)} · rating ${ratingDoScore(
+                    ponto.score,
+                  )} · ${ponto.eventos.length} evento(s) nesta data`}</title>
+                </circle>
               </g>
-            );
-          })}
-
-          {/* Eixo Y mínimo: 0, 500, 1000 */}
-          {[0, 500, 1000].map((marca) => (
+            ))}
+  
+            {/* Camada inferior: marcadores de evento e linha-guia */}
+            {eventosNaJanela.map((evento) => {
+              const px = x(evento.data);
+              const cy = ALTURA_SERIE + 22;
+              const familia = SEVERIDADE[evento.severidade].familia;
+              return (
+                <g
+                  key={evento.id}
+                  onClick={() => setEventoDestacado(evento.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <line
+                    x1={px}
+                    y1={y(evento.scoreApos)}
+                    x2={px}
+                    y2={cy - 7}
+                    stroke="var(--color-line-strong)"
+                    strokeWidth={1}
+                    strokeDasharray="2 3"
+                  />
+                  <path
+                    d={caminhoDoMarcador(evento.severidade, px, cy)}
+                    fill={CLASSES_RISCO[familia].varTint}
+                    stroke={CLASSES_RISCO[familia].varCor}
+                    strokeWidth={1.5}
+                  >
+                    <title>{`${formatarData(evento.data)} · ${SEVERIDADE[evento.severidade].rotulo} · ${evento.titulo} · ${formatarDelta(
+                      evento.deltaScore,
+                      'pts',
+                    )}`}</title>
+                  </path>
+                </g>
+              );
+            })}
+  
+            {/* Eixo X: primeira e última data da janela */}
             <text
-              key={marca}
-              x={MARGEM_ESQ - 6}
-              y={y(marca)}
+              x={MARGEM_ESQ}
+              y={ALTURA_SERIE + 42}
+              fontSize={9}
+              fill="var(--color-fg-tertiary)"
+            >
+              {formatarData(pontos[0].data)}
+            </text>
+            <text
+              x={LARGURA - MARGEM_DIR}
+              y={ALTURA_SERIE + 42}
               fontSize={9}
               textAnchor="end"
-              dominantBaseline="middle"
               fill="var(--color-fg-tertiary)"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {marca}
+              {formatarData(avaliacao.dataReferencia)}
             </text>
-          ))}
-
-          {/* Série em degraus */}
-          <path
-            d={pontos
-              .map((ponto, indice) => {
-                const px = x(ponto.data);
-                const py = y(ponto.score);
-                if (indice === 0) return `M ${px} ${py}`;
-                const anterior = pontos[indice - 1];
-                return `L ${px} ${y(anterior.score)} L ${px} ${py}`;
-              })
-              .join(' ')}
-            fill="none"
-            stroke="var(--color-accent-400, var(--color-fg-primary))"
-            strokeWidth={2}
-          />
-
-          {pontos.map((ponto, indice) => (
-            <g key={ponto.data}>
-              <circle
-                cx={x(ponto.data)}
-                cy={y(ponto.score)}
-                r={indice === focado ? 5.5 : 3.5}
-                fill="var(--color-surface-page)"
-                stroke={CLASSES_RISCO[RATING[ratingDoScore(ponto.score)].familia].varCor}
-                strokeWidth={2}
-                onClick={() => {
-                  setFocado(indice);
-                  setComparando(ponto);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <title>{`${formatarData(ponto.data)} · score ${formatarScore(ponto.score)} · rating ${ratingDoScore(
-                  ponto.score,
-                )} · ${ponto.eventos.length} evento(s) nesta data`}</title>
-              </circle>
-            </g>
-          ))}
-
-          {/* Camada inferior: marcadores de evento e linha-guia */}
-          {eventosNaJanela.map((evento) => {
-            const px = x(evento.data);
-            const cy = ALTURA_SERIE + 22;
-            const familia = SEVERIDADE[evento.severidade].familia;
-            return (
-              <g
-                key={evento.id}
-                onClick={() => setEventoDestacado(evento.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <line
-                  x1={px}
-                  y1={y(evento.scoreApos)}
-                  x2={px}
-                  y2={cy - 7}
-                  stroke="var(--color-line-strong)"
-                  strokeWidth={1}
-                  strokeDasharray="2 3"
-                />
-                <path
-                  d={caminhoDoMarcador(evento.severidade, px, cy)}
-                  fill={CLASSES_RISCO[familia].varTint}
-                  stroke={CLASSES_RISCO[familia].varCor}
-                  strokeWidth={1.5}
-                >
-                  <title>{`${formatarData(evento.data)} · ${SEVERIDADE[evento.severidade].rotulo} · ${evento.titulo} · ${formatarDelta(
-                    evento.deltaScore,
-                    'pts',
-                  )}`}</title>
-                </path>
-              </g>
-            );
-          })}
-
-          {/* Eixo X: primeira e última data da janela */}
-          <text
-            x={MARGEM_ESQ}
-            y={ALTURA_SERIE + 42}
-            fontSize={9}
-            fill="var(--color-fg-tertiary)"
-          >
-            {formatarData(pontos[0].data)}
-          </text>
-          <text
-            x={LARGURA - MARGEM_DIR}
-            y={ALTURA_SERIE + 42}
-            fontSize={9}
-            textAnchor="end"
-            fill="var(--color-fg-tertiary)"
-          >
-            {formatarData(avaliacao.dataReferencia)}
-          </text>
-        </svg>
+          </svg>
+        </div>
       )}
 
       <p className="type-caption mt-1">
@@ -354,7 +361,7 @@ export function BlocoLinhaDoTempo({
         subtitulo="A série do score e os eventos que a moveram, no mesmo eixo"
         largura="larga"
       >
-        <div className="mb-3 flex gap-1" role="group" aria-label="Janela da linha do tempo">
+        <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Janela da linha do tempo">
           {(Object.keys(ROTULO_JANELA) as Janela[]).map((opcao) => (
             <Button
               key={opcao}

@@ -50,7 +50,7 @@ export function Modal({
   if (!aberto || typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="no-print fixed inset-0 z-60 flex items-center justify-center p-6">
+    <div className="no-print fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6">
       <button
         type="button"
         tabIndex={-1}
@@ -68,13 +68,15 @@ export function Modal({
         aria-describedby={descricao ? `${id}-descricao` : undefined}
         tabIndex={-1}
         className={cn(
-          'transicao-base relative flex max-h-full w-full flex-col rounded-lg',
+          // `90dvh` em vez de `max-h-full`: no celular a barra do navegador come parte da
+          // viewport e o rodapé com as ações ficaria fora da tela.
+          'transicao-base relative flex max-h-[90dvh] w-full flex-col rounded-lg',
           'border border-line-strong bg-surface-raised shadow-overlay outline-none',
           className,
         )}
         style={{ maxWidth: LARGURA[tamanho] }}
       >
-        <header className="flex shrink-0 items-start justify-between gap-3 p-5 pb-3">
+        <header className="flex shrink-0 items-start justify-between gap-3 p-4 pb-3 sm:p-5 sm:pb-3">
           <div className="min-w-0">
             <h2 id={`${id}-titulo`} className="type-section-title">
               {titulo}
@@ -88,9 +90,11 @@ export function Modal({
           <IconButton icone={X} rotulo="Fechar" onClick={aoFechar} />
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 scrollbar-thin">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 scrollbar-thin sm:px-5">{children}</div>
 
-        <footer className="flex shrink-0 items-center justify-end gap-2 p-5 pt-3">{acoes}</footer>
+        <footer className="flex shrink-0 flex-wrap items-center justify-end gap-2 p-4 pt-3 sm:p-5 sm:pt-3">
+          {acoes}
+        </footer>
       </div>
     </div>,
     document.body,

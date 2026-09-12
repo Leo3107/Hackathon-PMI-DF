@@ -142,6 +142,8 @@ export interface LinhaCliente {
   deltaScore: number | null;
   alertasNaoLidos: number;
   severidadeMaximaAlerta: Severidade | null;
+  /** ISO date da avaliação vigente: é a "última varredura" que o card mobile exibe. */
+  dataReferencia: string;
   /** Texto pré-normalizado para a busca de §3.4. */
   indiceDeBusca: string;
 }
@@ -200,6 +202,7 @@ export function paraLinha(avaliado: ClienteAvaliado): LinhaCliente {
     deltaScore: variacao90d ? variacao90d.deltaScore : null,
     alertasNaoLidos,
     severidadeMaximaAlerta: extras.severidadeMaximaAlerta ?? null,
+    dataReferencia: avaliacao.dataReferencia,
     indiceDeBusca: normalizar(
       [
         cliente.razaoSocial,

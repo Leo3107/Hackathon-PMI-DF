@@ -87,20 +87,22 @@ export function FaixaMotorIndisponivel() {
   return (
     <div
       role="alert"
-      className="flex h-8 w-full items-center gap-2 border-b border-line-strong bg-surface-raised px-4 type-caption text-fg-primary"
+      // Abaixo de `md` a faixa cresce e o texto quebra; em `md`+ mantém os 32px e trunca.
+      className="flex min-h-8 w-full items-center gap-2 border-b border-line-strong bg-surface-raised px-4 py-1 type-caption text-fg-primary md:h-8 md:py-0"
     >
       <TriangleAlert aria-hidden className="size-3.5 shrink-0 text-fg-secondary" />
-      <span className="min-w-0 truncate">
+      <span className="min-w-0 flex-1 md:flex-initial md:truncate">
         Motor de risco indisponível — os valores exibidos podem estar desatualizados.
         {sondando ? ' Reconectando…' : ` Nova tentativa em instantes`} (tentativa {tentativas || 1})
       </span>
-      <span className="flex-1" />
+      <span className="hidden md:block md:flex-1" />
       <Button
         tamanho="sm"
         variante="secundario"
         iconeEsquerda={RotateCw}
         carregando={sondando}
         onClick={() => void sondar()}
+        className="shrink-0"
       >
         Tentar agora
       </Button>

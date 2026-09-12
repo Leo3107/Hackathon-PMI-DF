@@ -91,6 +91,7 @@ export function Entrada({
             variante="primario"
             iconeEsquerda={Search}
             disabled={!podeConsultar}
+            className="w-full sm:w-auto"
           >
             Consultar
           </Button>
@@ -114,7 +115,7 @@ export function Entrada({
         </div>
 
         {carregandoPerfis ? (
-          <div className="grid gap-3 md:grid-cols-3" aria-hidden="true">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3" aria-hidden="true">
             {[0, 1, 2].map((i) => (
               <div key={i} className="esqueleto h-[120px] rounded-md" />
             ))}
@@ -127,7 +128,8 @@ export function Entrada({
             </p>
           </Card>
         ) : (
-          <ul className="grid gap-3 md:grid-cols-3">
+          // Um perfil por linha no celular, dois em tablets estreitos, três a partir de `md`.
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {perfis.map(({ linha, perfil, naCarteira }) => (
               <li key={linha.cliente.id} className="contents">
                 <Card
@@ -149,7 +151,7 @@ export function Entrada({
                     <p className="type-body-strong truncate text-fg-primary">
                       {linha.cliente.razaoSocial}
                     </p>
-                    <p className="type-caption tnum">
+                    <p className="type-caption tnum break-all">
                       {formatarDocumento(linha.cliente.documento, { mascarar: false })}
                     </p>
                     <p className="type-caption truncate">

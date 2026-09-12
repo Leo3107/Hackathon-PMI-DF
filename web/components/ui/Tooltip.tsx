@@ -144,7 +144,8 @@ export function Tooltip({
           role="tooltip"
           id={id}
           className={cn(
-            'pointer-events-none absolute z-70 w-max max-w-[280px] rounded-md',
+            // Teto de 280px, mas nunca mais largo que a viewport menos as margens laterais.
+            'pointer-events-none absolute z-70 w-max max-w-[min(280px,calc(100vw_-_32px))] rounded-md',
             'border border-line-strong bg-surface-raised px-[10px] py-2',
             'text-[12px]/[16px] font-normal text-fg-primary shadow-overlay',
             POSICAO[ladoEfetivo],

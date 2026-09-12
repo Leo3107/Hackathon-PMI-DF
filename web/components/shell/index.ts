@@ -22,3 +22,4 @@ export {
 } from './rotas';
 export { useCopiloto, type Copiloto, type TurnoCopiloto } from './usar-copiloto';
 export { useSessao, useSessaoParaApi } from './usar-sessao';
+export { CONSULTA_DESKTOP, useMediaQuery } from './usar-media-query';

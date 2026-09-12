@@ -94,7 +94,8 @@ export function StackedBar({
         <ul
           className={cn(
             'grid gap-x-4 gap-y-1',
-            legenda === 'lateral' ? 'grid-cols-1' : 'grid-cols-3',
+            // Abaixo de `sm` três colunas não cabem: rótulo, valor e % viram uma linha por segmento.
+            legenda === 'lateral' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3',
           )}
         >
           {segmentos.map((segmento) => {

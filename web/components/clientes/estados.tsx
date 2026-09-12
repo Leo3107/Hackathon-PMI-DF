@@ -60,9 +60,9 @@ export function EstadoDeFalha({
         <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-surface-input">
           <Network size={20} strokeWidth={1.75} className="text-risk-c" aria-hidden="true" />
         </span>
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col gap-1">
           <p className="type-eyebrow text-risk-c">Motor de risco indisponível</p>
-          <p className="max-w-[72ch] text-[13px]/[20px] text-fg-secondary">
+          <p className="max-w-[72ch] text-[13px]/[20px] break-words text-fg-secondary">
             A interface do Lastro não calcula risco. Todos os scores, probabilidades, coberturas e
             recomendações vêm do serviço de cálculo em Python, que não está respondendo.
           </p>
@@ -71,7 +71,7 @@ export function EstadoDeFalha({
 
       <div className="flex flex-col gap-2">
         <p className="type-label">O que fazer</p>
-        <ol className="flex list-decimal flex-col gap-1 pl-5 text-[13px]/[20px] text-fg-secondary">
+        <ol className="flex list-decimal flex-col gap-1 pl-5 text-[13px]/[20px] break-words text-fg-secondary">
           {PASSOS.map((passo) => (
             <li key={passo}>{passo}</li>
           ))}
@@ -83,7 +83,12 @@ export function EstadoDeFalha({
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variante="primario" iconeEsquerda={RotateCcw} onClick={aoTentarNovamente}>
+        <Button
+          variante="primario"
+          iconeEsquerda={RotateCcw}
+          onClick={aoTentarNovamente}
+          className="w-full sm:w-auto"
+        >
           Tentar novamente
         </Button>
       </div>

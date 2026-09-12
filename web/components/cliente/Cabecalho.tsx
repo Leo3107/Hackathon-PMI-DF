@@ -58,12 +58,16 @@ export function CabecalhoDoCliente({
 
   return (
     <header className="flex flex-col gap-2 border-b border-line-subtle pb-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h1 className="type-page-title min-w-0 text-fg-primary">{cliente.razaoSocial}</h1>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+      {/* Em tela estreita as ações descem para a linha de baixo e ocupam a largura toda. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <h1 className="type-page-title min-w-0 break-words text-fg-primary">
+          {cliente.razaoSocial}
+        </h1>
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:shrink-0">
           <Button
             variante="primario"
             iconeEsquerda={FileText}
+            className="w-full sm:w-auto"
             disabled={parecerBloqueado}
             title={
               parecerBloqueado
@@ -77,8 +81,8 @@ export function CabecalhoDoCliente({
         </div>
       </div>
 
-      <p className="type-body flex flex-wrap items-center gap-x-2 gap-y-1 text-fg-secondary">
-        <span className="type-mono text-fg-primary">
+      <p className="type-body flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-fg-secondary">
+        <span className="type-mono break-all text-fg-primary">
           {formatarDocumento(cliente.documento, { mascarar: cliente.tipoPessoa === 'PF' })}
         </span>
         <Separador />
@@ -175,7 +179,7 @@ export function BandaDeVeto({
           <Gavel size={16} strokeWidth={2} aria-hidden="true" />
           {vetos.length === 1 ? 'Veto ativo' : `${vetos.length} vetos ativos`}
         </h2>
-        <p className="type-body text-fg-secondary">
+        <p className="type-body min-w-0 text-fg-secondary">
           O motor calculou <strong className="text-fg-primary">{scoreCalculado}</strong> (rating{' '}
           {ratingCalculado}); a classificação final é{' '}
           <strong className="text-fg-primary">{ratingFinal}</strong> por regra de negócio. O score
@@ -241,7 +245,7 @@ export function PainelStayPeriod({ stayPeriod }: PainelStayPeriodProps) {
           <Hourglass size={16} strokeWidth={2} aria-hidden="true" />
           <Termo sigla="STAY_PERIOD">Stay Period</Termo> ativo
         </h2>
-        <p className="type-body text-fg-secondary">
+        <p className="type-body min-w-0 text-fg-secondary">
           <Termo sigla="RJ" /> deferida em {formatarData(stayPeriod.dataDeferimento)} · decorridos{' '}
           <span className="tnum text-fg-primary">{stayPeriod.diasDecorridos}</span> de{' '}
           <span className="tnum text-fg-primary">{total}</span> dias

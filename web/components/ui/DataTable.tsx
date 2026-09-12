@@ -344,14 +344,23 @@ export function DataTable<T>({
     <div
       className={cn(
         'w-full rounded-md border border-line-default bg-surface-card shadow-card',
-        alturaMaxima ? 'overflow-auto scrollbar-thin' : 'overflow-x-auto',
+        alturaMaxima ? 'overflow-auto scrollbar-thin' : 'overflow-x-auto max-md:scrollbar-thin',
+        // Abaixo de `md` a tabela sangra até as bordas da tela (o conteúdo tem 16px de
+        // margem): o dedo ganha a largura toda para rolar de lado, e as bordas laterais
+        // somem para não desenhar um "quadro" que corta a rolagem. Sem `px` interno de
+        // propósito: a coluna fixa usa `left-0`, e um padding no scroller a desalinharia.
+        'max-md:-mx-4 max-md:w-auto max-md:rounded-none max-md:border-x-0',
         className,
       )}
       style={{
         maxHeight: typeof alturaMaxima === 'number' ? `${alturaMaxima}px` : alturaMaxima,
       }}
     >
-      <table className="w-full border-collapse text-[13px]" aria-label={ariaLabel}>
+      {/* Largura mínima só em mobile: 13 colunas em 390px viravam truncamentos ilegíveis. */}
+      <table
+        className="w-full border-collapse text-[13px] max-md:min-w-[720px]"
+        aria-label={ariaLabel}
+      >
         {cabecalho}
 
         <tbody ref={corpo}>

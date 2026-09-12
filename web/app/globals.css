@@ -155,7 +155,9 @@ html {
 }
 
 body {
-  min-width: 1024px;                  /* abaixo disso o produto não é suportado (D9) */
+  /* Sem largura mínima: a partir da revisão mobile o shell colapsa em menu off-canvas
+     abaixo de 1024px e as telas quebram em uma coluna. Cada tabela que precisar de
+     mais largura rola sozinha dentro do próprio contêiner, nunca a página inteira. */
   background: var(--color-surface-page);
   color: var(--color-fg-primary);
 }

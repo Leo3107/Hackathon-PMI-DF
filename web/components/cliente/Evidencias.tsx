@@ -81,10 +81,10 @@ export function DrawerDeEvidencia({
             <Tooltip conteudo="Documento arquivado no dossiê da consulta.">
               <p
                 tabIndex={0}
-                className="type-mono flex cursor-not-allowed items-center gap-1.5 rounded border border-line-default bg-surface-sunken px-2 py-1.5 text-fg-disabled"
+                className="type-mono flex min-w-0 cursor-not-allowed items-start gap-1.5 rounded border border-line-default bg-surface-sunken px-2 py-1.5 text-fg-disabled"
               >
-                <LinkIcon size={12} strokeWidth={2} aria-hidden="true" />
-                {evidencia.urlFicticia}
+                <LinkIcon size={12} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 break-all">{evidencia.urlFicticia}</span>
               </p>
             </Tooltip>
           ) : null}
@@ -201,10 +201,12 @@ export function DrawerDeFator({
                   const evidencia = evidencias.get(id);
                   return (
                     <li key={id}>
+                      {/* Título longo quebra linha em vez de vazar do drawer estreito. */}
                       <Button
                         variante="fantasma"
                         tamanho="sm"
                         larguraTotal
+                        className="h-auto min-h-[var(--height-control-sm)] justify-start py-1 text-left whitespace-normal"
                         onClick={() => aoAbrirEvidencia(id)}
                       >
                         {evidencia ? `${evidencia.titulo} · ${evidencia.nomeFonte}` : id}

@@ -267,10 +267,15 @@ export function PaginaDoCliente({ clienteId }: PaginaDoClienteProps) {
           <BotaoDeAprofundamento completo={completo} aoAlternar={completo ? recolher : expandir} />
         </div>
 
-        {/* Coluna lateral — 4 col, sticky. Completa nos dois modos: é a resposta. */}
+        {/*
+          Coluna lateral — 4 col, sticky. Completa nos dois modos: é a resposta.
+          Abaixo de `lg` a grade vira uma coluna e a lateral sobe para o topo (`order-first`):
+          no celular o analista lê score, PD, risco de RJ e recomendação antes do aprofundamento,
+          na mesma ordem em que decide.
+        */}
         <aside
           aria-label="Resumo de risco e recomendação"
-          className="flex min-w-0 flex-col gap-4 lg:col-span-4 lg:sticky lg:top-[76px] lg:self-start"
+          className="order-first flex min-w-0 flex-col gap-4 lg:order-none lg:col-span-4 lg:sticky lg:top-[76px] lg:self-start"
         >
           <CardDeScore
             avaliacao={avaliacao}
@@ -355,12 +360,13 @@ function EsqueletoDaPagina() {
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Carregando avaliação">
       <div className="flex flex-col gap-2 border-b border-line-subtle pb-4">
-        <span className="esqueleto h-7 w-[340px]" />
-        <span className="esqueleto h-4 w-[420px]" />
-        <span className="esqueleto h-3 w-[300px]" />
+        {/* Larguras são tetos, não medidas fixas: em tela estreita encolhem com a coluna. */}
+        <span className="esqueleto h-7 w-full max-w-[340px]" />
+        <span className="esqueleto h-4 w-full max-w-[420px]" />
+        <span className="esqueleto h-3 w-full max-w-[300px]" />
       </div>
       <div className="grid gap-4 lg:grid-cols-12">
-        <div className="flex flex-col gap-4 lg:col-span-8">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-8">
           {[180, 260].map((altura, indice) => (
             <Card key={indice}>
               <span className="esqueleto block" style={{ height: altura }} />
@@ -368,7 +374,8 @@ function EsqueletoDaPagina() {
           ))}
           <span className="esqueleto h-[var(--height-control)] w-full" />
         </div>
-        <div className="flex flex-col gap-4 lg:col-span-4">
+        {/* Mesma ordem da página real: a lateral vem primeiro abaixo de `lg`. */}
+        <div className="order-first flex min-w-0 flex-col gap-4 lg:order-none lg:col-span-4">
           {[240, 160, 200, 220].map((altura, indice) => (
             <Card key={indice}>
               <span className="esqueleto block" style={{ height: altura }} />

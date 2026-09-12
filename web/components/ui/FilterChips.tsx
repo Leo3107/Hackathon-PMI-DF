@@ -56,7 +56,13 @@ export function FilterChips<V extends string>({
     <div
       role="group"
       aria-label={rotulo}
-      className={cn('flex flex-wrap items-center gap-2', className)}
+      className={cn(
+        'flex items-center gap-2',
+        // Em mobile os nove chips quebravam em três linhas e empurravam a lista para baixo;
+        // uma faixa rolável mantém a altura de 24px. Em `md+` volta a quebrar como antes.
+        'flex-nowrap overflow-x-auto scrollbar-thin md:flex-wrap md:overflow-visible',
+        className,
+      )}
     >
       {opcoes.map((opcao) => {
         const ativo = selecionados.has(opcao.valor);
@@ -76,7 +82,7 @@ export function FilterChips<V extends string>({
             aria-pressed={ativo}
             onClick={() => alternar(opcao.valor)}
             className={cn(
-              'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-full border px-2 font-medium',
+              'transicao-controle type-badge inline-flex h-6 shrink-0 items-center gap-1 rounded-full border px-2 font-medium whitespace-nowrap',
               pele,
             )}
           >
@@ -96,7 +102,7 @@ export function FilterChips<V extends string>({
           type="button"
           onClick={() => aoMudar(new Set<V>())}
           className={cn(
-            'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-full border px-2 font-medium',
+            'transicao-controle type-badge inline-flex h-6 shrink-0 items-center gap-1 rounded-full border px-2 font-medium whitespace-nowrap',
             'border-line-default bg-transparent text-fg-secondary hover:border-line-strong hover:text-fg-primary',
           )}
         >

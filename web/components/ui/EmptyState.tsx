@@ -27,7 +27,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex w-full flex-col items-center justify-center gap-3 px-6 text-center',
+        'flex w-full flex-col items-center justify-center gap-3 px-4 text-center sm:px-6',
         compacto ? 'min-h-40 py-6' : 'min-h-80 py-12',
         className,
       )}
@@ -35,12 +35,19 @@ export function EmptyState({
       <span className="inline-flex size-14 items-center justify-center rounded-full bg-accent-tint">
         <Icone size={32} strokeWidth={1.5} className="text-accent-500" aria-hidden="true" />
       </span>
-      <div className="flex flex-col gap-1">
-        <p className="type-section-title text-fg-secondary">{titulo}</p>
-        {descricao ? <p className="type-caption max-w-[48ch]">{descricao}</p> : null}
+      <div className="flex min-w-0 max-w-full flex-col gap-1">
+        <p className="type-section-title break-words text-fg-secondary">{titulo}</p>
+        {descricao ? (
+          <p className="type-caption max-w-[48ch] break-words">{descricao}</p>
+        ) : null}
       </div>
       {acao ? (
-        <Button variante="secundario" iconeEsquerda={acao.icone} onClick={acao.aoClicar}>
+        <Button
+          variante="secundario"
+          iconeEsquerda={acao.icone}
+          onClick={acao.aoClicar}
+          className="w-full sm:w-auto"
+        >
           {acao.rotulo}
         </Button>
       ) : null}

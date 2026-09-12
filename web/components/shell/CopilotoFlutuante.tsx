@@ -111,7 +111,9 @@ export function CopilotoFlutuante() {
     <section
       id={painelId}
       aria-label="Copiloto de análise"
-      className="fixed right-5 bottom-5 z-50 flex h-[min(560px,calc(100vh-6rem))] w-[min(400px,calc(100vw-2rem))] flex-col rounded-xl border border-line-default bg-surface-raised shadow-overlay print:hidden"
+      // Abaixo de `sm` o painel ocupa a largura da tela, com margem de 12px; de `sm` em diante
+      // volta a ser o cartão de 400px no canto.
+      className="fixed inset-x-3 bottom-3 z-50 flex h-[min(560px,calc(100dvh-5rem))] flex-col rounded-xl border border-line-default bg-surface-raised shadow-overlay print:hidden sm:inset-x-auto sm:right-5 sm:bottom-5 sm:h-[min(560px,calc(100vh-6rem))] sm:w-[min(400px,calc(100vw-2rem))]"
     >
       <header className="flex shrink-0 items-start gap-2 border-b border-line-subtle px-3 py-2.5">
         <Sparkles

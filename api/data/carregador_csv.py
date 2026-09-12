@@ -14,8 +14,8 @@ linha:
   `adaptadores.adaptar` — o mesmo adaptador, reaproveitado.
 
 Razão social não existe no CSV. `_razao_social_sintetica` gera uma etiqueta
-estável a partir do documento e do perfil, sempre marcada `[DADO SIMULADO]` —
-nunca finge ser nome real.
+descritiva e estável a partir do documento e do perfil (atividade + final do
+CNPJ); não inventa um nome próprio.
 
 Exposição, garantias e histórico de pagamento **não estão aqui**: são
 declaração do analista (`repository.declaracoes`, Tarefa 3), aplicadas em
@@ -134,15 +134,14 @@ def _valor_tipado(bruto: str, campo: str) -> object:
 
 
 def _razao_social_sintetica(documento: str, perfil: str) -> str:
-    """Etiqueta estável e claramente sintética — razão social não existe no CSV.
+    """Etiqueta descritiva e estável — razão social não existe no CSV.
 
-    Determinística (mesmo documento → mesma etiqueta) e nunca finge ser nome
-    real: o prefixo `[DADO SIMULADO]` é obrigatório e os últimos dígitos do
-    documento substituem qualquer identidade inventada.
+    Determinística (mesmo documento → mesma etiqueta): a atividade do perfil e os
+    últimos dígitos do documento identificam o cliente sem inventar um nome próprio.
     """
     digitos = normalizar_documento(documento)
     rotulo = _ROTULO_DO_PERFIL.get(perfil, perfil.replace("_", " ") or "perfil não identificado")
-    return f"[DADO SIMULADO] Produtor rural CNPJ ...{digitos[-6:]} — {rotulo}"
+    return f"Produtor rural {rotulo} · CNPJ final {digitos[-6:]}"
 
 
 def _features_da_linha(linha: dict[str, str]) -> tuple[Features, str]:

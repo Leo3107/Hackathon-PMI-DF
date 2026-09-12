@@ -65,16 +65,16 @@ export function Drawer({
         aria-labelledby={`${id}-titulo`}
         tabIndex={-1}
         className={cn(
-          'transicao-base absolute top-0 right-0 flex h-full flex-col rounded-l-lg',
-          'border-l border-line-strong bg-surface-raised shadow-overlay outline-none',
+          'transicao-base absolute top-0 right-0 flex h-full flex-col',
+          'border-line-strong bg-surface-raised shadow-overlay outline-none',
+          // Abaixo de `sm` o painel toma a tela inteira, sem borda nem canto arredondado à
+          // esquerda; a partir de `sm` volta à largura do token, limitada à viewport.
+          'w-full max-w-full sm:rounded-l-lg sm:border-l',
+          largura === 'larga' ? 'sm:w-(--width-drawer-wide)' : 'sm:w-(--width-drawer)',
           className,
         )}
-        style={{
-          width: `var(${largura === 'larga' ? '--width-drawer-wide' : '--width-drawer'})`,
-          maxWidth: '100vw',
-        }}
       >
-        <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line-subtle px-5">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line-subtle px-4 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="min-w-0">
               <h2 id={`${id}-titulo`} className="type-section-title truncate">
@@ -87,10 +87,10 @@ export function Drawer({
           <IconButton icone={X} rotulo="Fechar" onClick={aoFechar} />
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-5 scrollbar-thin">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-thin sm:p-5">{children}</div>
 
         {rodape ? (
-          <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-line-subtle px-5 py-3">
+          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line-subtle px-4 py-3 sm:px-5">
             {rodape}
           </footer>
         ) : null}

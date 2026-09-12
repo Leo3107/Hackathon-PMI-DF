@@ -207,10 +207,19 @@ export function BlocoDecisao({ cliente, avaliacao }: BlocoDecisaoProps) {
         <AvisoDeDecisaoHumana />
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" variante="primario" carregando={enviando} disabled={!valido}>
+          <Button
+            type="submit"
+            variante="primario"
+            className="w-full sm:w-auto"
+            carregando={enviando}
+            disabled={!valido}
+          >
             Registrar decisão
           </Button>
-          <span className="type-caption">Ctrl/Cmd + Enter registra quando o formulário é válido.</span>
+          {/* Atalho de teclado só faz sentido com teclado físico. */}
+          <span className="type-caption hidden sm:inline">
+            Ctrl/Cmd + Enter registra quando o formulário é válido.
+          </span>
         </div>
       </form>
 

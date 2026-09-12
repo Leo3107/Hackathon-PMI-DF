@@ -42,9 +42,9 @@ export function NaoEncontrado({ documento, aoTentarOutro, aoVerPerfis }: NaoEnco
         <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-surface-input">
           <Ban size={20} strokeWidth={1.75} className="text-risk-b" aria-hidden="true" />
         </span>
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col gap-1">
           <p className="type-eyebrow text-risk-b">Documento sem registro nas bases consultadas</p>
-          <p className="type-body max-w-[68ch] text-fg-secondary">
+          <p className="type-body max-w-[68ch] break-words text-fg-secondary">
             <span className="tnum text-fg-primary">
               {formatarDocumento(documento, { mascarar: false })}
             </span>{' '}
@@ -73,11 +73,17 @@ export function NaoEncontrado({ documento, aoTentarOutro, aoVerPerfis }: NaoEnco
         </ul>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variante="primario" iconeEsquerda={RotateCcw} onClick={aoTentarOutro}>
+      {/* Botões empilhados no celular: os rótulos são longos e lado a lado estouravam 390px. */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <Button
+          variante="primario"
+          iconeEsquerda={RotateCcw}
+          onClick={aoTentarOutro}
+          className="w-full sm:w-auto"
+        >
           Tentar outro documento
         </Button>
-        <Button variante="secundario" onClick={aoVerPerfis}>
+        <Button variante="secundario" onClick={aoVerPerfis} className="w-full sm:w-auto">
           Ver perfis para consulta rápida
         </Button>
       </div>
@@ -104,21 +110,26 @@ export function JaNaCarteira({
         titulo="Documento já pertence a um cliente da carteira"
         descricao="A due diligence completa é para prospects. Este documento já tem histórico, exposição e avaliação no Lastro."
       />
-      <p className="type-body text-fg-primary">
+      <p className="type-body break-words text-fg-primary">
         {cliente.razaoSocial}
         <span className="type-caption block text-fg-secondary">
           {formatarDocumento(cliente.documento, { mascarar: false })} · {cliente.municipio}/
           {cliente.uf}
         </span>
       </p>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variante="primario" iconeDireita={ArrowRight} onClick={aoAbrirCliente}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <Button
+          variante="primario"
+          iconeDireita={ArrowRight}
+          onClick={aoAbrirCliente}
+          className="w-full sm:w-auto"
+        >
           Abrir cliente
         </Button>
-        <Button variante="secundario" onClick={aoReanalisar}>
+        <Button variante="secundario" onClick={aoReanalisar} className="w-full sm:w-auto">
           Reanalisar mesmo assim
         </Button>
-        <Button variante="fantasma" onClick={aoVoltar}>
+        <Button variante="fantasma" onClick={aoVoltar} className="w-full sm:w-auto">
           Consultar outro documento
         </Button>
       </div>

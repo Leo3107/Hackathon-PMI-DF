@@ -14,11 +14,12 @@
 import { ShieldAlert, Sprout } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import {
   Badge,
   CLASSES_RISCO,
+  Card,
   DataTable,
   EmptyState,
   FilterChips,
@@ -28,6 +29,7 @@ import {
   SectionHeader,
   Tooltip,
   TrendIndicator,
+  cn,
   type Coluna,
   type OpcaoChip,
 } from '@/components/ui';
@@ -400,6 +402,25 @@ export function ListaDeClientes() {
     uf ? { chave: 'uf', rotulo: `UF: ${uf}` } : null,
   ].filter((r): r is { chave: string; rotulo: string } => r !== null);
 
+  // Um só estado vazio para as duas formas (tabela e cards), para nunca divergirem.
+  const estadoVazio = (
+    <EstadoVazio
+      busca={busca}
+      filtro={filtro}
+      totalCarteira={linhas.length}
+      aoLimparBusca={() => {
+        setBusca('');
+        escrever({ busca: null });
+      }}
+      aoLimparFiltro={() => escrever({ filtro: null, rating: null })}
+      aoLimparTudo={() => {
+        setBusca('');
+        router.replace(caminho, { scroll: false });
+      }}
+      aoRecarregar={() => setTentativa((n) => n + 1)}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <SectionHeader
@@ -414,13 +435,14 @@ export function ListaDeClientes() {
       />
 
       <div className="flex flex-col gap-3">
+        {/* No celular a busca ocupa a linha inteira e os recortes quebram para baixo. */}
         <div className="flex flex-wrap items-center gap-3">
           <SearchInput
             valor={busca}
             aoMudar={setBusca}
             placeholder="Buscar por cliente, documento ou município…"
             aria-label="Buscar cliente por razão social, documento ou município"
-            className="w-[320px] max-w-full"
+            className="w-full max-w-full md:w-[320px]"
           />
           {recortes.map((recorte) => (
             <button
@@ -445,8 +467,24 @@ export function ListaDeClientes() {
             const escolhido = [...proximos][0] ?? 'todos';
             escrever({ filtro: escolhido === 'todos' ? null : escolhido, rating: null });
           }}
+          // A faixa rolável sangra até as bordas da tela, como a tabela; o `px-4` devolve o
+          // respiro nas pontas quando a rolagem está no início ou no fim.
+          className="max-md:-mx-4 max-md:px-4"
         />
       </div>
+
+      {/*
+        Abaixo de `md` a carteira vira uma lista de cards: 13 colunas em 390px só caberiam com
+        rolagem lateral e truncamento, e o que o gestor quer no celular é achar o cliente e ver
+        o rating. A tabela continua sendo a única forma em `md+`. Os dois consomem o mesmo
+        `visiveis`, então filtro, busca, recortes e ordenação valem igual nas duas formas.
+      */}
+      <ListaEmCards
+        linhas={visiveis}
+        carregando={carregando}
+        vazio={estadoVazio}
+        className="md:hidden"
+      />
 
       <DataTable
         aria-label="Clientes da carteira"
@@ -467,25 +505,170 @@ export function ListaDeClientes() {
         }}
         aoClicarLinha={(linha) => router.push(`/clientes/${encodeURIComponent(linha.id)}`)}
         familiaLinha={(linha) => (linha.ratingFinal === 'D' ? 'd' : null)}
-        vazio={
-          <EstadoVazio
-            busca={busca}
-            filtro={filtro}
-            totalCarteira={linhas.length}
-            aoLimparBusca={() => {
-              setBusca('');
-              escrever({ busca: null });
-            }}
-            aoLimparFiltro={() => escrever({ filtro: null, rating: null })}
-            aoLimparTudo={() => {
-              setBusca('');
-              router.replace(caminho, { scroll: false });
-            }}
-            aoRecarregar={() => setTentativa((n) => n + 1)}
-          />
-        }
+        vazio={estadoVazio}
+        className="hidden md:block"
       />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Lista em cards (mobile)
+// ---------------------------------------------------------------------------
+
+const CARDS_ESQUELETO = 6;
+
+function ListaEmCards({
+  linhas,
+  carregando,
+  vazio,
+  className,
+}: {
+  linhas: LinhaCliente[];
+  carregando: boolean;
+  vazio: ReactNode;
+  className?: string;
+}) {
+  if (carregando) {
+    return (
+      <div className={cn('flex flex-col gap-2', className)} aria-hidden="true">
+        {Array.from({ length: CARDS_ESQUELETO }).map((_, indice) => (
+          <div key={indice} className="esqueleto h-[132px] rounded-md" />
+        ))}
+      </div>
+    );
+  }
+
+  if (linhas.length === 0) {
+    return (
+      <Card semPadding className={className}>
+        {vazio}
+      </Card>
+    );
+  }
+
+  return (
+    <ul aria-label="Clientes da carteira" className={cn('flex flex-col gap-2', className)}>
+      {linhas.map((linha) => (
+        <CartaoCliente key={linha.id} linha={linha} />
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Um cliente por card. Mesmo padrão da linha da tabela: o card inteiro navega ao toque e o
+ * link da razão social é o alvo acessível. Sem `Tooltip` aqui: não há hover no celular, então
+ * o que na tabela vivia em tooltip vira texto ou `title`.
+ */
+function CartaoCliente({ linha }: { linha: LinhaCliente }) {
+  const router = useRouter();
+  const destino = `/clientes/${encodeURIComponent(linha.id)}`;
+
+  return (
+    <li>
+      <Card
+        as="article"
+        interativo
+        densidade="compacta"
+        destaque={linha.ratingFinal === 'D' ? 'd' : 'nenhum'}
+        aria-label={`${linha.razaoSocial}, rating ${linha.ratingFinal}, score ${formatarScore(linha.score)}`}
+        onClick={() => router.push(destino)}
+        className="flex flex-col gap-2"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="flex min-w-0 items-center gap-1.5">
+              {linha.tipoPessoa === 'PF' ? (
+                <Sprout
+                  size={13}
+                  strokeWidth={2}
+                  aria-label="Produtor rural pessoa física"
+                  role="img"
+                  className="shrink-0 text-fg-tertiary"
+                />
+              ) : null}
+              <Link
+                href={destino}
+                title={linha.razaoSocial}
+                onClick={(evento) => evento.stopPropagation()}
+                className="transicao-controle type-body-strong truncate rounded-sm text-fg-primary hover:text-accent-300"
+              >
+                {linha.razaoSocial}
+              </Link>
+            </span>
+            <span className="type-mono tnum text-[11px]/[14px] text-fg-tertiary">
+              {formatarDocumento(linha.documento)}
+            </span>
+            <span className="type-caption truncate" title={`${linha.municipio} · ${linha.uf}`}>
+              {linha.municipio} <span className="text-fg-tertiary">· {linha.uf}</span>
+            </span>
+          </div>
+
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="tnum text-[15px] font-medium text-fg-primary">
+                {formatarScore(linha.score)}
+              </span>
+              {/* Com veto, o par "calculado → final" mostra o rebaixamento sem esconder nenhum dos dois. */}
+              <RatingBadge
+                rating={linha.ratingFinal}
+                calculado={linha.temVeto ? linha.ratingCalculado : undefined}
+                tamanho="sm"
+              />
+            </span>
+            {linha.deltaScore === null ? (
+              <span className="type-caption text-fg-tertiary">sem variação em 90d</span>
+            ) : (
+              <TrendIndicator
+                tendencia={linha.tendencia}
+                deltaTexto={formatarDelta(linha.deltaScore)}
+                periodo="90d"
+                tamanho="sm"
+                rotuloCurto
+              />
+            )}
+          </div>
+        </div>
+
+        <dl className="grid grid-cols-3 gap-2 border-t border-line-subtle pt-2">
+          <div className="flex min-w-0 flex-col">
+            <dt className="type-eyebrow text-fg-tertiary">Exposição</dt>
+            <dd className="tnum truncate text-[13px] text-fg-primary" title={formatarMoeda(linha.exposicaoTotal, { casas: 0 })}>
+              {formatarMoedaCompacta(linha.exposicaoTotal)}
+            </dd>
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <dt className="type-eyebrow text-fg-tertiary">PD 12m</dt>
+            <dd className="tnum text-[13px] text-fg-primary">{formatarPercentual(linha.pd12m, 1)}</dd>
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <dt className="type-eyebrow text-fg-tertiary">Alertas</dt>
+            <dd className="text-[13px] text-fg-primary">
+              {linha.alertasNaoLidos === 0 ? (
+                <span className="text-fg-tertiary">{TRACO_LONGO}</span>
+              ) : (
+                <Badge
+                  variante="risco"
+                  familia={
+                    linha.severidadeMaximaAlerta
+                      ? SEVERIDADE[linha.severidadeMaximaAlerta].familia
+                      : 'neutral'
+                  }
+                  tamanho="sm"
+                >
+                  <span className="tnum">{linha.alertasNaoLidos} não lido(s)</span>
+                </Badge>
+              )}
+            </dd>
+          </div>
+        </dl>
+
+        <p className="type-caption tnum text-fg-tertiary">
+          Última varredura: {formatarData(linha.dataReferencia)}
+        </p>
+      </Card>
+    </li>
   );
 }
 

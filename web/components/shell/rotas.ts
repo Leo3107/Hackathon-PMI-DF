@@ -19,10 +19,11 @@ export const GRUPO_OPERACAO: ItemDeNavegacao[] = [
 ];
 
 /**
- * Rotas que renderizam **sem** sidebar e sem topbar: são documentos, não telas de trabalho.
+ * Rotas que renderizam **sem** sidebar e sem topbar: a landing pública em `/` e o parecer para
+ * impressão. Nenhuma das duas é tela de trabalho.
  */
 export function rotaSemShell(pathname: string): boolean {
-  return /^\/clientes\/[^/]+\/parecer\/?$/.test(pathname);
+  return pathname === '/' || /^\/clientes\/[^/]+\/parecer\/?$/.test(pathname);
 }
 
 /** Rótulo do primeiro nível da trilha, quando a rota tem um. */
