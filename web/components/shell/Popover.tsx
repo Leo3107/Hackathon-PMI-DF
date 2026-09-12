@@ -13,7 +13,7 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 
-import { cn } from '@/components/ui/cn';
+import { cn } from '@/components/ui';
 
 export interface PopoverProps {
   /** Recebe o estado para desenhar o gatilho (botão, avatar, campo). */

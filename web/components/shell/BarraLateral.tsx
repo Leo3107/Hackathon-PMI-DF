@@ -19,10 +19,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { cn } from '@/components/ui/cn';
+import { Badge, Button, Modal, cn } from '@/components/ui';
 import { listarAlertas } from '@/lib/api';
 import { restaurarDemonstracao, sessaoParaApi, sessaoTemAlteracoes } from '@/lib/sessao';
 

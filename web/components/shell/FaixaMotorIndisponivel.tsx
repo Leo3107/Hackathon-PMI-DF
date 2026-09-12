@@ -21,7 +21,7 @@ import { RotateCw, TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui';
 import {
   assinarEstadoDoMotor,
   estadoDoMotor,

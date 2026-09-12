@@ -4,7 +4,7 @@ export { Shell } from './Shell';
 export { BarraLateral } from './BarraLateral';
 export { BarraSuperior } from './BarraSuperior';
 export { BuscaGlobal } from './BuscaGlobal';
-export { ContadorDeCusto } from './ContadorDeCusto';
+export { CustoDoLlm } from './CustoDoLlm';
 export { FaixaMotorIndisponivel } from './FaixaMotorIndisponivel';
 export { IdentidadeDoAnalista } from './IdentidadeDoAnalista';
 export { Popover } from './Popover';

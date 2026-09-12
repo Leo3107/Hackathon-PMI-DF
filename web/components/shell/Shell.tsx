@@ -21,7 +21,7 @@
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { SimulatedDataBanner } from '@/components/ui/SimulatedDataBanner';
+import { SimulatedDataBanner } from '@/components/ui';
 
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';

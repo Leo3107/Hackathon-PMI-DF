@@ -19,8 +19,7 @@ import { Undo2, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Badge, Button } from '@/components/ui';
 import { simularEvento } from '@/lib/api';
 import { formatarDelta, formatarScore } from '@/lib/format';
 import {

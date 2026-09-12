@@ -14,8 +14,7 @@
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
-import { RatingBadge } from '@/components/ui/RatingBadge';
-import { SearchInput } from '@/components/ui/SearchInput';
+import { RatingBadge, SearchInput } from '@/components/ui';
 import { formatarDocumento } from '@/lib/format';
 
 import { Popover } from './Popover';

@@ -10,7 +10,7 @@
 import { usePathname } from 'next/navigation';
 
 import { BuscaGlobal } from './BuscaGlobal';
-import { ContadorDeCusto } from './ContadorDeCusto';
+import { CustoDoLlm } from './CustoDoLlm';
 import { IdentidadeDoAnalista } from './IdentidadeDoAnalista';
 import { SimularEvento } from './SimularEvento';
 import { Trilha } from './Trilha';
@@ -28,7 +28,7 @@ export function BarraSuperior() {
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line-default bg-surface-card px-4">
       <Trilha />
       <BuscaGlobal />
-      <ContadorDeCusto />
+      <CustoDoLlm />
       <SimularEvento clienteIdAtual={clienteDaRota(pathname)} />
       <IdentidadeDoAnalista />
     </header>

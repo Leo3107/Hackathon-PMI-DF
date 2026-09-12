@@ -1,7 +1,12 @@
 'use client';
 
 /**
- * Contador de custo do LLM na topbar (`04-camada-llm.md` §5.6 · `03-ux-e-telas.md` §1.3 slot 4).
+ * Fonte de dados do contador de custo do LLM (`04-camada-llm.md` §5.6 · §1.3 slot 4).
+ *
+ * **Não é um primitivo.** O visual é `CostCounter`, do design system, que é presentacional e
+ * recebe tudo por prop. O que falta a ele — e o que este arquivo faz — é buscar o ledger em
+ * `GET /api/llm/custo`, manter a revalidação viva e traduzir `motivoDesligado` em rótulo. Toda
+ * marcação sai de `components/ui`.
  *
  * É a **defesa visível contra gasto silencioso**: sem cache (D5), cada abertura de bloco de
  * prosa é uma chamada nova, e o orçamento de US$ 10 precisa estar à vista o tempo todo.
@@ -16,7 +21,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { CostCounter } from '@/components/ui/CostCounter';
+import { CostCounter } from '@/components/ui';
 import { EVENTO_USO_LLM, obterCustoLlm } from '@/lib/api';
 import type { MotivoLlmDesligado, RespostaCusto } from '@/types';
 
@@ -30,7 +35,7 @@ const ROTULO_DESLIGADO: Record<MotivoLlmDesligado, string> = {
   FORCADO_POR_ENV: 'LLM desligado (env)',
 };
 
-export function ContadorDeCusto() {
+export function CustoDoLlm() {
   const [custo, setCusto] = useState<RespostaCusto | null>(null);
   const [indisponivel, setIndisponivel] = useState(false);
 
