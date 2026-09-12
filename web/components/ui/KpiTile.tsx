@@ -56,8 +56,9 @@ export function KpiTile({
     <Tag
       {...(aoClicar ? { type: 'button' as const, onClick: aoClicar } : {})}
       className={cn(
-        'kpi-tile flex w-full flex-col gap-1 rounded-md border border-line-default bg-surface-card p-3 text-left',
-        aoClicar && 'transicao-controle hover:border-line-strong hover:bg-surface-hover',
+        'kpi-tile flex w-full flex-col gap-1 rounded-md border border-line-default bg-surface-card p-3 text-left shadow-card',
+        aoClicar &&
+          'transicao-controle transicao-elevacao hover:-translate-y-px hover:border-line-strong hover:bg-surface-hover hover:shadow-raised',
         className,
       )}
     >

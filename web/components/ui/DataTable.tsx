@@ -25,7 +25,7 @@ export interface Coluna<T> {
   fixa?: 'esquerda';
   termo?: TermoGlossario;
   /** Responsividade por corte de coluna, nunca por quebra de linha. */
-  ocultarAbaixoDe?: 1280 | 1440;
+  ocultarAbaixoDe?: 1280 | 1440 | 1536;
 }
 
 export interface Ordenacao {
@@ -66,9 +66,10 @@ export interface DataTableProps<T> {
   'aria-label': string;
 }
 
-const OCULTAR: Record<1280 | 1440, string> = {
+const OCULTAR: Record<1280 | 1440 | 1536, string> = {
   1280: 'max-[1280px]:hidden',
   1440: 'max-[1440px]:hidden',
+  1536: 'max-[1536px]:hidden',
 };
 
 const LARGURAS_ESQUELETO = ['70%', '45%', '85%'];
@@ -341,7 +342,11 @@ export function DataTable<T>({
 
   return (
     <div
-      className={cn('w-full', alturaMaxima ? 'overflow-auto scrollbar-thin' : 'overflow-x-auto', className)}
+      className={cn(
+        'w-full rounded-md border border-line-default bg-surface-card shadow-card',
+        alturaMaxima ? 'overflow-auto scrollbar-thin' : 'overflow-x-auto',
+        className,
+      )}
       style={{
         maxHeight: typeof alturaMaxima === 'number' ? `${alturaMaxima}px` : alturaMaxima,
       }}

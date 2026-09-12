@@ -14,10 +14,10 @@ export const metadata: Metadata = {
     'Protótipo demonstrativo de plataforma de inteligência de risco de crédito e prevenção à inadimplência no agronegócio. Dados simulados.',
 };
 
-/** Dark-only (D7): declarado no `<html>` para o navegador pintar os controles nativos certo. */
+/** Light (D7 revisto): declarado no `<html>` para o navegador pintar os controles nativos certo. */
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#0B0F14',
+  colorScheme: 'light',
+  themeColor: '#F5F6FB',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

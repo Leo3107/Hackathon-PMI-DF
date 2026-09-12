@@ -22,7 +22,6 @@
  */
 
 import type {
-  Alerta,
   AvaliacaoDeRisco,
   Cliente,
   ClienteAvaliado,
@@ -34,7 +33,6 @@ import type {
   RespostaDueDiligence,
   RespostaSaude,
   RespostaSimulacao,
-  ResumoCarteira,
   SnapshotHistorico,
   TipoEvento,
 } from '@/types';
@@ -142,19 +140,8 @@ export async function verificarSaude(signal?: AbortSignal): Promise<RespostaSaud
 }
 
 // ---------------------------------------------------------------------------
-// Carteira e clientes
+// Clientes
 // ---------------------------------------------------------------------------
-
-export function obterCarteira(
-  sessao?: EstadoDeSessaoApi,
-  signal?: AbortSignal,
-): Promise<ResumoCarteira> {
-  return requisitar<ResumoCarteira>('/api/carteira', {
-    metodo: 'POST',
-    corpo: comSessao(sessao),
-    signal,
-  });
-}
 
 export function listarClientes(
   sessao?: EstadoDeSessaoApi,
@@ -210,23 +197,8 @@ export function obterEventos(
 }
 
 // ---------------------------------------------------------------------------
-// Alertas e auditoria
+// Auditoria
 // ---------------------------------------------------------------------------
-
-export function listarAlertas(
-  sessao?: EstadoDeSessaoApi,
-  signal?: AbortSignal,
-): Promise<Alerta[]> {
-  return requisitar<Alerta[]>('/api/alertas', {
-    metodo: 'POST',
-    corpo: comSessao(sessao),
-    signal,
-  });
-}
-
-export function listarAuditoria(signal?: AbortSignal): Promise<RegistroAuditoria[]> {
-  return requisitar<RegistroAuditoria[]>('/api/auditoria', { signal });
-}
 
 /**
  * Registra a decisão do analista. O servidor não persiste (D3 · sem banco); a trilha vive em

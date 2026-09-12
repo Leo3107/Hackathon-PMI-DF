@@ -25,7 +25,7 @@ export function BarraSuperior() {
   const pathname = usePathname();
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line-default bg-surface-card px-4">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line-default bg-surface-card px-4 shadow-card">
       <Trilha />
       <BuscaGlobal />
       <CustoDoLlm />

@@ -1,7 +1,5 @@
 """`/api/auditoria` — trilha de decisão do analista (`03-ux-e-telas.md` §8).
 
-Leitura em `GET`: a trilha não depende do estado de sessão do cálculo.
-
 Escrita em `POST`: a interface manda a decisão e o servidor **carimba** id,
 data-hora e `divergiuDaRecomendacao` pela tabela de equivalência da §8.3. A
 tela não decide o que é divergência — se decidisse, dois clientes do mesmo
@@ -17,21 +15,10 @@ from flask import Blueprint
 from pydantic import ValidationError
 from repository import ClienteNaoEncontrado
 
-from .comum import (
-    corpo_da_requisicao,
-    lista_serializada,
-    repositorio,
-    resposta,
-    serializar,
-)
+from .comum import corpo_da_requisicao, repositorio, resposta, serializar
 from .erros import CodigoErro, ErroApi
 
 auditoria_bp = Blueprint("auditoria", __name__)
-
-
-@auditoria_bp.get("/api/auditoria")
-def listar_auditoria():
-    return resposta(lista_serializada(repositorio().listar_auditoria()))
 
 
 @auditoria_bp.post("/api/auditoria")

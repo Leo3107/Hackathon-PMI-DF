@@ -81,7 +81,14 @@ def criar_app(
     app.config["JSON_SORT_KEYS"] = False
     app.json.sort_keys = False
 
-    app.extensions[CHAVE_REPOSITORIO] = repositorio or RepositorioEmMemoria(fonte)
+    repo = repositorio or RepositorioEmMemoria(fonte)
+    app.extensions[CHAVE_REPOSITORIO] = repo
+    if not testando:
+        # Sem isto a carteira sobe vazia a cada reinício: as declarações de
+        # operação vivem só no processo (D3), e o CSV de Features não traz
+        # nenhuma (`routes/semeadura.py`). `/api/carteira/semear` continua
+        # disponível para re-semear ou trocar a amostra manualmente.
+        repo.semear_carteira_de_demonstracao()
 
     registrar_blueprints(app)
     _registrar_saude(app)

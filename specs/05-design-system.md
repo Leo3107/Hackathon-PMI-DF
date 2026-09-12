@@ -2,9 +2,11 @@
 
 > Sistema visual e catálogo de primitivos do **Lastro**. Vive em `app/globals.css` (tokens),
 > `components/ui/` (primitivos), `components/risk/` (compostos de risco), `lib/format.ts`
-> (formatadores) e `lib/chart-theme.ts` (Recharts). **Dark-only, design system próprio,
-> zero bibliotecas de componentes de terceiros** (`00-decisoes.md` D9). Todo valor abaixo é
-> literal: copiar, não interpretar.
+> (formatadores) e `lib/chart-theme.ts` (Recharts). **Light, comercial, design system próprio,
+> zero bibliotecas de componentes de terceiros** (`00-decisoes.md` D9). Pivot de outubro/2026:
+> saiu do dark-only "cockpit" original para uma linguagem clara, colorida e convidativa (referência
+> monday.com), mantendo a redundância de canal (cor + rótulo + ícone) e a densidade de dado como
+> regras funcionais, não estéticas. Todo valor abaixo é literal: copiar, não interpretar.
 
 Referências: `00-decisoes.md` D3, D9, D11.5–7 · `01-modelo-de-dados.md` (enums `Rating`,
 `Severidade`, `Tendencia`, `NaturezaGarantia`) · `02-motor-de-risco.md` §5 (faixas), §8 (veto), §10 (coberturas), §11 (delta)
@@ -13,15 +15,23 @@ Referências: `00-decisoes.md` D3, D9, D11.5–7 · `01-modelo-de-dados.md` (enu
 
 ## 0. Princípios (o que o implementador precisa internalizar)
 
-1. **Ferramenta, não vitrine.** O usuário é um analista de crédito que abre isto oito horas por dia.
-   Densidade alta, ruído zero, hierarquia tipográfica faz o trabalho que cor e sombra fariam num template.
+1. **Ferramenta comercial, não cockpit.** O usuário é um analista de crédito que abre isto oito
+   horas por dia — mas isso não obriga a interface a parecer um painel industrial. Densidade alta e
+   hierarquia tipográfica continuam fazendo o trabalho pesado; cor, raio e sombra suave fazem o
+   produto parecer cuidado e comercialmente atraente, não só funcional.
 2. **Cor é semântica ou é neutra.** Verde, âmbar, laranja e vermelho significam risco — sempre e só.
-   Ciano-aço significa "a interface" (navegação, foco, ação, marca). Todo o resto é cinza-azulado.
+   Índigo significa "a interface" (navegação, foco, ação, marca). Todo o resto é cinza-azulado.
 3. **Nenhum estado de risco depende só de cor.** Cor + rótulo textual + ícone, sempre os três (§3).
+   Isso não muda com o visual — é regra de acessibilidade, não de estética.
 4. **Números alinham.** `tabular-nums` em toda coluna numérica, valores monetários alinhados à direita.
-5. **Superfícies se distinguem por tom, não por sombra.** Uma sombra permitida (§1.6), sem blur grande.
-6. **Cantos discretos.** Raio máximo 8px. Nada é "pill" exceto o cursor do `ScoreGauge`.
-7. **Movimento só onde comunica** (§9): pipeline da Nova Análise, streaming de prosa, transições de estado.
+5. **Superfícies se distinguem por tom e por elevação.** Cartão branco sobre canvas cinza-claro,
+   com sombra suave e tingida de frio (`shadow-card`/`raised`/`overlay`) — nunca glass, nunca blur
+   difuso descontrolado.
+6. **Cantos generosos, com intenção.** Raio de card/input segue a escala §1.8; badge, rating, chip e
+   botão são pill (`radius-pill`) — deixou de ser exceção única do cursor do `ScoreGauge`.
+7. **Movimento só onde comunica** (§9): pipeline da Nova Análise, streaming de prosa, transições de
+   estado, e agora também microinteração de hover/press em botão e card (leve, sempre atrás de
+   `prefers-reduced-motion`).
 
 ### Proibições verificáveis em code review
 
@@ -29,10 +39,11 @@ Referências: `00-decisoes.md` D3, D9, D11.5–7 · `01-modelo-de-dados.md` (enu
 |---|---|
 | Gradientes, exceto o padrão hachurado do veto (§7.7) | `grep -rn "gradient" app components` deve retornar apenas `components/risk/ScoreGauge.tsx` |
 | `backdrop-filter` / glassmorphism | `grep -rn "backdrop" app components` retorna vazio |
-| Sombras com blur > 8px | `grep -rn "shadow-" ` só pode casar `shadow-raised` e `shadow-overlay` |
-| `rounded-xl`, `rounded-2xl`, `rounded-3xl`, `rounded-full` (exceto cursor do gauge e avatar) | grep |
+| Sombras fora dos tokens do sistema | `grep -rn "shadow-" ` só pode casar `shadow-card`, `shadow-raised` e `shadow-overlay` |
+| `rounded-xl`, `rounded-2xl`, `rounded-3xl` (raios fora da escala §1.8) | grep — `rounded-full` deixou de ser proibido: é o raio padrão de badge/rating/chip/botão |
+| Zebra em `DataTable` (linhas alternadas de cor) | leitura de `components/ui/DataTable.tsx` — segue banida |
 | Emoji em JSX/strings de UI | grep por faixa Unicode `[\u{1F300}-\u{1FAFF}]` em `app components lib` |
-| Verde/âmbar/laranja/vermelho fora de `components/risk/` e dos tokens `--color-risk-*` | grep por `#3DD68C`, `#F2C037`, `#F28C3B`, `#F47474` e por `risk-` fora de `components/risk/` |
+| Verde/âmbar/laranja/vermelho fora de `components/risk/` e dos tokens `--color-risk-*` | grep por `#15803D`, `#A16207`, `#9A3412`, `#B91C1C` e por `risk-` fora de `components/risk/` |
 | Importar `@radix-ui`, `shadcn`, `@headlessui`, `@mui`, `antd`, `chakra` | `package.json` |
 | Cores hexadecimais literais em componentes (fora de `globals.css` e `lib/chart-theme.ts`) | grep `#[0-9A-Fa-f]{6}` em `components/` |
 
@@ -48,97 +59,103 @@ Bloco completo, pronto para colar. Tailwind v4 gera as utilities a partir do `@t
 
 @theme {
   /* ------------------------------------------------------------------ */
-  /* 1.1 Superfícies — escala fria, quase-preta, nunca #000               */
+  /* 1.1 Superfícies — canvas claro e frio, cards brancos                 */
   /* ------------------------------------------------------------------ */
-  --color-surface-page:     #0B0F14;  /* fundo da aplicação                         */
-  --color-surface-card:     #11161D;  /* card padrão                                */
-  --color-surface-raised:   #171E27;  /* drawer, modal, popover, tooltip, dropdown  */
-  --color-surface-input:    #0D1218;  /* campos de formulário (mais fundo que card) */
-  --color-surface-hover:    #1B232E;  /* hover de linha/item                        */
-  --color-surface-sunken:   #080B0F;  /* trilhos de progresso, código, área de log  */
-  --color-surface-overlay:  rgb(4 6 9 / 0.64); /* scrim atrás de modal/drawer       */
+  --color-surface-page:     #F5F6FB;  /* fundo da aplicação                         */
+  --color-surface-card:     #FFFFFF;  /* card padrão                                */
+  --color-surface-raised:   #FFFFFF;  /* drawer, modal, popover, tooltip, dropdown  */
+  --color-surface-input:    #FFFFFF;  /* campos de formulário                       */
+  --color-surface-hover:    #F0F2FA;  /* hover de linha/item                        */
+  --color-surface-sunken:   #ECEEF6;  /* trilhos de progresso, código, área de log  */
+  --color-surface-overlay:  rgb(21 23 33 / 0.48); /* scrim atrás de modal/drawer    */
 
   /* ------------------------------------------------------------------ */
   /* 1.2 Bordas                                                          */
   /* ------------------------------------------------------------------ */
-  --color-line-subtle:   #1E2833;  /* divisórias internas, grid de gráfico          */
-  --color-line-default:  #283442;  /* borda de card e input                          */
-  --color-line-strong:   #3A4756;  /* borda de hover/ativo, cabeçalho de tabela      */
+  --color-line-subtle:   #EAECF4;  /* divisórias internas, grid de gráfico          */
+  --color-line-default:  #DDE0EC;  /* borda de card e input                          */
+  --color-line-strong:   #C2C7DA;  /* borda de hover/ativo, cabeçalho de tabela      */
 
   /* ------------------------------------------------------------------ */
   /* 1.3 Texto                                                           */
   /* ------------------------------------------------------------------ */
-  --color-fg-primary:    #E6EBF0;  /* 16,0:1 sobre page · 15,1:1 sobre card          */
-  --color-fg-secondary:  #A3AEBB;  /* 8,5:1 · 8,1:1                                  */
-  --color-fg-tertiary:   #7B889A;  /* 5,3:1 · 5,0:1 · 4,7:1 sobre raised             */
-  --color-fg-disabled:   #66727F;  /* 3,7:1 — isento (WCAG 1.4.3, componente inativo)*/
-  --color-fg-inverse:    #0B0F14;  /* texto sobre botão de acento e badges sólidos   */
+  --color-fg-primary:    #16181F;  /* quase-preto, nunca #000                        */
+  --color-fg-secondary:  #565D70;
+  --color-fg-tertiary:   #7C8298;
+  --color-fg-disabled:   #A4A9BB;
+  --color-fg-inverse:    #FFFFFF;  /* texto sobre botão de acento e badges sólidos   */
 
   /* ------------------------------------------------------------------ */
-  /* 1.4 Acento de marca — azul-aço / ciano técnico                       */
+  /* 1.4 Acento de marca — índigo vibrante                                */
   /*     Reservado a: navegação ativa, foco, links, ação primária, marca */
   /* ------------------------------------------------------------------ */
-  --color-accent-300:  #7CCDF0;  /* hover de link, texto sobre tint          10,3:1 */
-  --color-accent-400:  #4DB8E5;  /* texto/ícone de acento, link, foco         8,1:1 */
-  --color-accent-500:  #2FA4D6;  /* fundo de botão primário (texto inverse)   6,8:1 */
-  --color-accent-600:  #1F86B3;  /* botão primário :active (texto inverse)    4,7:1 */
-  --color-accent-tint: #192D39;  /* = accent-400 @14% sobre card. Linha selecionada, nav ativa */
-  --color-accent-line: #2A5A73;  /* borda de item ativo/selecionado                 */
+  --color-accent-300:  #A5ACFA;  /* tint de foco, hover suave                       */
+  --color-accent-400:  #6366F1;  /* ícone/acento secundário                         */
+  --color-accent-500:  #4F46E5;  /* fundo de botão primário, nav ativa, links       */
+  --color-accent-600:  #4338CA;  /* botão primário :hover/:active                  */
+  --color-accent-tint: #EEF0FE;  /* linha selecionada, fundo de nav ativa           */
+  --color-accent-line: #C7CBFB;  /* borda de item ativo/selecionado                 */
 
   /* ------------------------------------------------------------------ */
   /* 1.5 Semântica de risco — EXCLUSIVA. Ver §2.                          */
-  /*     Tints são pré-misturados a 14% sobre surface-card (opacos):     */
-  /*     contraste determinístico, sem depender da superfície abaixo.    */
+  /*     Tons vivos, calibrados para ≥4,5:1 sobre branco (texto/ícone) e, */
+  /*     por simetria de contraste, ≥4,5:1 como texto branco sobre o tom  */
+  /*     sólido (badge variante "solido").                                */
   /* ------------------------------------------------------------------ */
-  --color-risk-a:        #3DD68C;  /* A · Baixo risco  · melhorando                 */
-  --color-risk-a-tint:   #17312D;
-  --color-risk-a-line:   #23694A;
+  --color-risk-a:        #15803D;  /* A · Baixo risco  · melhorando                 */
+  --color-risk-a-tint:   #E6F4EB;
+  --color-risk-a-line:   #7FC79A;
 
-  --color-risk-b:        #F2C037;  /* B · Risco moderado · severidade MÉDIA         */
-  --color-risk-b-tint:   #312E21;
-  --color-risk-b-line:   #6E5A22;
+  --color-risk-b:        #A16207;  /* B · Risco moderado · severidade MÉDIA         */
+  --color-risk-b-tint:   #FBF0D9;
+  --color-risk-b-line:   #DDAB3D;
 
-  --color-risk-c:        #F28C3B;  /* C · Risco elevado · ALTA · deteriorando       */
-  --color-risk-c-tint:   #312721;
-  --color-risk-c-line:   #6E4623;
+  --color-risk-c:        #9A3412;  /* C · Risco elevado · ALTA · deteriorando       */
+  --color-risk-c-tint:   #FBE7DE;
+  --color-risk-c-line:   #E2916A;
 
-  --color-risk-d:        #F47474;  /* D · Risco crítico · CRÍTICA · deter. acelerada · veto */
-  --color-risk-d-tint:   #312329;
-  --color-risk-d-line:   #6F3A3E;
+  --color-risk-d:        #B91C1C;  /* D · Risco crítico · CRÍTICA · deter. acelerada · veto */
+  --color-risk-d-tint:   #FBE2E2;
+  --color-risk-d-line:   #E48A8A;
 
-  --color-risk-neutral:      #A3AEBB;  /* BAIXA/informativa · estável (= fg-secondary) */
-  --color-risk-neutral-tint: #252B33;
-  --color-risk-neutral-line: #3A4756;
+  --color-risk-neutral:      #475569;  /* BAIXA/informativa · estável                */
+  --color-risk-neutral-tint: #EEF1F5;
+  --color-risk-neutral-line: #B8C0CE;
 
   /* ------------------------------------------------------------------ */
   /* 1.6 Paleta categórica — séries SEM significado de risco (§8.4)     */
+  /* Fica deliberadamente fora da família verde/âmbar/laranja/vermelho    */
+  /* pra nunca ser confundida com risco: índigo/azul/ciano/violeta.       */
   /* ------------------------------------------------------------------ */
-  --color-cat-1: #4DB8E5;  /* ciano (acento)   8,1:1 sobre card */
-  --color-cat-2: #7D8CF0;  /* índigo           6,0:1 */
-  --color-cat-3: #A48BF2;  /* violeta          6,5:1 */
-  --color-cat-4: #D98BC7;  /* orquídea         7,3:1 */
-  --color-cat-5: #8FA3B8;  /* ardósia          7,0:1 */
-  --color-cat-6: #C9B79C;  /* areia            9,3:1 — último recurso */
+  --color-cat-1: #4F46E5;  /* índigo (= acento)                */
+  --color-cat-2: #2563EB;  /* azul                             */
+  --color-cat-3: #0EA5E9;  /* céu                              */
+  --color-cat-4: #06B6D4;  /* ciano                            */
+  --color-cat-5: #7C3AED;  /* violeta                          */
+  --color-cat-6: #94A3B8;  /* ardósia — último e "outras"      */
 
   /* ------------------------------------------------------------------ */
   /* 1.7 Tipografia (famílias vêm do next/font, ver §4.1)                */
   /* ------------------------------------------------------------------ */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-sans:    var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-outfit), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
 
   /* ------------------------------------------------------------------ */
-  /* 1.8 Raios — teto 8px                                                 */
+  /* 1.8 Raios — comercial e amigável, com pill de verdade                */
   /* ------------------------------------------------------------------ */
-  --radius-xs: 2px;   /* barras, ticks                        */
-  --radius-sm: 4px;   /* badge, chip, input, botão            */
-  --radius-md: 6px;   /* card, tile, tooltip                  */
-  --radius-lg: 8px;   /* modal, drawer, gauge container       */
+  --radius-xs:   6px;    /* barras, ticks                        */
+  --radius-sm:   10px;   /* input                                 */
+  --radius-md:   14px;   /* card, tile, tooltip                  */
+  --radius-lg:   18px;   /* modal, drawer, gauge container       */
+  --radius-pill: 999px;  /* badge, rating, chip, botão            */
 
   /* ------------------------------------------------------------------ */
-  /* 1.9 Sombras — apenas duas, sem blur difuso                           */
+  /* 1.9 Sombras — elevação suave, tingida de frio, sem virar glass       */
   /* ------------------------------------------------------------------ */
-  --shadow-raised:  0 0 0 1px var(--color-line-default), 0 1px 2px 0 rgb(0 0 0 / 0.40);
-  --shadow-overlay: 0 0 0 1px var(--color-line-strong), 0 8px 8px -4px rgb(0 0 0 / 0.55);
+  --shadow-card:    0 1px 2px 0 rgb(23 26 43 / 0.04), 0 1px 3px 0 rgb(23 26 43 / 0.08);
+  --shadow-raised:  0 4px 12px -2px rgb(23 26 43 / 0.10), 0 2px 4px -2px rgb(23 26 43 / 0.06);
+  --shadow-overlay: 0 20px 40px -8px rgb(23 26 43 / 0.22), 0 8px 16px -8px rgb(23 26 43 / 0.10);
 
   /* ------------------------------------------------------------------ */
   /* 1.10 Movimento (§9)                                                  */
@@ -150,6 +167,7 @@ Bloco completo, pronto para colar. Tailwind v4 gera as utilities a partir do `@t
   --ease-standard:  cubic-bezier(0.2, 0, 0, 1);
   --ease-exit:      cubic-bezier(0.4, 0, 1, 1);
   --ease-gauge:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1); /* hover/press de botão e card */
 
   /* ------------------------------------------------------------------ */
   /* 1.11 Layout                                                          */
@@ -170,7 +188,7 @@ Bloco completo, pronto para colar. Tailwind v4 gera as utilities a partir do `@t
 
 /* Base ------------------------------------------------------------------ */
 html {
-  color-scheme: dark;                 /* scrollbars, inputs nativos, seleção */
+  color-scheme: light;                /* scrollbars, inputs nativos, seleção */
   background: var(--color-surface-page);
   color: var(--color-fg-primary);
   font-family: var(--font-sans);
@@ -233,59 +251,52 @@ porque significam a mesma intensidade de risco — isso é intencional e ensina 
 
 ### 2.2 Pares texto/fundo e contraste calculado
 
-Método: WCAG 2.x luminância relativa, `(L1 + 0,05) / (L2 + 0,05)`. Tints são opacos
-(pré-misturados a 14% sobre `#11161D`), portanto o contraste é o mesmo em qualquer contexto.
-Calculado em 2026-09-12 por script; valores arredondados a duas casas.
+> **Nota do pivot (redesign light/comercial):** a tabela abaixo foi recalculada à mão para o novo
+> conjunto de tokens, com margem de segurança deliberada (erra para o lado mais escuro/mais
+> contrastado quando a fonte não tinha certeza absoluta do valor exato). É uma **primeira passada**,
+> não a mesma auditoria por script que gerou a tabela original — antes de fechar o pivot,
+> revalidar com o mesmo script de contraste (WCAG 2.x, `(L1 + 0,05) / (L2 + 0,05)`) e substituir os
+> valores abaixo pelos calculados.
 
-| Uso | Texto | Fundo | Razão | Mín. exigido | Status |
+Como os quatro tons de risco (`risk-a/b/c/d`) foram escolhidos para bater ≥4,5:1 contra branco, o
+contraste é simétrico: o mesmo tom funciona como **texto sobre card branco** e, invertido, como
+**texto branco sobre o próprio tom** (badge `solido`) — não é preciso um par de cores por direção.
+
+| Uso | Texto | Fundo | Razão (estimada) | Mín. exigido | Status |
 |---|---|---|---|---|---|
-| A texto sobre card | `#3DD68C` | `#11161D` | **9,68:1** | 4,5 | passa |
-| A badge (texto sobre tint) | `#3DD68C` | `#17312D` | **7,40:1** | 4,5 | passa |
-| A sólido (texto inverso sobre cor) | `#0B0F14` | `#3DD68C` | **10,25:1** | 4,5 | passa |
-| B texto sobre card | `#F2C037` | `#11161D` | **10,70:1** | 4,5 | passa |
-| B badge | `#F2C037` | `#312E21` | **8,02:1** | 4,5 | passa |
-| B sólido | `#0B0F14` | `#F2C037` | **11,32:1** | 4,5 | passa |
-| C texto sobre card | `#F28C3B` | `#11161D` | **7,43:1** | 4,5 | passa |
-| C badge | `#F28C3B` | `#312721` | **5,95:1** | 4,5 | passa |
-| C sólido | `#0B0F14` | `#F28C3B` | **7,86:1** | 4,5 | passa |
-| D texto sobre card | `#F47474` | `#11161D` | **6,57:1** | 4,5 | passa |
-| D badge | `#F47474` | `#312329` | **5,41:1** | 4,5 | passa |
-| D sólido | `#0B0F14` | `#F47474` | **6,95:1** | 4,5 | passa |
-| Neutro texto sobre card | `#A3AEBB` | `#11161D` | **8,07:1** | 4,5 | passa |
-| Neutro badge | `#A3AEBB` | `#252B33` | **6,34:1** | 4,5 | passa |
-| Texto sobre superfície `raised` (drawer) | | | | | |
-| A sobre raised | `#3DD68C` | `#171E27` | **8,95:1** | 4,5 | passa |
-| B sobre raised | `#F2C037` | `#171E27` | **9,89:1** | 4,5 | passa |
-| C sobre raised | `#F28C3B` | `#171E27` | **6,86:1** | 4,5 | passa |
-| D sobre raised | `#F47474` | `#171E27` | **6,07:1** | 4,5 | passa |
+| A texto/ícone sobre card | `#15803D` | `#FFFFFF` | **≈5,1:1** | 4,5 | passa |
+| A sólido (texto inverso sobre cor) | `#FFFFFF` | `#15803D` | **≈5,1:1** | 4,5 | passa |
+| B texto/ícone sobre card | `#A16207` | `#FFFFFF` | **≈5,0:1** | 4,5 | passa |
+| B sólido | `#FFFFFF` | `#A16207` | **≈5,0:1** | 4,5 | passa |
+| C texto/ícone sobre card | `#9A3412` | `#FFFFFF` | **≈6,3:1** | 4,5 | passa |
+| C sólido | `#FFFFFF` | `#9A3412` | **≈6,3:1** | 4,5 | passa |
+| D texto/ícone sobre card | `#B91C1C` | `#FFFFFF` | **≈6,3:1** | 4,5 | passa |
+| D sólido | `#FFFFFF` | `#B91C1C` | **≈6,3:1** | 4,5 | passa |
+| Neutro texto sobre card | `#475569` | `#FFFFFF` | **≈7,5:1** | 4,5 | passa |
 | Acento e neutros | | | | | |
-| Acento texto/link sobre card | `#4DB8E5` | `#11161D` | **8,05:1** | 4,5 | passa |
-| Botão primário (texto inverso sobre accent-500) | `#0B0F14` | `#2FA4D6` | **6,77:1** | 4,5 | passa |
-| Botão primário `:active` (accent-600) | `#0B0F14` | `#1F86B3` | **4,69:1** | 4,5 | passa |
-| Texto primário sobre linha selecionada | `#E6EBF0` | `#192D39` | **12,26:1** | 4,5 | passa |
-| Texto terciário sobre raised | `#7B889A` | `#171E27` | **4,66:1** | 4,5 | passa |
-| Texto desabilitado sobre card | `#66727F` | `#11161D` | **3,70:1** | isento | ver nota |
-| Borda default vs card (não-texto) | `#283442` | `#11161D` | 1,44:1 | 3,0 (1.4.11) | ver nota |
-| Faixas do gauge (cor a 28% sobre card) | `#3DD68C` | `#1D4C3C` | 5,20:1 | 3,0 (gráfico) | passa |
+| Acento texto/link sobre card | `#4338CA` (accent-600) | `#FFFFFF` | **≈8,4:1** | 4,5 | passa |
+| Botão primário (texto inverso sobre accent-500) | `#FFFFFF` | `#4F46E5` | **≈5,5:1** | 4,5 | passa |
+| Botão primário `:hover`/`:active` (accent-600) | `#FFFFFF` | `#4338CA` | **≈8,4:1** | 4,5 | passa |
+| Texto secundário sobre card | `#565D70` | `#FFFFFF` | **≈7,0:1** | 4,5 | passa |
+| Texto terciário sobre card (caption) | `#7C8298` | `#FFFFFF` | **≈4,4:1** | 4,5 | no limite — ver nota |
+| Texto desabilitado sobre card | `#A4A9BB` | `#FFFFFF` | **≈2,7:1** | isento | ver nota |
+| Ícone de acento decorativo (accent-400) | `#6366F1` | `#FFFFFF` | **≈3,9:1** | 3,0 (não-texto) | passa como ícone; não usar como texto pequeno |
 
-**Pares que não atingiram 4,5:1 na primeira rodada e como foram resolvidos:**
+**Notas de resolução:**
 
-1. **Texto claro `#E6EBF0` sobre `accent-600 #1F86B3` = 3,42:1 — reprovado.** Resolução: o botão
-   primário **nunca** usa texto claro. Usa `fg-inverse #0B0F14` sobre `accent-500` (6,77:1),
-   hover clareia para `accent-400` (8,51:1) e `:active` escurece para `accent-600` (4,69:1, ainda
-   acima do mínimo). `accent-600` fica proibido como fundo de texto claro.
-2. **Vermelho candidato `#F16B6B` sobre tint a 16% = 4,91:1** — passava, mas com margem de 0,4.
-   Resolução: vermelho D fixado em `#F47474` e tint a 14% → 5,41:1 sobre card e 4,95:1 se o mesmo
-   tint fosse recalculado sobre `raised`. Como os tints são opacos, o valor efetivo é sempre 5,41:1.
-3. **Texto desabilitado `#4B5664` = 2,43:1.** Isento pela WCAG 1.4.3 (componente inativo), mas
-   ficava ilegível. Resolução: elevado para `#66727F` (3,70:1). Regra: `fg-disabled` só em controles
-   `disabled`; nunca em conteúdo informativo. Placeholder de input usa `fg-tertiary`, não `fg-disabled`.
-4. **Borda default vs card = 1,44:1.** Bordas de card não são componente de interface acionável
-   (isentas de 1.4.11); servem à separação de superfície, reforçada pela diferença de tom
-   page→card. Controles acionáveis (input, botão secundário, chip) usam `line-strong` no estado
-   normal quando o fundo é `surface-card`… e o **anel de foco** `accent-400` (8,05:1) garante a
-   percepção do estado. Inputs sobre `surface-input` (#0D1218) com borda `line-default` ganham
-   contraste adicional pelo fundo mais escuro.
+1. **`accent-500` é o único fundo de botão primário com texto claro fixo.** Como no sistema
+   original, o texto do botão primário nunca alterna entre claro/escuro por variante — é sempre
+   `fg-inverse` (branco), e tanto `accent-500` (repouso) quanto `accent-600` (hover/active) foram
+   escolhidos para passar 4,5:1 com branco, então não existe transição que rompa contraste.
+2. **`fg-tertiary` fica no limite (~4,4:1)**, igual ao sistema original já aceitava para texto
+   terciário sobre `raised`. Mantém-se a regra: `fg-tertiary` é para legendas/metadados curtos, não
+   para texto de leitura longa; se a revalidação por script apontar abaixo de 4,5:1, escurecer um
+   ou dois tons.
+3. **`fg-disabled` fica isento (WCAG 1.4.3, componente inativo)**, igual antes. Regra mantida:
+   `fg-disabled` só em controles `disabled`, nunca em conteúdo informativo; placeholder de input
+   usa `fg-tertiary`.
+4. **`accent-400` é só ícone/decoração**, nunca texto pequeno — por isso o piso exigido é 3:1
+   (não-texto), não 4,5:1.
 
 ---
 

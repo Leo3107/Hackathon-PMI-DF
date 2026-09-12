@@ -122,7 +122,7 @@ export function BlocoDecisao({ cliente, avaliacao }: BlocoDecisaoProps) {
       <SectionHeader
         nivel={2}
         titulo={concessao ? 'Decisão de concessão' : 'Decisão do analista'}
-        descricao={`Registrada em nome de ${PERSONA.nome}. A trilha completa fica em /auditoria.`}
+        descricao={`Registrada em nome de ${PERSONA.nome}. A trilha completa fica salva nesta sessão.`}
         meta={<PenLine size={14} strokeWidth={2} aria-hidden="true" />}
       />
       <h2 id="titulo-decisao" className="sr-only">

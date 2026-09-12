@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { ListaDeClientes } from '@/components/carteira';
+import { ListaDeClientes } from '@/components/clientes';
 
 export const metadata: Metadata = {
   title: 'Clientes',

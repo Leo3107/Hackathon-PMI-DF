@@ -4,25 +4,11 @@
  * Os tipos de `dominio.ts`, `avaliacao.ts` e `eventos.ts` são transcrição de
  * `specs/01-modelo-de-dados.md`. Os deste arquivo cobrem o que só existe na **fronteira**:
  * envelopes de erro (`03-ux-e-telas.md` §9.4), estado de sessão (`00-decisoes.md` D3),
- * protocolo NDJSON e ledger de custo (`04-camada-llm.md` §2.3 e §5.5), e os agregados de
- * carteira que `/carteira` consome (`03-ux-e-telas.md` §2).
- *
- * ⚠️ Os agregados (`ResumoCarteira`, `ClienteAvaliado`) são o contrato **proposto por WS6**
- * para as rotas de dados do Flask, que ainda não existem. O WS3 deve espelhá-los; qualquer
- * divergência se resolve aqui, não na tela.
+ * protocolo NDJSON e ledger de custo (`04-camada-llm.md` §2.3 e §5.5).
  */
 
 import type { AvaliacaoDeRisco, ComparacaoDeAvaliacoes } from './avaliacao';
-import type {
-  Cliente,
-  EstadoCliente,
-  Rating,
-  Severidade,
-  StatusRedFlag,
-  Tendencia,
-  TipoEvento,
-} from './dominio';
-import type { Alerta } from './eventos';
+import type { Cliente, StatusRedFlag, TipoEvento } from './dominio';
 
 // ---------------------------------------------------------------------------
 // Erros
@@ -83,89 +69,6 @@ export interface ClienteAvaliado {
   alertasNaoLidos: number;
 }
 
-export interface FatiaDeConcentracao {
-  rotulo: string;
-  exposicao: number;
-  /** 0..1 */
-  pct: number;
-  clientes: number;
-}
-
-export interface PontoMatrizDeRisco {
-  clienteId: string;
-  razaoSocial: string;
-  /** 0..1 */
-  pd12m: number;
-  exposicaoTotal: number;
-  exposicaoEmRiscoEmRJ: number;
-  rating: Rating;
-  temVeto: boolean;
-}
-
-export interface LinhaDinheiroEmRisco {
-  clienteId: string;
-  razaoSocial: string;
-  uf: string;
-  exposicaoTotal: number;
-  exposicaoEmRisco: number;
-  exposicaoEmRiscoEmRJ: number;
-  rating: Rating;
-  temVeto: boolean;
-  tendencia: Tendencia;
-}
-
-export type MotivoAtencao = 'VETO_ATIVO' | 'MAIOR_QUEDA_90D' | 'ALERTA_CRITICO';
-
-/** Cartão da faixa de atenção imediata (`03-ux-e-telas.md` §2.2). Seleção é do motor, não da tela. */
-export interface CartaoDeAtencao {
-  motivo: MotivoAtencao;
-  eyebrow: string;
-  clienteId: string;
-  razaoSocial: string;
-  /** Uma linha de causa nomeada. */
-  causa: string;
-  /** Uma linha com o número financeiro relevante, já formatado pelo Flask. */
-  numero: string;
-  acao: string;
-  severidade: Severidade;
-}
-
-export interface ResumoCarteira {
-  /** ISO date. */
-  dataReferencia: string;
-  /** ISO datetime da última varredura — exibido quando não há atenção imediata. */
-  ultimaVarredura: string;
-  atencaoImediata: CartaoDeAtencao[];
-  exposicaoTotal: number;
-  exposicaoAVencer90d: number;
-  exposicaoEmRisco: number;
-  exposicaoEmRiscoEmRJ: number;
-  exposicaoCritica: number;
-  /** 0..1 */
-  pctExposicaoEmRisco: number;
-  /** 0..1 */
-  pctExposicaoCritica: number;
-  clientesCriticos: number;
-  /** 0..1 */
-  coberturaExtraconcursal: number;
-  /** 0..1 */
-  coberturaTotal: number;
-  totalClientes: number;
-  clientesPorEstado: Record<EstadoCliente, number>;
-  clientesPorRating: Record<Rating, { clientes: number; exposicao: number }>;
-  alertas30d: { total: number; porSeveridade: Record<Severidade, number> };
-  deterioracao: {
-    clientes: number;
-    /** Limiar em pontos usado na contagem (ex.: 25). */
-    limiarPontos: number;
-    aceleradas: number;
-  };
-  concentracaoPorCultura: FatiaDeConcentracao[];
-  concentracaoPorUf: FatiaDeConcentracao[];
-  matrizDeRisco: PontoMatrizDeRisco[];
-  dinheiroEmRisco: LinhaDinheiroEmRisco[];
-}
-
 // ---------------------------------------------------------------------------
 // Due diligence (fluxo A)
 // ---------------------------------------------------------------------------
@@ -209,7 +112,6 @@ export interface RespostaSimulacao {
   deltaScore: number;
   avaliacao: AvaliacaoDeRisco;
   variacao: ComparacaoDeAvaliacoes;
-  alertaGerado?: Alerta;
 }
 
 // ---------------------------------------------------------------------------

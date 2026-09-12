@@ -308,5 +308,4 @@ def test_servico_sobe_sem_warehouse(fonte_simulada):
 def test_rotas_do_lastro_continuam_intactas(fonte_simulada):
     app = criar_app(fonte=fonte_simulada, testando=True)
     with app.test_client() as cliente:
-        assert cliente.get("/api/carteira").status_code == 200
         assert cliente.get("/api/clientes").status_code == 200

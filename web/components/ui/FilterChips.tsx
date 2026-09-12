@@ -76,7 +76,7 @@ export function FilterChips<V extends string>({
             aria-pressed={ativo}
             onClick={() => alternar(opcao.valor)}
             className={cn(
-              'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-sm border px-2 font-medium',
+              'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-full border px-2 font-medium',
               pele,
             )}
           >
@@ -96,7 +96,7 @@ export function FilterChips<V extends string>({
           type="button"
           onClick={() => aoMudar(new Set<V>())}
           className={cn(
-            'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-sm border px-2 font-medium',
+            'transicao-controle type-badge inline-flex h-6 items-center gap-1 rounded-full border px-2 font-medium',
             'border-line-default bg-transparent text-fg-secondary hover:border-line-strong hover:text-fg-primary',
           )}
         >

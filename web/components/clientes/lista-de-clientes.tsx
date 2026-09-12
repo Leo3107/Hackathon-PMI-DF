@@ -4,9 +4,8 @@
  * `/clientes` — lista de clientes (`03-ux-e-telas.md` §3).
  *
  * 13 colunas, 9 filtros exclusivos, busca por cliente/documento/município, 5 ordenações
- * visíveis mais 2 usadas apenas pelo drill-down da carteira, e **todo o estado na URL** (§3.6):
- * `?filtro=…&busca=…&ordem=…&dir=…`, mais os recortes `?rating=`, `?cultura=` e `?uf=` que os
- * gráficos de §2.7 produzem.
+ * visíveis mais 2 usadas só por link direto, e **todo o estado na URL** (§3.6):
+ * `?filtro=…&busca=…&ordem=…&dir=…`, mais os recortes `?rating=`, `?cultura=` e `?uf=`.
  *
  * Mudança de filtro usa `router.replace` — não empilha histórico. Navegar para um cliente usa
  * `push`, para que o "voltar" do navegador devolva a lista com os mesmos critérios.
@@ -210,7 +209,7 @@ export function ListaDeClientes() {
         id: 'municipio',
         cabecalho: 'Município/UF',
         largura: 150,
-        ocultarAbaixoDe: 1280,
+        ocultarAbaixoDe: 1536,
         celula: (linha) => (
           <span className="truncate" title={`${linha.municipio} · ${linha.uf}`}>
             {linha.municipio} <span className="text-fg-secondary">· {linha.uf}</span>
@@ -221,7 +220,7 @@ export function ListaDeClientes() {
         id: 'cultura',
         cabecalho: 'Cultura',
         largura: 140,
-        ocultarAbaixoDe: 1280,
+        ocultarAbaixoDe: 1536,
         celula: (linha) =>
           linha.culturas.length === 0 ? (
             <span className="text-fg-tertiary">{TRACO_LONGO}</span>

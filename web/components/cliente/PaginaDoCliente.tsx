@@ -141,9 +141,9 @@ export function PaginaDoCliente({ clienteId }: PaginaDoClienteProps) {
       {/* 3 — Stay Period (12 col) */}
       {stay?.ativo ? <PainelStayPeriod stayPeriod={stay} /> : null}
 
-      <div className="grid gap-4 xl:grid-cols-12">
+      <div className="grid gap-4 lg:grid-cols-12">
         {/* Coluna principal — 8 col */}
-        <div className="flex min-w-0 flex-col gap-4 xl:col-span-8">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-8">
           {/* 4 — o que mudou */}
           {daCarteira && variacao ? (
             <BlocoOQueMudou variacao={variacao} aoSelecionarFator={selecionarFator} />
@@ -214,7 +214,7 @@ export function PaginaDoCliente({ clienteId }: PaginaDoClienteProps) {
         {/* Coluna lateral — 4 col, sticky */}
         <aside
           aria-label="Resumo de risco e recomendação"
-          className="flex min-w-0 flex-col gap-4 xl:col-span-4 xl:sticky xl:top-[76px] xl:self-start"
+          className="flex min-w-0 flex-col gap-4 lg:col-span-4 lg:sticky lg:top-[76px] lg:self-start"
         >
           <CardDeScore
             avaliacao={avaliacao}
@@ -266,15 +266,15 @@ function EsqueletoDaPagina() {
         <span className="esqueleto h-4 w-[420px]" />
         <span className="esqueleto h-3 w-[300px]" />
       </div>
-      <div className="grid gap-4 xl:grid-cols-12">
-        <div className="flex flex-col gap-4 xl:col-span-8">
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="flex flex-col gap-4 lg:col-span-8">
           {[220, 260, 200, 240].map((altura, indice) => (
             <Card key={indice}>
               <span className="esqueleto block" style={{ height: altura }} />
             </Card>
           ))}
         </div>
-        <div className="flex flex-col gap-4 xl:col-span-4">
+        <div className="flex flex-col gap-4 lg:col-span-4">
           {[240, 160, 200, 220].map((altura, indice) => (
             <Card key={indice}>
               <span className="esqueleto block" style={{ height: altura }} />

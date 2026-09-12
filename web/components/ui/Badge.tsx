@@ -139,7 +139,7 @@ export function Badge(props: BadgeProps) {
   return (
     <span
       className={cn(
-        'type-badge inline-flex shrink-0 items-center rounded-sm whitespace-nowrap',
+        'type-badge inline-flex shrink-0 items-center rounded-full whitespace-nowrap',
         TAMANHO[tamanho],
         aparenciaClasses,
         resolvido.tracejado && 'border-dashed',

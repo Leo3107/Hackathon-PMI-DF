@@ -49,7 +49,7 @@ export function IconButton({
         type={type}
         aria-label={rotulo}
         className={cn(
-          'transicao-controle inline-flex shrink-0 items-center justify-center rounded-sm',
+          'transicao-controle inline-flex shrink-0 items-center justify-center rounded-full',
           TAMANHO[tamanho],
           VARIANTE[variante],
           className,

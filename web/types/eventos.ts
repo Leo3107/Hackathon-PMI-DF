@@ -36,22 +36,6 @@ export interface EventoDeRisco {
   evidenciaIds: string[];
 }
 
-export interface Alerta {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  /** ISO date. */
-  data: string;
-  severidade: Severidade;
-  titulo: string;
-  descricao: string;
-  impacto: string;
-  acaoRecomendada: string;
-  /** Estado de sessão: sobrescrito por `lib/sessao.ts` no cliente. */
-  lido: boolean;
-  eventoId?: string | null;
-}
-
 export interface RegistroAuditoria {
   id: string;
   clienteId: string;

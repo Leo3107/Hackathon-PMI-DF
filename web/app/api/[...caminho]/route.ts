@@ -5,15 +5,13 @@
  *
  * | Rota no Next (browser) | Rota no Flask |
  * |---|---|
- * | `POST /api/carteira` | `POST /api/carteira` |
  * | `POST /api/clientes` | `POST /api/clientes` |
  * | `GET  /api/clientes/:id` | `GET  /api/clientes/:id` |
  * | `POST /api/clientes/:id/avaliacao` | idem |
  * | `GET  /api/clientes/:id/historico` | idem |
  * | `POST /api/clientes/:id/eventos` | idem |
  * | `POST /api/clientes/:id/simular-evento` | idem |
- * | `POST /api/alertas` | idem |
- * | `GET/POST /api/auditoria` | idem |
+ * | `POST /api/auditoria` | idem |
  * | `POST /api/due-diligence` | idem |
  *
  * Por que um catch-all em vez de um arquivo por rota: o proxy é **puro** — não valida corpo,

@@ -65,7 +65,7 @@ export function Drawer({
         aria-labelledby={`${id}-titulo`}
         tabIndex={-1}
         className={cn(
-          'transicao-base absolute top-0 right-0 flex h-full flex-col',
+          'transicao-base absolute top-0 right-0 flex h-full flex-col rounded-l-lg',
           'border-l border-line-strong bg-surface-raised shadow-overlay outline-none',
           className,
         )}

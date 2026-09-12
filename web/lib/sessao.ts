@@ -63,6 +63,12 @@ export const SESSAO_VAZIA: EstadoDeSessao = {
 
 /** Espelho em memória: é o estado real quando `localStorage` não está disponível. */
 let memoria: EstadoDeSessao = SESSAO_VAZIA;
+/**
+ * Texto cru que originou `memoria`. `lerSessao` é o `getSnapshot` de `useSyncExternalStore`, que
+ * exige a **mesma referência** enquanto o estado não muda — devolver um objeto novo a cada
+ * chamada faz o React re-renderizar em laço até estourar ("Maximum update depth exceeded").
+ */
+let cruMemorizado: string | null = null;
 let armazenamentoUtilizavel: boolean | null = null;
 
 function armazenamento(): Storage | null {
@@ -110,7 +116,10 @@ export function lerSessao(): EstadoDeSessao {
   try {
     const cru = store.getItem(CHAVE_SESSAO);
     if (!cru) return memoria;
-    memoria = normalizar(JSON.parse(cru));
+    if (cru !== cruMemorizado) {
+      memoria = normalizar(JSON.parse(cru));
+      cruMemorizado = cru;
+    }
     return memoria;
   } catch {
     return memoria;
@@ -122,7 +131,9 @@ function gravar(proxima: EstadoDeSessao): EstadoDeSessao {
   const store = armazenamento();
   if (store) {
     try {
-      store.setItem(CHAVE_SESSAO, JSON.stringify(proxima));
+      const cru = JSON.stringify(proxima);
+      store.setItem(CHAVE_SESSAO, cru);
+      cruMemorizado = cru;
     } catch {
       // Cota estourada ou storage bloqueado: segue com o espelho em memória.
     }

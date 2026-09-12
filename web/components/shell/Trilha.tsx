@@ -3,7 +3,7 @@
 /**
  * Trilha de navegação da topbar (`03-ux-e-telas.md` §1.3, slot 1).
  *
- * `Carteira` · `Clientes › Fazenda Vale do Araguaia` · `… › Parecer`. Cada nível anterior é
+ * `Nova análise` · `Clientes › Fazenda Vale do Araguaia` · `… › Parecer`. Cada nível anterior é
  * link; o nível atual não é clicável e trunca com reticências.
  *
  * O último nível de `/clientes/[id]` é a razão social. Ela sai do cache compartilhado da lista

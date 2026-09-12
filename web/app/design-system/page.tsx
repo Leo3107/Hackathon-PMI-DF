@@ -269,9 +269,9 @@ export default function PaginaDesignSystem() {
           <p className="type-eyebrow">Lastro · specs/05-design-system.md</p>
           <h1 className="type-page-title">Design system</h1>
           <p className="type-caption max-w-[68ch]">
-            Catálogo vivo dos primitivos em todos os estados. Dark-only, sem biblioteca de
-            componentes. Nenhum estado de risco é comunicado só por cor: cor, rótulo e ícone,
-            sempre os três.
+            Catálogo vivo dos primitivos em todos os estados. Light, comercial, sem biblioteca de
+            componentes de terceiros. Nenhum estado de risco é comunicado só por cor: cor, rótulo e
+            ícone, sempre os três.
           </p>
         </header>
 

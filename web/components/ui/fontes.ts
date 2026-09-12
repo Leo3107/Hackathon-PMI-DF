@@ -1,18 +1,20 @@
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Outfit } from 'next/font/google';
 
 /**
  * Famílias do design system (spec §4.1).
  *
- * **Inter** (variável, 400–700) para tudo; **JetBrains Mono** (400, 500)
- * exclusivamente para identificadores técnicos — CPF/CNPJ, IDs de processo,
- * hashes de evidência, contador de tokens.
+ * **Inter** para corpo/tabela/densidade (legibilidade em texto pequeno);
+ * **Outfit** para títulos, KPIs e o número do score (`--font-display`) — dá o
+ * tom comercial/amigável sem sacrificar densidade onde ela importa;
+ * **JetBrains Mono** exclusivamente para identificadores técnicos —
+ * CPF/CNPJ, IDs de processo, hashes de evidência, contador de tokens.
  *
- * Ambas via `next/font/google`: o Next baixa em build e serve do próprio
+ * Todas via `next/font/google`: o Next baixa em build e serve do próprio
  * domínio. Nenhuma requisição a CDN externo em runtime; nunca importar por
  * `<link>` ou `@import url()`.
  *
- * O `app/globals.css` já aponta `--font-sans`/`--font-mono` para as variáveis
- * abaixo. Ao layout resta uma única linha:
+ * O `app/globals.css` já aponta `--font-sans`/`--font-display`/`--font-mono`
+ * para as variáveis abaixo. Ao layout resta uma única linha:
  *
  * ```tsx
  * import { classeFontes } from '@/components/ui/fontes';
@@ -26,6 +28,13 @@ export const inter = Inter({
   axes: ['opsz'], // eixo óptico: melhora o número gigante do gauge
 });
 
+export const outfit = Outfit({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
 export const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
@@ -33,5 +42,5 @@ export const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
 });
 
-/** Classe única a aplicar no `<html>` — expõe `--font-inter` e `--font-jetbrains-mono`. */
-export const classeFontes = `${inter.variable} ${jetbrainsMono.variable}`;
+/** Classe única a aplicar no `<html>` — expõe `--font-inter`, `--font-outfit` e `--font-jetbrains-mono`. */
+export const classeFontes = `${inter.variable} ${outfit.variable} ${jetbrainsMono.variable}`;

@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import pytest
 from app import criar_app
-from models.enums import EstadoCliente, Rating, Severidade
 
 from test_repositorio import cnpj_valido, fonte_de_teste
 
@@ -60,14 +59,14 @@ def test_rota_inexistente_devolve_envelope_padrao(client):
 
 def test_corpo_malformado_e_recusado(client):
     resposta = client.post(
-        "/api/carteira", data="{isto não é json", content_type="application/json"
+        "/api/clientes", data="{isto não é json", content_type="application/json"
     )
     assert resposta.status_code == 400
     assert _json(resposta)["erro"] == "CORPO_INVALIDO"
 
 
 def test_sessao_com_tipo_errado_e_recusada(client):
-    resposta = client.post("/api/carteira", json={"sessao": []})
+    resposta = client.post("/api/clientes", json={"sessao": []})
     assert resposta.status_code == 400
     assert _json(resposta)["erro"] == "CORPO_INVALIDO"
 
@@ -79,57 +78,6 @@ def test_evento_simulado_desconhecido_na_sessao_e_recusado(client):
     )
     assert resposta.status_code == 400
     assert _json(resposta)["erro"] == "CORPO_INVALIDO"
-
-
-# ---------------------------------------------------------------------------
-# Carteira
-# ---------------------------------------------------------------------------
-
-
-def test_carteira_aceita_post_com_sessao(client):
-    resposta = client.post(
-        "/api/carteira", json={"sessao": {"eventosSimulados": [], "statusRedFlags": {}}}
-    )
-    assert resposta.status_code == 200
-    corpo = _json(resposta)
-
-    assert corpo["totalClientes"] == 10
-    assert corpo["exposicaoTotal"] > 0
-    assert corpo["exposicaoEmRiscoEmRJ"] >= 0
-    assert set(corpo["clientesPorEstado"]) == {e.value for e in EstadoCliente}
-    assert set(corpo["clientesPorRating"]) == {r.value for r in Rating}
-    assert set(corpo["alertas30d"]["porSeveridade"]) == {s.value for s in Severidade}
-    assert corpo["deterioracao"]["limiarPontos"] == 25.0
-    assert corpo["ultimaVarredura"].startswith(corpo["dataReferencia"])
-
-
-def test_carteira_tambem_responde_em_get(client):
-    """Tolerância declarada em `web/lib/api/cliente.ts`: 405 nunca deve acontecer."""
-    assert client.get("/api/carteira").status_code == 200
-
-
-def test_carteira_traz_visualizacoes_e_faixa_de_atencao(client):
-    corpo = _json(client.post("/api/carteira"))
-    assert corpo["matrizDeRisco"], "V1 precisa de um ponto por cliente"
-    assert len(corpo["matrizDeRisco"]) == corpo["totalClientes"]
-    assert len(corpo["dinheiroEmRisco"]) <= 8
-    assert corpo["concentracaoPorUf"] and corpo["concentracaoPorCultura"]
-
-    cartoes = corpo["atencaoImediata"]
-    assert 1 <= len(cartoes) <= 3
-    assert {c["clienteId"] for c in cartoes} == {c["clienteId"] for c in cartoes}
-    for cartao in cartoes:
-        assert cartao["motivo"] in {
-            "VETO_ATIVO",
-            "MAIOR_QUEDA_90D",
-            "ALERTA_CRITICO",
-        }
-        assert cartao["causa"] and cartao["numero"] and cartao["acao"]
-
-
-def test_carteira_nao_vaza_chave_snake_case(client):
-    corpo = _json(client.post("/api/carteira"))
-    assert "_" not in "".join(corpo.keys())
 
 
 # ---------------------------------------------------------------------------
@@ -264,20 +212,8 @@ def test_simular_evento_em_cliente_inexistente(client):
 
 
 # ---------------------------------------------------------------------------
-# Alertas e auditoria
+# Auditoria
 # ---------------------------------------------------------------------------
-
-
-def test_alertas(client):
-    corpo = _json(client.post("/api/alertas"))
-    assert len(corpo) == 3
-    assert corpo[0]["severidade"] in {s.value for s in Severidade}
-    assert corpo[0]["acaoRecomendada"]
-
-
-def test_auditoria_lista(client):
-    corpo = _json(client.get("/api/auditoria"))
-    assert corpo and corpo[0]["divergiuDaRecomendacao"] is False
 
 
 def test_auditoria_registra_e_carimba(client):
@@ -298,7 +234,6 @@ def test_auditoria_registra_e_carimba(client):
     assert corpo["id"]
     assert corpo["dataHora"]
     assert corpo["divergiuDaRecomendacao"] is True
-    assert len(_json(client.get("/api/auditoria"))) == 2
 
 
 def test_auditoria_recusa_corpo_vazio(client):
@@ -452,14 +387,3 @@ def test_parcela_em_atraso_tem_precedencia(client):
     vencimento = por_id["cli-critico"].get("proximoVencimento")
     if vencimento is not None and "diasAtraso" in vencimento:
         assert vencimento["diasAtraso"] >= 0
-
-
-def test_fatias_de_concentracao_trazem_risco_e_clima(client):
-    corpo = _json(client.post("/api/carteira"))
-    for fatia in corpo["concentracaoPorCultura"]:
-        assert fatia["exposicaoEmRisco"] <= fatia["exposicao"] + 0.01
-        assert isinstance(fatia["zarcAlto"], bool)
-    for fatia in corpo["concentracaoPorUf"]:
-        assert "exposicaoEmRisco" in fatia
-        #: `zarcAlto` é marcador de cultura (V3); não faz sentido por UF.
-        assert "zarcAlto" not in fatia

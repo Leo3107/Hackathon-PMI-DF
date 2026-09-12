@@ -32,8 +32,8 @@ export function EmptyState({
         className,
       )}
     >
-      <span className="inline-flex size-14 items-center justify-center rounded-md bg-surface-input">
-        <Icone size={32} strokeWidth={1.5} className="text-fg-tertiary" aria-hidden="true" />
+      <span className="inline-flex size-14 items-center justify-center rounded-full bg-accent-tint">
+        <Icone size={32} strokeWidth={1.5} className="text-accent-500" aria-hidden="true" />
       </span>
       <div className="flex flex-col gap-1">
         <p className="type-section-title text-fg-secondary">{titulo}</p>

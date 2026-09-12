@@ -53,7 +53,7 @@ function Selo({ rating, tamanho, mostrarRotulo, aparencia, className }: SeloProp
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center rounded-sm whitespace-nowrap',
+        'inline-flex shrink-0 items-center rounded-full whitespace-nowrap',
         ALTURA[tamanho],
         pele,
         className,

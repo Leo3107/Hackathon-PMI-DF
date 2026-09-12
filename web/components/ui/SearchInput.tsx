@@ -60,7 +60,7 @@ export function SearchInput({
   return (
     <div
       className={cn(
-        'transicao-controle relative flex items-center rounded-sm border border-line-default bg-surface-input',
+        'transicao-controle relative flex items-center rounded-full border border-line-default bg-surface-input',
         'focus-within:border-accent-400 focus-within:shadow-[0_0_0_1px_var(--color-accent-400)]',
         tamanho === 'sm' ? 'h-[var(--height-control-sm)]' : 'h-[var(--height-control)]',
         className,

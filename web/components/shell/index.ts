@@ -13,7 +13,6 @@ export { Trilha } from './Trilha';
 export { useClientes, useRazaoSocial, recarregarClientes } from './usar-clientes';
 export { PERSONA } from './persona';
 export {
-  GRUPO_DOCUMENTACAO,
   GRUPO_OPERACAO,
   itemAtivo,
   rotaSemShell,

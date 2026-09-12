@@ -165,13 +165,13 @@ def test_rota_semear_declara_e_avisa_que_e_demonstracao(client):
     assert corpo["totalDeclarado"] > 0
 
 
-def test_carteira_responde_com_clientes_depois_de_semear(client):
+def test_clientes_respondem_com_dados_depois_de_semear(client):
     client.post("/api/carteira/semear")
-    resposta = client.post("/api/carteira")
+    resposta = client.post("/api/clientes")
     assert resposta.status_code == 200
     corpo = resposta.get_json()
-    assert corpo["totalClientes"] > 0
-    assert corpo["exposicaoTotal"] > 0
+    assert len(corpo) > 0
+    assert corpo[0]["avaliacao"]["exposicao"]["exposicaoTotal"] > 0
 
 
 def test_rota_limpar_semeadura_esvazia_a_carteira_de_novo(client):
@@ -180,5 +180,5 @@ def test_rota_limpar_semeadura_esvazia_a_carteira_de_novo(client):
     assert resposta.status_code == 200
     assert resposta.get_json()["limpo"] is True
 
-    carteira = client.post("/api/carteira").get_json()
-    assert carteira["totalClientes"] == 0
+    clientes = client.post("/api/clientes").get_json()
+    assert clientes == []

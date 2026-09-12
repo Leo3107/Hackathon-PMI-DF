@@ -29,13 +29,13 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
  */
 const VARIANTE: Record<VarianteBotao, string> = {
   primario: cn(
-    'border border-transparent bg-accent-500 text-fg-inverse',
-    'hover:bg-accent-400 active:bg-accent-600',
-    'disabled:bg-line-default disabled:text-fg-disabled disabled:hover:bg-line-default',
+    'border border-transparent bg-accent-500 text-fg-inverse shadow-card',
+    'hover:bg-accent-600 hover:shadow-raised active:translate-y-0 active:shadow-card',
+    'disabled:bg-line-default disabled:text-fg-disabled disabled:shadow-none disabled:hover:bg-line-default',
   ),
   secundario: cn(
     'border border-line-strong bg-surface-card text-fg-primary',
-    'hover:bg-surface-hover active:bg-surface-input',
+    'hover:border-line-strong hover:bg-surface-hover active:bg-surface-input',
     'disabled:border-line-default disabled:text-fg-disabled disabled:hover:bg-surface-card',
   ),
   fantasma: cn(
@@ -77,8 +77,9 @@ export function Button({
       disabled={disabled || carregando}
       aria-busy={carregando || undefined}
       className={cn(
-        'transicao-controle inline-flex shrink-0 items-center justify-center gap-1.5',
-        'rounded-sm font-medium whitespace-nowrap',
+        'transicao-controle transicao-elevacao inline-flex shrink-0 items-center justify-center gap-1.5',
+        'rounded-full font-medium whitespace-nowrap',
+        'hover:-translate-y-px active:translate-y-0 active:scale-[0.98]',
         TAMANHO[tamanho],
         VARIANTE[variante],
         larguraTotal && 'w-full',

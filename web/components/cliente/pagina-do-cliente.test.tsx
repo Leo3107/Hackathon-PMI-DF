@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // devolve só o que o barrel usa — as variáveis CSS.
 vi.mock('next/font/google', () => ({
   Inter: () => ({ variable: '--font-inter', className: 'fonte-inter' }),
+  Outfit: () => ({ variable: '--font-outfit', className: 'fonte-outfit' }),
   JetBrains_Mono: () => ({ variable: '--font-jetbrains-mono', className: 'fonte-mono' }),
 }));
 

@@ -31,9 +31,8 @@ const DESTAQUE: Record<DestaqueCard, string> = {
 
 /**
  * Superfície padrão (spec §6.1): bg `surface-card`, borda 1px `line-default`,
- * raio `radius-md`, **sem sombra** — sombra só em elementos flutuantes.
- * Cards não se aninham: dentro de um card, agrupamento é por `SectionHeader`
- * e divisórias.
+ * raio `radius-md`, elevação suave (`shadow-card`). Cards não se aninham:
+ * dentro de um card, agrupamento é por `SectionHeader` e divisórias.
  */
 export function Card({
   children,
@@ -48,10 +47,10 @@ export function Card({
   return (
     <Tag
       className={cn(
-        'card rounded-md border border-line-default bg-surface-card',
+        'card rounded-md border border-line-default bg-surface-card shadow-card',
         semPadding ? 'p-0' : densidade === 'compacta' ? 'p-3' : 'p-4',
         interativo &&
-          'transicao-controle cursor-pointer hover:border-line-strong hover:bg-surface-hover',
+          'transicao-controle transicao-elevacao cursor-pointer hover:-translate-y-px hover:border-line-strong hover:bg-surface-hover hover:shadow-raised',
         DESTAQUE[destaque],
         className,
       )}

@@ -12,10 +12,9 @@
  * BarraLateral 240px │ conteúdo · padding 24px · max-width 1440px
  * ```
  *
- * `/canvas` e `/clientes/[id]/parecer` renderizam **sem** sidebar e sem topbar: são documentos,
- * não telas de trabalho, e trazem o próprio banner na variante de impressão. A decisão fica
- * aqui, no shell, e não no layout de cada rota, porque o layout raiz é único e essas rotas
- * pertencem a outros agentes.
+ * `/clientes/[id]/parecer` renderiza **sem** sidebar e sem topbar: é documento para impressão,
+ * não tela de trabalho, e traz o próprio banner na variante de impressão. A decisão fica aqui,
+ * no shell, e não no layout da rota, porque o layout raiz é único.
  */
 
 import { usePathname } from 'next/navigation';
